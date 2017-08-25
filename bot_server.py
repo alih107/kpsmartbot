@@ -152,6 +152,7 @@ def handle_incoming_messages():
         elif payload == 'misc':
             main.reply_misc(sender)
         elif payload == 'onai':
+            logging.info('entered payload == onai')
             try:
                 encodedLoginPass = last_sender_message['encodedLoginPass']
                 assert encodedLoginPass != None
