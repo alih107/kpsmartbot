@@ -19,28 +19,28 @@ hint_main_menu2 = "(Нажмите (y) для перехода в главное
 
 url_mobile_payments = 'https://post.kz/finance/payment/mobile'
 
-def reply(user_id, msg):
+def reply(sender, msg):
     data = {
-        "recipient": {"id": user_id},
+        "recipient": {"id": sender},
         "message": {"text": msg}
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
 
-def reply_typing_on(user_id):
+def reply_typing_on(sender):
     data = {
-        "recipient": {"id": user_id},
+        "recipient": {"id": sender},
         "sender_action": "typing_on"
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
 
-def reply_typing_off(user_id):
+def reply_typing_off(sender):
     data = {
-        "recipient": {"id": user_id},
+        "recipient": {"id": sender},
         "sender_action": "typing_off"
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
 
-def reply_get_started_button(user_id):
+def reply_get_started_button(sender):
     data = { 
       "get_started":{
         "payload":"GET_STARTED_PAYLOAD"
@@ -48,10 +48,10 @@ def reply_get_started_button(user_id):
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)    
 
-def reply_pdd_shtrafy(user_id):
+def reply_pdd_shtrafy(sender):
     data_quick_replies = {
       "recipient":{
-        "id": user_id
+        "id": sender
       },
       "message":{
         "text":" Выберите:\n" + hint_main_menu2,
@@ -71,7 +71,7 @@ def reply_pdd_shtrafy(user_id):
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_quick_replies)
 
-def reply_pdd_shtrafy_iin(user_id, message, last_sender_message):
+def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
     try:
         year = int(message[:2])
         month = int(message[2:4])
@@ -88,9 +88,9 @@ def reply_pdd_shtrafy_iin(user_id, message, last_sender_message):
             assert day <= 31
         assert century <= 6
     except:
-        reply(user_id, "Вы ввели неправильный ИИН, введите еще раз")
+        reply(sender, "Вы ввели неправильный ИИН, введите еще раз")
         return "again"
-    reply_typing_on(user_id)
+    reply_typing_on(sender)
     try:
         session = requests.Session()
         headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type':'application/json'}
@@ -104,8 +104,8 @@ def reply_pdd_shtrafy_iin(user_id, message, last_sender_message):
         status = data['responseInfo']['status']
         if status == 'FAILED':
             result = 'Штрафов по данным ' + message + ' не найдено'
-            reply(user_id, result)
-            reply_typing_off(user_id)
+            reply(sender, result)
+            reply_typing_off(sender)
             return "again"
 
         subscriptionId = str(r.json()['subscriptionData']['id'])
@@ -117,16 +117,16 @@ def reply_pdd_shtrafy_iin(user_id, message, last_sender_message):
             amount = str(fine['details'][0]['amount'])
             result += desc + ' - сумма ' + amount + ' тг\n\n'
 
-        reply(user_id, result)
-        reply_typing_off(user_id)
+        reply(sender, result)
+        reply_typing_off(sender)
 
     except:
         url_login = 'https://post.kz/mail-app/api/public/v2/invoices/create'
         data = {'operatorId':'pddIin', 'data':message}
         r = session.post(url_login, json=data)
 
-def reply_pdd_shtrafy_gosnomer(user_id, message, last_sender_message):
-    reply(user_id, "Идет проверка на наличие штрафов...")
+def reply_pdd_shtrafy_gosnomer(sender, message, last_sender_message):
+    reply(sender, "Идет проверка на наличие штрафов...")
     try:
         session = requests.Session()
         headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type':'application/json'}
@@ -140,7 +140,7 @@ def reply_pdd_shtrafy_gosnomer(user_id, message, last_sender_message):
         status = data['responseInfo']['status']
         if status == 'FAILED':
             result = 'Штрафов по данным ' + message + ' не найдено'
-            reply(user_id, result)
+            reply(sender, result)
             return "again"
 
         subscriptionId = str(r.json()['subscriptionData']['id'])
@@ -152,31 +152,31 @@ def reply_pdd_shtrafy_gosnomer(user_id, message, last_sender_message):
             amount = str(fine['details'][0]['amount'])
             result += desc + ' - сумма ' + amount + ' тг\n\n'
 
-        reply(user_id, result)
+        reply(sender, result)
     except:
         url_login = 'https://post.kz/mail-app/api/public/v2/invoices/create'
         data = {'operatorId':'pddIin', 'data':message}
         r = session.post(url_login, json=data)
 
-def reply_onai(user_id, message, last_sender_message):
+def reply_onai(sender, message, last_sender_message):
     url_login = 'https://post.kz/mail-app/api/public/v2/invoices/create'
     message = message.replace(' ','')
     r = requests.post(url_login, json={"operatorId":"onai", "data":message})
     if r.status_code == 404:
-        reply(user_id, "Вы ввели неправильный номер карты Онай, введите еще раз")
+        reply(sender, "Вы ввели неправильный номер карты Онай, введите еще раз")
         return "wrong onai number"
 
     last_sender_message['onaiToRefill'] = message
     last_sender_message['payload'] = 'onai.amount'
-    collection_messages.update_one({'sender':user_id}, {"$set": last_sender_message}, upsert=False)
-    reply(user_id, "Введите сумму пополнения баланса (не менее 100 тг)")
+    collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+    reply(sender, "Введите сумму пополнения баланса (не менее 100 тг)")
 
-def reply_onai_enter_number(user_id, last_sender_message):
+def reply_onai_enter_number(sender, last_sender_message):
     try:
         lastOnaiNumber = last_sender_message['onaiToRefill']
         data_quick_replies = {
           "recipient":{
-            "id": user_id
+            "id": sender
           },
           "message":{
             "text":"Выберите последнюю карту Онай или введите 13ти-значный номер карты Онай\n" + hint_main_menu,
@@ -193,25 +193,25 @@ def reply_onai_enter_number(user_id, last_sender_message):
     except:
         reply(sender, "Введите 13ти-значный номер карты Онай\n" + hint_main_menu)
 
-def reply_onai_amount(user_id, message, last_sender_message):
+def reply_onai_amount(sender, message, last_sender_message):
     amount = 0
     minAmount = 100
     try:
         amount = int(message)
     except:
-        reply(user_id, "Вы неправильно ввели сумму пополнения баланса. Введите сумму заново")
+        reply(sender, "Вы неправильно ввели сумму пополнения баланса. Введите сумму заново")
         return "again"
 
     if amount < minAmount:
-        reply(user_id, "Сумма пополнения баланса должна быть не менее " + str(minAmount) +" тг. Введите сумму заново")
+        reply(sender, "Сумма пополнения баланса должна быть не менее " + str(minAmount) +" тг. Введите сумму заново")
         return "again"
 
     last_sender_message['payload'] = 'onai.chooseCard'
     last_sender_message['amount'] = amount
-    collection_messages.update_one({'sender':user_id}, {"$set": last_sender_message}, upsert=False)
-    reply_onai_chooseCard(user_id, message, last_sender_message)
+    collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+    reply_onai_chooseCard(sender, message, last_sender_message)
 
-def reply_onai_chooseCard(user_id, message, last_sender_message):
+def reply_onai_chooseCard(sender, message, last_sender_message):
     session = requests.Session()
     headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type':'application/json'}
     url_login = 'https://post.kz/mail-app/api/account/'
@@ -239,7 +239,7 @@ def reply_onai_chooseCard(user_id, message, last_sender_message):
 
     data_cards = {
       "recipient": {
-        "id": user_id
+        "id": sender
       },
       "message": {
         "attachment": {
@@ -252,9 +252,9 @@ def reply_onai_chooseCard(user_id, message, last_sender_message):
       }
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_cards)
-    collection_messages.update_one({'sender':user_id}, {"$set": last_sender_message}, upsert=False)
+    collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
 
-def reply_onai_csc(user_id, payload, last_sender_message):
+def reply_onai_csc(sender, payload, last_sender_message):
     amount = last_sender_message['amount']
     onaiToRefill = last_sender_message['onaiToRefill']
     chosenCard = last_sender_message[payload]
@@ -265,11 +265,11 @@ def reply_onai_csc(user_id, payload, last_sender_message):
     message += "Карта: " + chosenCard + '\n\n'
     message += "Если всё верно, введите трехзначный код CSC/CVV2 на обратной стороне карты"
     
-    reply(user_id, message)
+    reply(sender, message)
 
-def reply_onai_startPayment(user_id, message, last_sender_message):
-    reply(user_id, "Идет обработка платежа...")
-    reply_typing_on(user_id)
+def reply_onai_startPayment(sender, message, last_sender_message):
+    reply(sender, "Идет обработка платежа...")
+    reply_typing_on(sender)
     # 1 - авторизация на post.kz
     try:
         url_login = 'https://post.kz/mail-app/api/account/'
@@ -358,7 +358,7 @@ def reply_onai_startPayment(user_id, message, last_sender_message):
         if state == 'redirect':
             data_url_button = {
               "recipient": {
-                "id": user_id
+                "id": sender
               },
               "message": {
                 "attachment": {
@@ -383,7 +383,7 @@ def reply_onai_startPayment(user_id, message, last_sender_message):
                 }
               }
             }
-            reply_typing_off(user_id)
+            reply_typing_off(sender)
             resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_url_button)
             time.sleep(9)
 
@@ -398,40 +398,40 @@ def reply_onai_startPayment(user_id, message, last_sender_message):
                 result_status = data['result']['status']
                 logging.info ("result_status = " + result_status)
                 if result_status == 'fail':
-                    reply(user_id, "Платеж не был завершен успешно. Попробуйте снова")
+                    reply(sender, "Платеж не был завершен успешно. Попробуйте снова")
                 elif result_status == 'success':
                     logging.info ('got here #success')
                     logging.info ('#######################')
                     logging.info (r.json())
                     res = "Поздравляю! Платеж был проведен успешно, карта Онай " + onaiToRefill + " пополнена на сумму " + str(amount) + " тг.\n"
                     res += "Номер квитанции: " + str(payment_id) + ", она доступна в профиле post.kz"
-                    reply(user_id, res)
+                    reply(sender, res)
                 last_sender_message['payload'] = 'onai.finished'
-                collection_messages.update_one({'sender':user_id}, {"$set": last_sender_message}, upsert=False)
-                reply_typing_off(user_id)
-                reply_main_menu_buttons(user_id)
+                collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+                reply_typing_off(sender)
+                reply_main_menu_buttons(sender)
                 return "ok"
             except Exception as e:
                 logging.info ("Error occured = " + str(e))
             timer += 1
 
-        reply(user_id, "Прошло больше 2 минут: платеж отменяется")
-        reply_typing_off(user_id)
-        reply_main_menu_buttons(user_id)
+        reply(sender, "Прошло больше 2 минут: платеж отменяется")
+        reply_typing_off(sender)
+        reply_main_menu_buttons(sender)
         last_sender_message['payload'] = 'mainMenu'
-        collection_messages.update_one({'sender':user_id}, {"$set": last_sender_message}, upsert=False)
+        collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
         return "time exceed"
     except Exception as e:
-        reply(user_id, "Произошла непредвиденная ошибка, попробуйте позднее")
-        reply_typing_off(user_id)
-        reply_main_menu_buttons(user_id)
+        reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
+        reply_typing_off(sender)
+        reply_main_menu_buttons(sender)
         logging.info ("Error occured = " + e.message)
         return "fail"
 
-def reply_balance(user_id):
+def reply_balance(sender):
     data_balance_replies = {
       "recipient":{
-        "id": user_id
+        "id": sender
       },
       "message":{
         "text":"Выберите оператора\n" + hint_main_menu,
@@ -462,10 +462,10 @@ def reply_balance(user_id):
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_balance_replies)
 
-def reply_komuslugi_cities(user_id):
+def reply_komuslugi_cities(sender):
     data_buttons_cities = {
       "recipient": {
-        "id": user_id
+        "id": sender
       },
       "message": {
         "attachment": {
@@ -552,9 +552,9 @@ def reply_komuslugi_cities(user_id):
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_buttons_cities)
 
-def reply_currencies(user_id):
+def reply_currencies(sender):
     data_cur_buttons = {
-        "recipient": {"id": user_id},
+        "recipient": {"id": sender},
         "message":{
             "attachment":{
               "type":"template",
@@ -584,9 +584,9 @@ def reply_currencies(user_id):
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_cur_buttons)
 
-def reply_currencies_grafik(user_id):
+def reply_currencies_grafik(sender):
     data_cur_grafik_buttons = {
-        "recipient": {"id": user_id},
+        "recipient": {"id": sender},
         "message":{
             "attachment":{
               "type":"template",
@@ -616,12 +616,12 @@ def reply_currencies_grafik(user_id):
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_cur_grafik_buttons)
 
-def reply_tracking(user_id, tracking_number):
+def reply_tracking(sender, tracking_number):
     data = requests.get("https://post.kz/external-api/tracking/api/v2/" + tracking_number + "/events").json()
     data2 = requests.get("https://post.kz/external-api/tracking/api/v2/" + tracking_number).json()
     try:
         error = data2['error']
-        reply(user_id, error + '\n(Чтобы узнать статус другой посылки, отправьте её трек-номер либо нажмите (y) для перехода в главное меню)')
+        reply(sender, error + '\n(Чтобы узнать статус другой посылки, отправьте её трек-номер либо нажмите (y) для перехода в главное меню)')
         return "not found"
     except:
         new_mapping = requests.get("https://post.kz/static/new_mappings.json").json()
@@ -635,18 +635,18 @@ def reply_tracking(user_id, tracking_number):
         result += "Статус: " + t_status_mapping + '\n' + t_address + '\n' + t_datetime + '\n'
         result += "(Чтобы узнать статус другой посылки, отправьте её трек-номер либо нажмите (y) для перехода в главное меню)" + '\n'
         
-        reply(user_id, result)
+        reply(sender, result)
         return "ok"
 
-def reply_currencies_kursy(user_id):
+def reply_currencies_kursy(sender):
     data = requests.get("https://post.kz/mail-app/info/remote/currencies/ops").json()
     result = "Курс валют на " + datetime.now().strftime('%d.%m.%Y %H:%M:%S') + " (время западное GMT +5)\n" 
     result += "USD: " + data['usdBuy'] + " / " + data['usdSell'] + '\n'
     result += "EUR: " + data['eurBuy'] + " / " + data['eurSell'] + '\n'
     result += "RUB: " + data['rurBuy'] + " / " + data['rurSell']
-    reply(user_id, result)
+    reply(sender, result)
 
-def reply_auth(user_id, loginPass, last_sender_message):
+def reply_auth(sender, loginPass, last_sender_message):
     url_login = 'https://post.kz/mail-app/api/account/'
     login = loginPass.split()[0]
     loginPass = loginPass.replace(' ', ':').encode()
@@ -656,24 +656,24 @@ def reply_auth(user_id, loginPass, last_sender_message):
     r = requests.get(url_login, headers=headers)
     status_code = r.status_code
     if status_code == 401:
-        reply(user_id, "Вы ввели неправильные логин и пароль, попробуйте еще раз")
+        reply(sender, "Вы ввели неправильные логин и пароль, попробуйте еще раз")
     elif status_code == 200:
         profile_data = r.json()
         iin = profile_data['iin']
         mobile = profile_data['mobileNumber']
         answer = "Вы успешно авторизованы! Добро пожаловать, " + profile_data['firstName'] + "!\n"
         answer = "В целях безопасности удалите сообщение с вашими логином и паролем"
-        reply(user_id, answer)
+        reply(sender, answer)
         last_sender_message['encodedLoginPass'] = encodedLoginPass
         last_sender_message['login'] = login
         last_sender_message['iin'] = iin
         last_sender_message['mobileNumber'] = mobile
-        collection_messages.update_one({'sender':user_id}, {"$set": last_sender_message}, upsert=False)
-        reply_main_menu_buttons(user_id)
+        collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+        reply_main_menu_buttons(sender)
 
-def reply_closest(user_id):
+def reply_closest(sender):
     data_closest_buttons = {
-        "recipient": {"id": user_id},
+        "recipient": {"id": sender},
         "message":{
             "attachment":{
               "type":"template",
@@ -703,9 +703,9 @@ def reply_closest(user_id):
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_closest_buttons)
 
-def reply_misc(user_id):
+def reply_misc(sender):
     data_misc_buttons = {
-        "recipient": {"id": user_id},
+        "recipient": {"id": sender},
         "message":{
             "attachment":{
               "type":"template",
@@ -738,12 +738,12 @@ def reply_misc(user_id):
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_misc_buttons)
 
-def reply_main_menu_buttons(user_id):
+def reply_main_menu_buttons(sender):
     url = "https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN
     title = "Прокрутите влево/вправо, либо нажмите < или > для других команд"
     data_main_menu_buttons = {
       "recipient": {
-        "id": user_id
+        "id": sender
       },
       "message": {
         "attachment": {
@@ -853,12 +853,12 @@ def reply_main_menu_buttons(user_id):
     }
     resp = requests.post(url, json=data_main_menu_buttons)
 
-def reply_mobile_enter_number(user_id, last_sender_message):
+def reply_mobile_enter_number(sender, last_sender_message):
     try:
         lastPhoneToRefill = last_sender_message['phoneToRefill']
         data_quick_replies = {
           "recipient":{
-            "id": user_id
+            "id": sender
           },
           "message":{
             "text":"Выберите последний номер телефона или введите его\n" + hint_main_menu,
@@ -873,9 +873,9 @@ def reply_mobile_enter_number(user_id, last_sender_message):
         }
         resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_quick_replies)
     except:
-        reply(user_id, "Введите номер телефона\n" + hint_main_menu)
+        reply(sender, "Введите номер телефона\n" + hint_main_menu)
 
-def reply_check_mobile_number(user_id, message, last_sender_message):
+def reply_check_mobile_number(sender, message, last_sender_message):
     #print ('got here check mobile number')
     url_login = 'https://post.kz/mail-app/public/check/operator'
     message = message.replace(' ', '')
@@ -885,7 +885,7 @@ def reply_check_mobile_number(user_id, message, last_sender_message):
     operator = r.json()['operator']
     
     if operator == 'error':
-        reply(user_id, "Вы ввели неправильный номер телефона. Попробуйте еще раз")
+        reply(sender, "Вы ввели неправильный номер телефона. Попробуйте еще раз")
         return "error"
 
     minAmount = 0
@@ -908,34 +908,34 @@ def reply_check_mobile_number(user_id, message, last_sender_message):
         minAmount = 200
         commission = 20
     if operator == 'altelWf':
-        reply(user_id, "Оператор Altel в данный момент не поддерживается. Введите другой номер, пожалуйста.")
+        reply(sender, "Оператор Altel в данный момент не поддерживается. Введите другой номер, пожалуйста.")
 
     last_sender_message['payload'] = 'mobile.amount'
     last_sender_message['phoneToRefill'] = message
     last_sender_message['minAmount'] = minAmount
     last_sender_message['commission'] = commission
-    collection_messages.update_one({'sender':user_id}, {"$set": last_sender_message}, upsert=False)
-    reply(user_id, "Оператор номера: " + operator + "\nВведите сумму пополнения баланса (не менее " + str(minAmount) + " тг)")
+    collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+    reply(sender, "Оператор номера: " + operator + "\nВведите сумму пополнения баланса (не менее " + str(minAmount) + " тг)")
     
-def reply_mobile_amount(user_id, message, last_sender_message):
+def reply_mobile_amount(sender, message, last_sender_message):
     amount = 0
     minAmount = last_sender_message['minAmount']
     try:
         amount = int(message)
     except:
-        reply(user_id, "Вы неправильно ввели сумму пополнения баланса. Введите сумму заново")
+        reply(sender, "Вы неправильно ввели сумму пополнения баланса. Введите сумму заново")
         return "again"
 
     if amount < minAmount:
-        reply(user_id, "Сумма пополнения баланса должна быть не менее " + str(minAmount) +" тг. Введите сумму заново")
+        reply(sender, "Сумма пополнения баланса должна быть не менее " + str(minAmount) +" тг. Введите сумму заново")
         return "again"
 
     last_sender_message['payload'] = 'mobile.chooseCard'
     last_sender_message['amount'] = amount
-    collection_messages.update_one({'sender':user_id}, {"$set": last_sender_message}, upsert=False)
-    reply_mobile_chooseCard(user_id, message, last_sender_message)
+    collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+    reply_mobile_chooseCard(sender, message, last_sender_message)
 
-def reply_mobile_chooseCard(user_id, message, last_sender_message):
+def reply_mobile_chooseCard(sender, message, last_sender_message):
     session = requests.Session()
     headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type':'application/json'}
     url_login = 'https://post.kz/mail-app/api/account/'
@@ -963,7 +963,7 @@ def reply_mobile_chooseCard(user_id, message, last_sender_message):
 
     data_cards = {
       "recipient": {
-        "id": user_id
+        "id": sender
       },
       "message": {
         "attachment": {
@@ -976,9 +976,9 @@ def reply_mobile_chooseCard(user_id, message, last_sender_message):
       }
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_cards)
-    collection_messages.update_one({'sender':user_id}, {"$set": last_sender_message}, upsert=False)
+    collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
     
-def reply_mobile_csc(user_id, payload, last_sender_message):
+def reply_mobile_csc(sender, payload, last_sender_message):
     amount = last_sender_message['amount']
     commission = last_sender_message['commission']
     phoneToRefill = last_sender_message['phoneToRefill']
@@ -993,11 +993,11 @@ def reply_mobile_csc(user_id, payload, last_sender_message):
     message += "Карта: " + chosenCard + '\n\n'
     message += "Если всё верно, введите трехзначный код CSC/CVV2 на обратной стороне карты"
     
-    reply(user_id, message)
+    reply(sender, message)
 
-def reply_mobile_startPayment(user_id, message, last_sender_message):
-    reply(user_id, "Идет обработка платежа...")
-    reply_typing_on(user_id)
+def reply_mobile_startPayment(sender, message, last_sender_message):
+    reply(sender, "Идет обработка платежа...")
+    reply_typing_on(sender)
     # 1 - авторизация на post.kz
     try:
         url_login = 'https://post.kz/mail-app/api/account/'
@@ -1087,7 +1087,7 @@ def reply_mobile_startPayment(user_id, message, last_sender_message):
         if state == 'redirect':
             data_url_button = {
               "recipient": {
-                "id": user_id
+                "id": sender
               },
               "message": {
                 "attachment": {
@@ -1113,7 +1113,7 @@ def reply_mobile_startPayment(user_id, message, last_sender_message):
               }
             }
             resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_url_button)
-            reply_typing_off(user_id)
+            reply_typing_off(sender)
             time.sleep(9)
 
         timer = 0
@@ -1127,37 +1127,37 @@ def reply_mobile_startPayment(user_id, message, last_sender_message):
                 result_status = data['result']['status']
                 logging.info ("result_status = " + result_status)
                 if result_status == 'fail':
-                    reply(user_id, "Платеж не был завершен успешно. Попробуйте снова")
+                    reply(sender, "Платеж не был завершен успешно. Попробуйте снова")
                 elif result_status == 'success':
                     logging.info ('got here #success')
                     logging.info ('#######################')
                     logging.info (r.json())
                     res = "Поздравляю! Платеж был проведен успешно, номер " + phoneToRefill + " пополнен на сумму " + str(amount) + " тг.\n"
                     res += "Номер квитанции: " + str(payment_id) + ", она доступна в профиле post.kz"
-                    reply(user_id, res)
+                    reply(sender, res)
                 last_sender_message['payload'] = 'mobile.finished'
-                collection_messages.update_one({'sender':user_id}, {"$set": last_sender_message}, upsert=False)
-                reply_typing_off(user_id)
-                reply_main_menu_buttons(user_id)
+                collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+                reply_typing_off(sender)
+                reply_main_menu_buttons(sender)
                 return "ok"
             except Exception as e:
                 logging.info ("Error occured = " + str(e))
             timer += 1
 
-        reply(user_id, "Прошло больше 2 минут: платеж отменяется")
-        reply_typing_off(user_id)
-        reply_main_menu_buttons(user_id)
+        reply(sender, "Прошло больше 2 минут: платеж отменяется")
+        reply_typing_off(sender)
+        reply_main_menu_buttons(sender)
         last_sender_message['payload'] = 'mainMenu'
-        collection_messages.update_one({'sender':user_id}, {"$set": last_sender_message}, upsert=False)
+        collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
         return "time exceed"
     except Exception as e:
-        reply(user_id, "Произошла непредвиденная ошибка, попробуйте позднее")
-        reply_typing_off(user_id)
-        reply_main_menu_buttons(user_id)
+        reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
+        reply_typing_off(sender)
+        reply_main_menu_buttons(sender)
         logging.info ("Error occured = " + e.message)
         return "fail"
 
-def reply_has_cards(user_id, last_sender_message):
+def reply_has_cards(sender, last_sender_message):
     session = requests.Session()
     headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type':'application/json'}
     url_login = 'https://post.kz/mail-app/api/account/'
