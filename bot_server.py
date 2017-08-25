@@ -5,6 +5,7 @@ import requests
 import pymongo
 import constants
 import logging
+import traceback
 
 app = Flask(__name__)
 client = pymongo.MongoClient()
@@ -216,6 +217,7 @@ def handle_incoming_messages():
 
     except:
         logging.info ("No postback payload")
+        logging.info(traceback.format_exc())
 
     try:
         message = data['entry'][0]['messaging'][0]['message']['text']
