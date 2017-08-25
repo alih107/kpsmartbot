@@ -11,7 +11,6 @@ import logging
 client = pymongo.MongoClient()
 db = client.kpsmartbot_db
 collection_messages = db.messages
-logging.basicConfig(filename='botserver_main.log',level=logging.INFO)
 
 ACCESS_TOKEN = constants.ACCESS_TOKEN
 
