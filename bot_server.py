@@ -105,7 +105,7 @@ def handle_incoming_messages():
         main.reply_main_menu_buttons(sender)
         return "ok"    
     except:
-        logging.info ("No sticker")
+        pass
 
     try:
         payload = data['entry'][0]['messaging'][0]['message']['quick_reply']['payload']
@@ -124,7 +124,7 @@ def handle_incoming_messages():
         return "ok"
          
     except:
-        logging.info("No quick-reply payload")
+        pass
 
     try:
         payload = data['entry'][0]['messaging'][0]['postback']['payload']
@@ -250,7 +250,7 @@ def handle_incoming_messages():
         return "ok" 
 
     except:
-        logging.info ("No postback payload")
+        pass
 
     try:
         message = data['entry'][0]['messaging'][0]['message']['text']
@@ -296,7 +296,7 @@ def handle_incoming_messages():
         return "ok"
 
     except:
-        logging.info ("No message")
+        pass
 
     return "ok"
  
