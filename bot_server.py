@@ -4,14 +4,12 @@ from flask import Flask, request
 import requests
 import pymongo
 import constants
-import logging
 
 app = Flask(__name__)
 client = pymongo.MongoClient()
 db = client.kpsmartbot_db
 collection_messages = db.messages
-logging.basicConfig(filename='botserver.log',level=logging.DEBUG)
- 
+
 ACCESS_TOKEN = constants.ACCESS_TOKEN
 
 gosnomer_text = """Введите номер авто и номер техпаспорта через пробел
