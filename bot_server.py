@@ -1,11 +1,10 @@
-import sys
 import main
 from flask import Flask, request
 import requests
 import pymongo
 import constants
 import logging
-import traceback
+import datetime
 
 app = Flask(__name__)
 client = pymongo.MongoClient()
@@ -34,6 +33,47 @@ def verify():
 
     return "Hello world", 200
 
+def print_facebook_data(data):
+    sender = data['entry'][0]['messaging'][0]['sender']['id']
+    res = 'Sender id = ' + sender + ' | '
+
+    try:
+        last_sender_message = collection_messages.find_one({"sender": sender})
+        assert last_sender_message != None
+        res += 'Name = ' + last_sender_message['first_name'] + ' ' + last_sender_message['last_name'] + ' | '
+    except:
+        firstname, lastname = get_firstname_lastname(sender)
+        res += '[new user] Name = ' + firstname + ' ' + lastname
+
+    ms = data['entry'][0]['time']
+    res += 'Time = ' + datetime.datetime.fromtimestamp(ms).strftime('%Y-%m-%d %H:%M:%S') + ' | '
+    try:
+        sticker_id = data['entry'][0]['messaging'][0]['message']['sticker_id']
+        res += 'Received sticker'
+    except:
+        pass
+
+    try:
+        payload = data['entry'][0]['messaging'][0]['message']['quick_reply']['payload']
+        text = data['entry'][0]['messaging'][0]['message']['text']
+        res += 'Received quick-reply, payload = ' + payload + ', text = ' + text
+    except:
+        pass
+
+    try:
+        payload = data['entry'][0]['messaging'][0]['postback']['payload']
+        res += 'Received postback, payload = ' + payload
+    except:
+        pass
+
+    try:
+        message = data['entry'][0]['messaging'][0]['message']['text']
+        res += 'Received message = ' + message
+    except:
+        pass
+
+    return res
+
 def reply(user_id, msg):
     data = {
         "recipient": {"id": user_id},
@@ -51,16 +91,13 @@ def get_firstname_lastname(user_id):
 @app.route('/kpsmartbot', methods=['POST'])
 def handle_incoming_messages():
     data = request.json
-    logging.info ("#############RECEIVED MESSAGE###############################")
-    logging.info (data)
+    logging.info (print_facebook_data(data))
     sender = data['entry'][0]['messaging'][0]['sender']['id']
     last_sender_message = collection_messages.find_one({"sender": sender})
     if last_sender_message == None:
         firstname, lastname = get_firstname_lastname(sender)
         db_record = {"sender":sender, "first_name":firstname, "last_name":lastname}
         last_sender_message = collection_messages.insert_one(db_record)
-    #print ("###### what is received #########")
-    #print (data)
     try:
         sticker_id = data['entry'][0]['messaging'][0]['message']['sticker_id']
         last_sender_message['payload'] = 'mainMenu'
