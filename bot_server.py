@@ -85,8 +85,6 @@ def handle_incoming_messages():
         last_sender_message['payload'] = payload
         collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
         return "ok"
-        collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
-        return "ok"
          
     except:
         logging.info("No quick-reply payload")
@@ -171,11 +169,11 @@ def handle_incoming_messages():
             hasCards = main.reply_has_cards(sender, last_sender_message)
             if not hasCards:
                 reply(sender, "У вас нет подвязанной карты в профиле post.kz для оплаты пожалуйста добавьте карту https://post.kz/finance/cards/add\nТакже Вы можете переавторизоваться через Главное меню (нажмите (y) )-> Авторизация на post.kz")
-                #main.reply_main_menu_buttons(sender)
                 last_sender_message['payload'] = 'mainMenu'
                 collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
                 return "need cards"
 
+            logging.info('got here before calling reply_onai_enter_number')
             last_sender_message['lastCommand'] = payload
             main.reply_onai_enter_number(sender, last_sender_message)  
         elif payload == 'auth':
