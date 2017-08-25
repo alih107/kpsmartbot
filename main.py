@@ -6,10 +6,12 @@ import pymongo
 from flask import Flask, request
 from datetime import datetime
 import constants
+import logging
 
 client = pymongo.MongoClient()
 db = client.kpsmartbot_db
 collection_messages = db.messages
+logging.basicConfig(filename='botserver_main.log',level=logging.DEBUG)
 
 ACCESS_TOKEN = constants.ACCESS_TOKEN
 
@@ -347,8 +349,7 @@ def reply_onai_startPayment(user_id, message, last_sender_message):
         # 9 - вызов acceptPayment()
         url_login9 = 'https://post.kz/mail-app/api/intervale/payment/accept/' + token
         r = session.post(url_login9, json=sd2)
-        print ('#############################################')
-        print (r.text)
+        logging.info ('#############################################\n' + r.text)
 
         # 10 - вызов statusPayment()
         url_login10 = 'https://post.kz/mail-app/api/intervale/payment/status/' + token
@@ -392,17 +393,17 @@ def reply_onai_startPayment(user_id, message, last_sender_message):
             time.sleep(1)
             r = session.post(url_login10, json=sd22)
             data = r.json()
-            print ('############status data##############')
-            print (data)
+            logging.info ('############status data##############')
+            logging.info (data)
             try:
                 result_status = data['result']['status']
-                print ("result_status = " + result_status)
+                logging.info ("result_status = " + result_status)
                 if result_status == 'fail':
                     reply(user_id, "Платеж не был завершен успешно. Попробуйте снова")
                 elif result_status == 'success':
-                    print ('got here #success')
-                    print ('#######################')
-                    print (r.json())
+                    logging.info ('got here #success')
+                    logging.info ('#######################')
+                    logging.info (r.json())
                     res = "Поздравляю! Платеж был проведен успешно, карта Онай " + onaiToRefill + " пополнена на сумму " + str(amount) + " тг.\n"
                     res += "Номер квитанции: " + str(payment_id) + ", она доступна в профиле post.kz"
                     reply(user_id, res)
@@ -412,7 +413,7 @@ def reply_onai_startPayment(user_id, message, last_sender_message):
                 reply_main_menu_buttons(user_id)
                 return "ok"
             except Exception as e:
-                print ("Error occured = " + str(e))
+                logging.info ("Error occured = " + str(e))
             timer += 1
 
         reply(user_id, "Прошло больше 2 минут: платеж отменяется")
@@ -425,7 +426,7 @@ def reply_onai_startPayment(user_id, message, last_sender_message):
         reply(user_id, "Произошла непредвиденная ошибка, попробуйте позднее")
         reply_typing_off(user_id)
         reply_main_menu_buttons(user_id)
-        print ("Error occured = " + e.message)
+        logging.info ("Error occured = " + e.message)
         return "fail"
 
 def reply_balance(user_id):
@@ -881,7 +882,7 @@ def reply_check_mobile_number(user_id, message, last_sender_message):
     message = message.replace(' ', '')
     message = message[-10:]
     r = requests.post(url_login, json={"phone":message})
-    print (r.json())
+    logging.info (r.json())
     operator = r.json()['operator']
     
     if operator == 'error':
@@ -1076,8 +1077,8 @@ def reply_mobile_startPayment(user_id, message, last_sender_message):
         # 9 - вызов acceptPayment()
         url_login9 = 'https://post.kz/mail-app/api/intervale/payment/accept/' + token + '?device=mobile'
         r = session.post(url_login9, json=sd2)
-        print ('#############################################')
-        print (r.text)
+        logging.info ('#############################################')
+        logging.info (r.text)
 
         # 10 - вызов statusPayment()
         url_login10 = 'https://post.kz/mail-app/api/intervale/payment/status/' + token + '?device=mobile'
@@ -1121,17 +1122,17 @@ def reply_mobile_startPayment(user_id, message, last_sender_message):
             time.sleep(1)
             r = session.post(url_login10, json=sd22)
             data = r.json()
-            print ('############status data##############')
-            print (data)
+            logging.info ('############status data##############')
+            logging.info (data)
             try:
                 result_status = data['result']['status']
-                print ("result_status = " + result_status)
+                logging.info ("result_status = " + result_status)
                 if result_status == 'fail':
                     reply(user_id, "Платеж не был завершен успешно. Попробуйте снова")
                 elif result_status == 'success':
-                    print ('got here #success')
-                    print ('#######################')
-                    print (r.json())
+                    logging.info ('got here #success')
+                    logging.info ('#######################')
+                    logging.info (r.json())
                     res = "Поздравляю! Платеж был проведен успешно, номер " + phoneToRefill + " пополнен на сумму " + str(amount) + " тг.\n"
                     res += "Номер квитанции: " + str(payment_id) + ", она доступна в профиле post.kz"
                     reply(user_id, res)
@@ -1141,7 +1142,7 @@ def reply_mobile_startPayment(user_id, message, last_sender_message):
                 reply_main_menu_buttons(user_id)
                 return "ok"
             except Exception as e:
-                print ("Error occured = " + str(e))
+                logging.info ("Error occured = " + str(e))
             timer += 1
 
         reply(user_id, "Прошло больше 2 минут: платеж отменяется")
@@ -1154,7 +1155,7 @@ def reply_mobile_startPayment(user_id, message, last_sender_message):
         reply(user_id, "Произошла непредвиденная ошибка, попробуйте позднее")
         reply_typing_off(user_id)
         reply_main_menu_buttons(user_id)
-        print ("Error occured = " + e.message)
+        logging.info ("Error occured = " + e.message)
         return "fail"
 
 def reply_has_cards(user_id, last_sender_message):

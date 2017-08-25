@@ -4,11 +4,13 @@ from flask import Flask, request
 import requests
 import pymongo
 import constants
+import logging
 
 app = Flask(__name__)
 client = pymongo.MongoClient()
 db = client.kpsmartbot_db
 collection_messages = db.messages
+logging.basicConfig(filename='botserver.log',level=logging.DEBUG)
  
 ACCESS_TOKEN = constants.ACCESS_TOKEN
 
@@ -48,8 +50,8 @@ def get_firstname_lastname(user_id):
 @app.route('/kpsmartbot', methods=['POST'])
 def handle_incoming_messages():
     data = request.json
-    print ("#############RECEIVED MESSAGE###############################")
-    print (data)
+    logging.info ("#############RECEIVED MESSAGE###############################")
+    logging.info (data)
     sender = data['entry'][0]['messaging'][0]['sender']['id']
     last_sender_message = collection_messages.find_one({"sender": sender})
     if last_sender_message == None:
@@ -65,7 +67,7 @@ def handle_incoming_messages():
         main.reply_main_menu_buttons(sender)
         return "ok"    
     except:
-        print ("No sticker")
+        logging.info ("No sticker")
 
     try:
         payload = data['entry'][0]['messaging'][0]['message']['quick_reply']['payload']
@@ -86,7 +88,7 @@ def handle_incoming_messages():
         return "ok"
          
     except:
-        print ("No quick-reply payload")
+        logging.info("No quick-reply payload")
 
     try:
         payload = data['entry'][0]['messaging'][0]['postback']['payload']
@@ -205,7 +207,7 @@ def handle_incoming_messages():
                 reply(sender, "Авторизации нет")
 
         else:
-            print ("Ne raspoznana komanda")  
+            logging.info ("Ne raspoznana komanda")
 
 
         last_sender_message['payload'] = payload
@@ -213,7 +215,7 @@ def handle_incoming_messages():
         return "ok" 
 
     except:
-        print ("No postback payload")
+        logging.info ("No postback payload")
 
     try:
         message = data['entry'][0]['messaging'][0]['message']['text']
@@ -259,7 +261,7 @@ def handle_incoming_messages():
         return "ok"
 
     except:
-        print ("No message")
+        logging.info ("No message")
 
     return "ok"
  
