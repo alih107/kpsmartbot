@@ -90,6 +90,7 @@ def handle_incoming_messages():
         logging.info("No quick-reply payload")
 
     try:
+        logging.info('trying to get postback payload')
         payload = data['entry'][0]['messaging'][0]['postback']['payload']
         if payload == 'GET_STARTED_PAYLOAD':
             #print (last_sender_message)
@@ -218,7 +219,6 @@ def handle_incoming_messages():
 
     except:
         logging.info ("No postback payload")
-        logging.info(traceback.format_exc())
 
     try:
         message = data['entry'][0]['messaging'][0]['message']['text']
