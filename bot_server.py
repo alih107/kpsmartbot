@@ -166,7 +166,9 @@ def handle_incoming_messages():
                 collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
                 return "need auth"
 
+            logging.info('before hasCards')
             hasCards = main.reply_has_cards(sender, last_sender_message)
+            logging.info('after hasCards')
             if not hasCards:
                 reply(sender, "У вас нет подвязанной карты в профиле post.kz для оплаты пожалуйста добавьте карту https://post.kz/finance/cards/add\nТакже Вы можете переавторизоваться через Главное меню (нажмите (y) )-> Авторизация на post.kz")
                 last_sender_message['payload'] = 'mainMenu'
