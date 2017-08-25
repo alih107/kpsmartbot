@@ -172,7 +172,6 @@ def reply_onai(sender, message, last_sender_message):
     reply(sender, "Введите сумму пополнения баланса (не менее 100 тг)")
 
 def reply_onai_enter_number(sender, last_sender_message):
-    logging.info('entered reply_onai_enter_number')
     try:
         lastOnaiNumber = last_sender_message['onaiToRefill']
         data_quick_replies = {

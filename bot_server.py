@@ -90,7 +90,6 @@ def handle_incoming_messages():
         logging.info("No quick-reply payload")
 
     try:
-        logging.info('trying to get postback payload')
         payload = data['entry'][0]['messaging'][0]['postback']['payload']
         if payload == 'GET_STARTED_PAYLOAD':
             #print (last_sender_message)
@@ -153,7 +152,6 @@ def handle_incoming_messages():
         elif payload == 'misc':
             main.reply_misc(sender)
         elif payload == 'onai':
-            logging.info('entered payload == onai')
             try:
                 encodedLoginPass = last_sender_message['encodedLoginPass']
                 assert encodedLoginPass != None
@@ -168,16 +166,13 @@ def handle_incoming_messages():
                 collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
                 return "need auth"
 
-            logging.info('before hasCards')
             hasCards = main.reply_has_cards(sender, last_sender_message)
-            logging.info('after hasCards')
             if not hasCards:
                 reply(sender, "У вас нет подвязанной карты в профиле post.kz для оплаты пожалуйста добавьте карту https://post.kz/finance/cards/add\nТакже Вы можете переавторизоваться через Главное меню (нажмите (y) )-> Авторизация на post.kz")
                 last_sender_message['payload'] = 'mainMenu'
                 collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
                 return "need cards"
 
-            logging.info('got here before calling reply_onai_enter_number')
             last_sender_message['lastCommand'] = payload
             main.reply_onai_enter_number(sender, last_sender_message)  
         elif payload == 'auth':
