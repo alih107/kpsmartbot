@@ -854,6 +854,7 @@ def reply_main_menu_buttons(user_id):
     resp = requests.post(url, json=data_main_menu_buttons)
 
 def reply_mobile_enter_number(user_id, last_sender_message):
+    print ('got here reply mobile enter number')
     try:
         lastPhoneToRefill = last_sender_message['phoneToRefill']
         data_quick_replies = {
