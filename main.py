@@ -854,7 +854,6 @@ def reply_main_menu_buttons(user_id):
     resp = requests.post(url, json=data_main_menu_buttons)
 
 def reply_mobile_enter_number(user_id, last_sender_message):
-    print ('got here reply mobile enter number')
     try:
         lastPhoneToRefill = last_sender_message['phoneToRefill']
         data_quick_replies = {
@@ -874,7 +873,7 @@ def reply_mobile_enter_number(user_id, last_sender_message):
         }
         resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_quick_replies)
     except:
-        reply(sender, "Введите номер телефона\n" + hint_main_menu)
+        reply(user_id, "Введите номер телефона\n" + hint_main_menu)
 
 def reply_check_mobile_number(user_id, message, last_sender_message):
     #print ('got here check mobile number')
