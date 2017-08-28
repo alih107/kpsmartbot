@@ -64,16 +64,17 @@ def print_facebook_data(data, last_sender_message):
     try:
         payload = data['entry'][0]['messaging'][0]['postback']['payload']
         res += 'Received postback, payload = ' + payload
-        try:
-            res += ', payload = ' + last_sender_message['payload']
-        except:
-            pass
+
     except:
         pass
 
     try:
         message = data['entry'][0]['messaging'][0]['message']['text'] + ' | '
-        res += 'Received message = ' + message + ', payload = ' +
+        res += 'Received message = ' + message
+        try:
+            res += ', payload = ' + last_sender_message['payload']
+        except:
+            pass
     except:
         pass
 

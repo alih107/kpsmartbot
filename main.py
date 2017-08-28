@@ -16,6 +16,7 @@ ACCESS_TOKEN = constants.ACCESS_TOKEN
 
 hint_main_menu = "(для перехода в главное меню нажмите кнопку (y) "
 hint_main_menu2 = "(Нажмите (y) для перехода в главное меню)"
+timeout = 300
 
 url_mobile_payments = 'https://post.kz/finance/payment/mobile'
 
@@ -385,10 +386,11 @@ def reply_onai_startPayment(sender, message, last_sender_message):
             }
             reply_typing_off(sender)
             resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_url_button)
+            logging.info(data)
             time.sleep(9)
 
         timer = 0
-        while timer < 120:
+        while timer < timeout:
             time.sleep(1)
             r = session.post(url_login10, json=sd22)
             data = r.json()
@@ -410,7 +412,7 @@ def reply_onai_startPayment(sender, message, last_sender_message):
                 reply_main_menu_buttons(sender)
                 return "ok"
             except Exception as e:
-                logging.info ('Still processing payment... timer = ' + str(timer))
+                pass
             timer += 1
 
         reply(sender, "Прошло больше 2 минут: платеж отменяется")
@@ -1112,15 +1114,14 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
             }
             resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_url_button)
             reply_typing_off(sender)
+            logging.info(data)
             time.sleep(9)
 
         timer = 0
-        while timer < 120:
+        while timer < timeout:
             time.sleep(1)
             r = session.post(url_login10, json=sd22)
             data = r.json()
-            logging.info ('############status data##############')
-            logging.info (data)
             try:
                 result_status = data['result']['status']
                 logging.info ("result_status = " + result_status)
@@ -1139,7 +1140,7 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
                 reply_main_menu_buttons(sender)
                 return "ok"
             except Exception as e:
-                logging.info ("Error occured = " + str(e))
+                pass
             timer += 1
 
         reply(sender, "Прошло больше 2 минут: платеж отменяется")
