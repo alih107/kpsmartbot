@@ -284,6 +284,7 @@ def handle_incoming_messages():
             return "ok"
         elif payload == 'mobile.startPayment':
             t = threading.Thread(target=main.reply_mobile_startPayment, args=(sender, message, last_sender_message))
+            t.setDaemon(True)
             t.start()
             logging.info('main.reply_mobile_startPayment called with a new thread')
             return "ok"
@@ -291,6 +292,7 @@ def handle_incoming_messages():
             return "ok"
         elif payload == 'onai':
             t = threading.Thread(target=main.reply_onai_startPayment, args=(sender, message, last_sender_message))
+            t.setDaemon(True)
             t.start()
             logging.info('main.reply_onai_startPayment called with a new thread')
             return "ok"
