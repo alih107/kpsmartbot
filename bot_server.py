@@ -34,7 +34,7 @@ def verify():
 
     return "Hello world", 200
 
-def print_facebook_data(data):
+def print_facebook_data(data, last_sender_message):
     sender = data['entry'][0]['messaging'][0]['sender']['id']
     res = 'Sender id = ' + sender + ' | '
 
@@ -63,13 +63,17 @@ def print_facebook_data(data):
 
     try:
         payload = data['entry'][0]['messaging'][0]['postback']['payload']
-        res += 'Received postback, payload = ' + payload + ' | '
+        res += 'Received postback, payload = ' + payload
+        try:
+            res += ', payload = ' + last_sender_message['payload']
+        except:
+            pass
     except:
         pass
 
     try:
         message = data['entry'][0]['messaging'][0]['message']['text'] + ' | '
-        res += 'Received message = ' + message
+        res += 'Received message = ' + message + ', payload = ' +
     except:
         pass
 
@@ -92,8 +96,6 @@ def get_firstname_lastname(user_id):
 @app.route('/kpsmartbot', methods=['POST'])
 def handle_incoming_messages():
     data = request.json
-    #logging.info('Number of threads running = ' + str(threading.active_count()))
-    logging.info (print_facebook_data(data))
     sender = data['entry'][0]['messaging'][0]['sender']['id']
     last_sender_message = collection_messages.find_one({"sender": sender})
     if last_sender_message == None:
@@ -101,6 +103,7 @@ def handle_incoming_messages():
         db_record = {"sender":sender, "first_name":firstname, "last_name":lastname}
         last_sender_message = collection_messages.insert_one(db_record)
 
+    logging.info(print_facebook_data(data, last_sender_message))
     try:
         sticker_id = data['entry'][0]['messaging'][0]['message']['sticker_id']
         last_sender_message['payload'] = 'mainMenu'
