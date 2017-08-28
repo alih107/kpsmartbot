@@ -50,25 +50,25 @@ def print_facebook_data(data):
     res += 'Time = ' + datetime.datetime.fromtimestamp(ms).strftime('%Y-%m-%d %H:%M:%S') + ' | '
     try:
         sticker_id = data['entry'][0]['messaging'][0]['message']['sticker_id']
-        res += 'Received sticker'
+        res += 'Received sticker' + ' | '
     except:
         pass
 
     try:
         payload = data['entry'][0]['messaging'][0]['message']['quick_reply']['payload']
         text = data['entry'][0]['messaging'][0]['message']['text']
-        res += 'Received quick-reply, payload = ' + payload + ', text = ' + text
+        res += 'Received quick-reply, payload = ' + payload + ', text = ' + text + ' | '
     except:
         pass
 
     try:
         payload = data['entry'][0]['messaging'][0]['postback']['payload']
-        res += 'Received postback, payload = ' + payload
+        res += 'Received postback, payload = ' + payload + ' | '
     except:
         pass
 
     try:
-        message = data['entry'][0]['messaging'][0]['message']['text']
+        message = data['entry'][0]['messaging'][0]['message']['text'] + ' | '
         res += 'Received message = ' + message
     except:
         pass
