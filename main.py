@@ -415,7 +415,8 @@ def reply_onai_startPayment(sender, message, last_sender_message):
                 pass
             timer += 1
 
-        reply(sender, "Прошло больше 2 минут: платеж отменяется")
+        strminutes = str(timeout / 60)
+        reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
         reply_typing_off(sender)
         reply_main_menu_buttons(sender)
         last_sender_message['payload'] = 'mainMenu'
@@ -1143,7 +1144,8 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
                 pass
             timer += 1
 
-        reply(sender, "Прошло больше 2 минут: платеж отменяется")
+        strminutes = str(timeout / 60)
+        reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
         reply_typing_off(sender)
         reply_main_menu_buttons(sender)
         last_sender_message['payload'] = 'mainMenu'

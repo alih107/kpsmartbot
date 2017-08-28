@@ -136,12 +136,7 @@ def handle_incoming_messages():
     try:
         payload = data['entry'][0]['messaging'][0]['postback']['payload']
         if payload == 'GET_STARTED_PAYLOAD':
-            fn = ''
-            ln = ''
-            if last_sender_message != None:
-                fn, ln = last_sender_message['firstname'], last_sender_message['lastname']
-            else:
-                fn, ln = get_firstname_lastname(sender)
+            fn, ln = get_firstname_lastname(sender)
             result = "Добро пожаловать в бот АО КазПочта, " + ln + " " + fn + "! "
             reply(sender, result)
             main.reply_main_menu_buttons(sender)
