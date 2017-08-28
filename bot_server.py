@@ -283,7 +283,6 @@ def handle_incoming_messages():
             main.reply_mobile_chooseCard(sender, message, last_sender_message)
             return "ok"
         elif payload == 'mobile.startPayment':
-            return "ok"
             t = threading.Thread(target=main.reply_mobile_startPayment, args=(sender, message, last_sender_message))
             t.start()
             return "ok"
