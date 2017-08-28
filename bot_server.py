@@ -285,12 +285,14 @@ def handle_incoming_messages():
         elif payload == 'mobile.startPayment':
             t = threading.Thread(target=main.reply_mobile_startPayment, args=(sender, message, last_sender_message))
             t.start()
+            logging.info('main.reply_mobile_startPayment called with a new thread')
             return "ok"
         elif payload == 'mobile.finished' or payload =='onai.finished':
             return "ok"
         elif payload == 'onai':
-            t = threading.Thread(target=main.reply_onai, args=(sender, message, last_sender_message))
+            t = threading.Thread(target=main.reply_onai_startPayment, args=(sender, message, last_sender_message))
             t.start()
+            logging.info('main.reply_onai_startPayment called with a new thread')
             return "ok"
         elif payload == 'onai.amount':
             main.reply_onai_amount(sender, message, last_sender_message)
