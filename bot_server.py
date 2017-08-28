@@ -291,16 +291,16 @@ def handle_incoming_messages():
         elif payload == 'mobile.finished' or payload =='onai.finished':
             return "ok"
         elif payload == 'onai':
-            t = threading.Thread(target=main.reply_onai_startPayment, args=(sender, message, last_sender_message))
-            t.setDaemon(True)
-            t.start()
-            logging.info('main.reply_onai_startPayment called with a new thread')
+            main.reply_onai(sender, message, last_sender_message)
             return "ok"
         elif payload == 'onai.amount':
             main.reply_onai_amount(sender, message, last_sender_message)
             return "ok"
         elif payload == 'onai.startPayment':
-            main.reply_onai_startPayment(sender, message, last_sender_message)
+            t = threading.Thread(target=main.reply_onai_startPayment, args=(sender, message, last_sender_message))
+            t.setDaemon(True)
+            t.start()
+            logging.info('main.reply_onai_startPayment called with a new thread')
             return "ok"
         main.reply_main_menu_buttons(sender)
         last_sender_message['payload'] = 'mainMenu'
