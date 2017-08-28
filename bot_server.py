@@ -43,7 +43,7 @@ def print_facebook_data(data):
         res += 'Name = ' + last_sender_message['first_name'] + ' ' + last_sender_message['last_name'] + ' | '
     except:
         firstname, lastname = get_firstname_lastname(sender)
-        res += '[new user] Name = ' + firstname + ' ' + lastname
+        res += '[new user] Name = ' + firstname + ' ' + lastname + ' | '
 
     ms = int(data['entry'][0]['time']) / 1000.0
     res += 'Time = ' + datetime.datetime.fromtimestamp(ms).strftime('%Y-%m-%d %H:%M:%S') + ' | '
@@ -98,6 +98,7 @@ def handle_incoming_messages():
         firstname, lastname = get_firstname_lastname(sender)
         db_record = {"sender":sender, "first_name":firstname, "last_name":lastname}
         last_sender_message = collection_messages.insert_one(db_record)
+
     try:
         sticker_id = data['entry'][0]['messaging'][0]['message']['sticker_id']
         last_sender_message['payload'] = 'mainMenu'
@@ -129,8 +130,12 @@ def handle_incoming_messages():
     try:
         payload = data['entry'][0]['messaging'][0]['postback']['payload']
         if payload == 'GET_STARTED_PAYLOAD':
-            #print (last_sender_message)
-            fn, ln = get_firstname_lastname(sender)
+            fn = ''
+            ln = ''
+            if last_sender_message != None:
+                fn, ln = last_sender_message['firstname'], last_sender_message['lastname']
+            else:
+                fn, ln = get_firstname_lastname(sender)
             result = "Добро пожаловать в бот АО КазПочта, " + ln + " " + fn + "! "
             reply(sender, result)
             main.reply_main_menu_buttons(sender)
