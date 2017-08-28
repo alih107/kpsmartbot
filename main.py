@@ -410,7 +410,7 @@ def reply_onai_startPayment(sender, message, last_sender_message):
                 reply_main_menu_buttons(sender)
                 return "ok"
             except Exception as e:
-                logging.info ('Still processing payment... timer = ' + timer)
+                logging.info ('Still processing payment... timer = ' + str(timer))
             timer += 1
 
         reply(sender, "Прошло больше 2 минут: платеж отменяется")
@@ -423,7 +423,7 @@ def reply_onai_startPayment(sender, message, last_sender_message):
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
         reply_typing_off(sender)
         reply_main_menu_buttons(sender)
-        logging.info ("Error occured = " + e.message)
+        logging.info ("Error occured = " + str(e))
         return "fail"
 
 def reply_balance(sender):

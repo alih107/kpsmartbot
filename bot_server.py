@@ -283,7 +283,7 @@ def handle_incoming_messages():
             main.reply_mobile_chooseCard(sender, message, last_sender_message)
             return "ok"
         elif payload == 'mobile.startPayment':
-            t = threading.Thread(target=main.reply_mobile_startPayment, args=(sender, message, last_sender_message))
+            t = threading.Thread(target=main.reply_mobile_startPayment, args=(sender, message, last_sender_message,))
             t.setDaemon(True)
             t.start()
             logging.info('main.reply_mobile_startPayment called with a new thread')
@@ -297,7 +297,7 @@ def handle_incoming_messages():
             main.reply_onai_amount(sender, message, last_sender_message)
             return "ok"
         elif payload == 'onai.startPayment':
-            t = threading.Thread(target=main.reply_onai_startPayment, args=(sender, message, last_sender_message))
+            t = threading.Thread(target=main.reply_onai_startPayment, args=(sender, message, last_sender_message,))
             t.setDaemon(True)
             t.start()
             logging.info('main.reply_onai_startPayment called with a new thread')
