@@ -11,7 +11,7 @@ app = Flask(__name__)
 client = pymongo.MongoClient()
 db = client.kpsmartbot_db
 collection_messages = db.messages
-logging.basicConfig(filename='botserver.log',level=logging.INFO)
+logging.basicConfig(filename='botserver.log',level=logging.INFO,format='[%(levelname)s] (%(threadName)-10s) %(message)s')
 
 ACCESS_TOKEN = constants.ACCESS_TOKEN
 
@@ -283,6 +283,7 @@ def handle_incoming_messages():
             main.reply_mobile_chooseCard(sender, message, last_sender_message)
             return "ok"
         elif payload == 'mobile.startPayment':
+            return "ok"
             t = threading.Thread(target=main.reply_mobile_startPayment, args=(sender, message, last_sender_message))
             t.start()
             return "ok"
