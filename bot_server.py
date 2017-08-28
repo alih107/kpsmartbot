@@ -6,12 +6,14 @@ import constants
 import logging
 import datetime
 import threading
+import os
 
 app = Flask(__name__)
 client = pymongo.MongoClient()
 db = client.kpsmartbot_db
 collection_messages = db.messages
 logging.basicConfig(filename='botserver.log',level=logging.INFO,format='[%(levelname)s] (%(threadName)-10s) %(message)s')
+pid = os.getpid()
 
 ACCESS_TOKEN = constants.ACCESS_TOKEN
 
@@ -36,7 +38,7 @@ def verify():
 
 def print_facebook_data(data):
     sender = data['entry'][0]['messaging'][0]['sender']['id']
-    res = 'Sender id = ' + sender + ' | '
+    res = 'pid = ' + str(pid) + ' | Sender id = ' + sender + ' | '
 
     try:
         last_sender_message = collection_messages.find_one({"sender": sender})
@@ -92,6 +94,7 @@ def get_firstname_lastname(user_id):
 @app.route('/kpsmartbot', methods=['POST'])
 def handle_incoming_messages():
     data = request.json
+    logging.info('Number of threads running = ' + str(threading.active_count()))
     logging.info (print_facebook_data(data))
     sender = data['entry'][0]['messaging'][0]['sender']['id']
     last_sender_message = collection_messages.find_one({"sender": sender})
@@ -313,4 +316,4 @@ def handle_incoming_messages():
     return "ok"
  
 if __name__ == '__main__':
-	app.run(debug=True, threaded=True)
+	app.run(debug=True)
