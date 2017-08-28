@@ -392,8 +392,6 @@ def reply_onai_startPayment(sender, message, last_sender_message):
             time.sleep(1)
             r = session.post(url_login10, json=sd22)
             data = r.json()
-            logging.info ('############status data##############')
-            logging.info (data)
             try:
                 result_status = data['result']['status']
                 logging.info ("result_status = " + result_status)
@@ -412,7 +410,7 @@ def reply_onai_startPayment(sender, message, last_sender_message):
                 reply_main_menu_buttons(sender)
                 return "ok"
             except Exception as e:
-                logging.info ("Error occured = " + str(e))
+                logging.info ('Still processing payment... timer = ' + timer)
             timer += 1
 
         reply(sender, "Прошло больше 2 минут: платеж отменяется")
