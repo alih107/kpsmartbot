@@ -155,7 +155,9 @@ def handle_incoming_messages():
         elif payload == 'shtrafy':
             main.reply_pdd_shtrafy(sender) 
         elif payload == 'komuslugi':
-            main.reply_komuslugi_cities(sender) 
+            main.reply_komuslugi_cities(sender)
+        elif payload == 'nearest':
+            main.reply_nearest(sender)
         elif payload == 'balance':
             try:
                 encodedLoginPass = last_sender_message['encodedLoginPass']

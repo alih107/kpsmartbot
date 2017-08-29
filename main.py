@@ -812,9 +812,8 @@ def reply_main_menu_buttons(sender):
                   },
                   {
                     "type": "web_url",
-                    "title": "🏃 Вызов курьера",
-                    "url":"https://post.kz/courier",
-                    "webview_height_ratio":"full"
+                    "title": "📍 Ближайшие", # 🏃 Вызов курьера
+                    "payload": "nearest"
                   }
                 ]
               },              
@@ -1194,3 +1193,36 @@ def reply_has_cards(sender, last_sender_message):
     r = session.post(url_login6, json=sd2)
     cardsCount = len(r.json())
     return cardsCount > 0
+
+def reply_nearest(sender):
+    data_misc_buttons = {
+        "recipient": {"id": sender},
+        "message": {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "button",
+                    "text": " Выберите команду\n" + hint_main_menu,
+                    "buttons": [
+                        {
+                            "type": "postback",
+                            "title": "📦 Постаматы",
+                            "payload": "nearest.postamats"
+                        },
+                        {
+                            "type": "postback",
+                            "title": "🏢 Отделения",
+                            "payload": "shtrafy"
+                        },
+                        {
+                            "type": "postback",
+                            "title": "🏧 Банкоматы",
+                            "payload": "shtrafy"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
+                         json=data_misc_buttons)
