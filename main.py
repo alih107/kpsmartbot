@@ -811,7 +811,7 @@ def reply_main_menu_buttons(sender):
                     "payload": "tracking"
                   },
                   {
-                    "type": "web_url",
+                    "type": "postback",
                     "title": "📍 Ближайшие",
                     "payload": "nearest"
                   }
