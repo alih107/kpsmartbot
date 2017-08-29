@@ -1212,12 +1212,12 @@ def reply_nearest(sender):
                         {
                             "type": "postback",
                             "title": "🏢 Отделения",
-                            "payload": "shtrafy"
+                            "payload": "nearest.offices"
                         },
                         {
                             "type": "postback",
                             "title": "🏧 Банкоматы",
-                            "payload": "shtrafy"
+                            "payload": "nearest.atms"
                         }
                     ]
                 }
@@ -1226,3 +1226,12 @@ def reply_nearest(sender):
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
                          json=data_misc_buttons)
+
+def reply_nearest_postamats_location(sender):
+    reply(sender, 'Отправьте своё местоположение (нажмите ➕)')
+
+def reply_nearest_offices_location(sender):
+    reply(sender, 'Отправьте своё местоположение (нажмите ➕)')
+
+def reply_nearest_atms_location(sender):
+    reply(sender, 'Отправьте своё местоположение (нажмите ➕)')

@@ -158,6 +158,13 @@ def handle_incoming_messages():
             main.reply_komuslugi_cities(sender)
         elif payload == 'nearest':
             main.reply_nearest(sender)
+        elif payload == 'nearest.postamats':
+            main.reply_nearest_postamats_location(sender)
+        elif payload == 'nearest.offices':
+            main.reply_nearest_offices_location(sender)
+        elif payload == 'nearest.atms':
+            main.reply_nearest_atms_location(sender)
+
         elif payload == 'balance':
             try:
                 encodedLoginPass = last_sender_message['encodedLoginPass']
