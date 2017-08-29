@@ -1211,11 +1211,11 @@ def reply_nearest(sender):
                             "title": "📦 Постаматы",
                             "payload": "nearest.postamats"
                         },
-                        {
-                            "type": "postback",
-                            "title": "🏢 Отделения",
-                            "payload": "nearest.offices"
-                        },
+                        #{
+                        #    "type": "postback",
+                        #    "title": "🏢 Отделения",
+                        #    "payload": "nearest.offices"
+                        #},
                         {
                             "type": "postback",
                             "title": "🏧 Банкоматы",
@@ -1260,4 +1260,4 @@ def reply_nearest_find(sender, locLong, locLat, payload):
         res += 'Расстояние: ' + str(items[0][1]) + ' м.'
         reply(sender, res)
     except:
-        logging.info('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
+        reply(sender, 'Произошла непредвиденная ошибка, попробуйте позднее')

@@ -277,7 +277,6 @@ def handle_incoming_messages():
             main.reply_nearest_find(sender, locLong, locLat, payload)
     except:
         pass
-        #logging.info('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
 
     try:
         message = data['entry'][0]['messaging'][0]['message']['text']
