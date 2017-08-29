@@ -6,6 +6,7 @@ import constants
 import logging
 import datetime
 import threading
+import sys
 
 app = Flask(__name__)
 client = pymongo.MongoClient()
@@ -275,7 +276,7 @@ def handle_incoming_messages():
             payload = last_sender_message['payload']
             main.reply_nearest_find(sender, locLong, locLat, payload)
     except:
-        logging.info('Failed to process location')
+        logging.info('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
 
     try:
         message = data['entry'][0]['messaging'][0]['message']['text']
