@@ -266,12 +266,12 @@ def handle_incoming_messages():
         pass
 
     try:
-        logging.info(data['entry'][0]['messaging'][0]['message'])
         attachment = data['entry'][0]['messaging'][0]['message']['attachments'][0]
         type = attachment['type']
         if type == 'location':
             coordinates = attachment['payload']['coordinates']
-            locLong, locLat = coordinates['long'], coordinates['lat']
+            locLong = coordinates['long'],
+            locLat = coordinates['lat']
             payload = last_sender_message['payload']
             main.reply_nearest_find(sender, locLong, locLat, payload)
     except:
