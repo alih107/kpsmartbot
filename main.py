@@ -92,8 +92,16 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
         reply(sender, "Вы ввели неправильный ИИН, введите еще раз")
         return "again"
     reply_typing_on(sender)
+    session = requests.Session()
+    url_login = 'https://post.kz/mail-app/api/public/transfer/loadName/' + message
+    r = session.get(url_login).json()
     try:
-        session = requests.Session()
+        name = r['name']
+    except:
+        reply(sender, "Такой ИИН не найден, введите еще раз")
+        return "again"
+
+    try:
         headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type':'application/json'}
         url_login = 'https://post.kz/mail-app/api/account/'
         r = session.get(url_login, headers=headers)
@@ -125,6 +133,23 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
         url_login = 'https://post.kz/mail-app/api/public/v2/invoices/create'
         data = {'operatorId':'pddIin', 'data':message}
         r = session.post(url_login, json=data)
+        data = r.json()
+        status = data['responseInfo']['status']
+        if status == 'FAILED':
+            result = 'Штрафов по данным ' + message + ' не найдено\n'
+            result += '(Информация может быть неполной! Для полной информации авторизуйтесь в главном меню)'
+            reply(sender, result)
+            reply_typing_off(sender)
+            return "again"
+        invoiceData = r['invoiceData']
+        result = ''
+        desc = invoiceData['details'][0]['description']
+        amount = str(invoiceData['details'][0]['amount'])
+        result += desc + ' - сумма ' + amount + ' тг\n'
+        result += '(Информация может быть неполной! Для полной информации авторизуйтесь в главном меню)'
+
+        reply_typing_off(sender)
+        reply(sender, result)
 
 def reply_pdd_shtrafy_gosnomer(sender, message, last_sender_message):
     reply(sender, "Идет проверка на наличие штрафов...")
