@@ -267,7 +267,7 @@ def handle_incoming_messages():
         pass
 
     try:
-        attachment = data['entry'][0]['messaging']['0']['message']['attachments'][0]
+        attachment = data['entry'][0]['messaging'][0]['message']['attachments'][0]
         type = attachment['type']
         if type == 'location':
             coordinates = attachment['payload']['coordinates']
