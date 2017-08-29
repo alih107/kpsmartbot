@@ -1274,7 +1274,7 @@ def reply_nearest_find(sender, locLong, locLat, payload):
 def reply_nearest_map_location(sender, locLong, locLat, title):
     latCommaLong = str(locLat) + ',' + str(locLong)
     image_url = 'https://maps.googleapis.com/maps/api/staticmap?size=764x400&center='
-    image_url += longCommaLat + '&zoom=15&markers=' + latCommaLong
+    image_url += latCommaLong + '&zoom=15&markers=' + latCommaLong
     web_url = 'https://www.google.com/maps/place/' + latCommaLong
     data_misc_buttons = {
       "recipient":{ "id":sender },

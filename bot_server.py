@@ -66,7 +66,7 @@ def print_facebook_data(data, last_sender_message):
             locLong = coordinates['long']
             locLat = coordinates['lat']
             latCommaLong = str(locLat) + ',' + str(locLong)
-            res += 'Received location; Lat,Long = ' + latCommaLong + '; payload = ' + last_sender_message['payload']
+            res += 'Received location = ' + latCommaLong + '; payload = ' + last_sender_message['payload']
     except:
         pass
 
