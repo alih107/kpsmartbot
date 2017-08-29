@@ -812,7 +812,7 @@ def reply_main_menu_buttons(sender):
                   },
                   {
                     "type": "web_url",
-                    "title": "📍 Ближайшие", # 🏃 Вызов курьера
+                    "title": "📍 Ближайшие",
                     "payload": "nearest"
                   }
                 ]
