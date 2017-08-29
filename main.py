@@ -1267,15 +1267,15 @@ def reply_nearest_find(sender, locLong, locLat, payload):
             res += closestLoc['address'] + '\n'
         res += 'Расстояние: ' + str(items[0][1]) + ' м.'
         reply(sender, res)
-        reply_nearest_map_location(sender, locLong, locLat, title)
+        reply_nearest_map_location(sender, closestLoc['longitude'], closestLoc['latitude'], title)
     except:
         reply(sender, 'Произошла непредвиденная ошибка, попробуйте позднее')
 
 def reply_nearest_map_location(sender, locLong, locLat, title):
-    longCommaLat = str(locLat) + ',' + str(locLong)
+    latCommaLong = str(locLat) + ',' + str(locLong)
     image_url = 'https://maps.googleapis.com/maps/api/staticmap?size=764x400&center='
-    image_url += longCommaLat + '&zoom=15&markers=' + longCommaLat
-    web_url = 'https://www.google.com/maps/place/' + longCommaLat
+    image_url += longCommaLat + '&zoom=15&markers=' + latCommaLong
+    web_url = 'https://www.google.com/maps/place/' + latCommaLong
     data_misc_buttons = {
       "recipient":{ "id":sender },
       "message":{

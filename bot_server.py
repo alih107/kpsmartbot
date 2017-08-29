@@ -59,6 +59,18 @@ def print_facebook_data(data, last_sender_message):
         pass
 
     try:
+        attachment = data['entry'][0]['messaging'][0]['message']['attachments'][0]
+        type = attachment['type']
+        if type == 'location':
+            coordinates = attachment['payload']['coordinates']
+            locLong = coordinates['long']
+            locLat = coordinates['lat']
+            latCommaLong = str(locLat) + ',' + str(locLong)
+            res += 'Received location; Lat,Long = ' + latCommaLong + '; payload = ' + last_sender_message['payload']
+    except:
+        pass
+
+    try:
         payload = data['entry'][0]['messaging'][0]['message']['quick_reply']['payload']
         text = data['entry'][0]['messaging'][0]['message']['text']
         res += 'Received quick-reply, payload = ' + payload + ', text = ' + text + ' | '
