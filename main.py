@@ -1233,29 +1233,32 @@ def reply_nearest_request_location(sender):
     reply(sender, 'Отправьте своё местоположение (нажмите ➕)')
 
 def reply_nearest_find(sender, locLong, locLat, payload):
-    fileName = ''
-    if payload == 'payload.postamats':
-        fileName = 'postamats.json'
-    elif payload == 'atms.json':
-        fileName = 'atms.json'
+    try:
+        fileName = ''
+        if payload == 'payload.postamats':
+            fileName = 'postamats.json'
+        elif payload == 'atms.json':
+            fileName = 'atms.json'
 
-    with open('initial_data/' + fileName) as json_data:
-        d = json.load(json_data)
+        with open('initial_data/' + fileName) as json_data:
+            d = json.load(json_data)
 
-    items = []
-    for model in d:
-        if model['fields']['is_active']:
-            dist = helper.get_distance_in_meters(locLat, float(model['fields']['latitude']), locLong,
-                                          float(model['fields']['longitude']))
-            items.append((model['fields'], dist))
+        items = []
+        for model in d:
+            if model['fields']['is_active']:
+                dist = helper.get_distance_in_meters(locLat, float(model['fields']['latitude']), locLong,
+                                              float(model['fields']['longitude']))
+                items.append((model['fields'], dist))
 
-    items.sort(key=lambda x: x[1])
-    closestLoc = items[0][0]
-    res = 'Ближайший Постамат:\n'
-    res += closestLoc['full_name'] + '\n'
-    res += 'Город: ' + closestLoc['city'] + '\n'
-    res += 'Индекс: ' + closestLoc['postcode'] + '\n'
-    if closestLoc['postcode_new'] != None:
-        res += 'Новый индекс: ' + closestLoc['postcode_new'] + '\n'
-    res += 'Расстояние: ' + str(items[0][1]) + ' м.'
-    reply(sender, res)
+        items.sort(key=lambda x: x[1])
+        closestLoc = items[0][0]
+        res = 'Ближайший Постамат:\n'
+        res += closestLoc['full_name'] + '\n'
+        res += 'Город: ' + closestLoc['city'] + '\n'
+        res += 'Индекс: ' + closestLoc['postcode'] + '\n'
+        if closestLoc['postcode_new'] != None:
+            res += 'Новый индекс: ' + closestLoc['postcode_new'] + '\n'
+        res += 'Расстояние: ' + str(items[0][1]) + ' м.'
+        reply(sender, res)
+    except:
+        logging.info('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
