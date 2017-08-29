@@ -1235,9 +1235,9 @@ def reply_nearest_request_location(sender):
 def reply_nearest_find(sender, locLong, locLat, payload):
     try:
         fileName = ''
-        if payload == 'payload.postamats':
+        if payload == 'nearest.postamats':
             fileName = 'postamats.json'
-        elif payload == 'atms.json':
+        elif payload == 'nearest.atms':
             fileName = 'atms.json'
 
         with open('initial_data/' + fileName) as json_data:
