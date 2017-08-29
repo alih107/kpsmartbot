@@ -1287,6 +1287,7 @@ def reply_nearest_map_location(sender, locLong, locLat, title):
                {
                 "title":title,
                 "image_url":image_url,
+                "subtitle": "Google Maps",
                 "default_action": {
                   "type": "web_url",
                   "url": web_url
