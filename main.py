@@ -1235,13 +1235,13 @@ def reply_nearest_request_location(sender):
 def reply_nearest_find(sender, locLong, locLat, payload):
     try:
         fileName = ''
-        res = ''
+        title = ''
         if payload == 'nearest.postamats':
             fileName = 'postamats.json'
-            res = 'Ближайший Постамат:\n'
+            title = 'Ближайший Постамат'
         elif payload == 'nearest.atms':
             fileName = 'atms.json'
-            res = 'Ближайший Банкомат:\n'
+            title = 'Ближайший Банкомат'
 
         with open('initial_data/' + fileName) as json_data:
             d = json.load(json_data)
@@ -1255,6 +1255,7 @@ def reply_nearest_find(sender, locLong, locLat, payload):
         items.sort(key=lambda x: x[1])
         closestLoc = items[0][0]
 
+        res = title + ':\n'
         if payload == 'nearest.postamats':
             res += closestLoc['full_name'] + '\n'
             res += 'Город: ' + closestLoc['city'] + '\n'
@@ -1266,5 +1267,36 @@ def reply_nearest_find(sender, locLong, locLat, payload):
             res += closestLoc['address'] + '\n'
         res += 'Расстояние: ' + str(items[0][1]) + ' м.'
         reply(sender, res)
+        reply_nearest_map_location(sender, locLong, locLat, title)
     except:
         reply(sender, 'Произошла непредвиденная ошибка, попробуйте позднее')
+
+def reply_nearest_map_location(sender, locLong, locLat, title):
+    longCommaLat = str(locLong) + ',' + str(locLat)
+    image_url = 'https://maps.googleapis.com/maps/api/staticmap?size=764x400&center='
+    image_url += longCommaLat + '&zoom=15&markers=' + longCommaLat
+    web_url = 'https://www.google.com/maps/place/' + longCommaLat
+    data_misc_buttons = {
+      "recipient":{ "id":sender },
+      "message":{
+        "attachment":{
+          "type":"template",
+          "payload":{
+            "template_type":"generic",
+            "elements":[
+               {
+                "title":title,
+                "image_url":image_url,
+                "default_action": {
+                  "type": "web_url",
+                  "url": web_url
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+
+    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
+                         json=data_misc_buttons)
