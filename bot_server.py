@@ -46,8 +46,10 @@ def print_facebook_data(data, last_sender_message):
         firstname, lastname = get_firstname_lastname(sender)
         res += '[new user] Name = ' + firstname + ' ' + lastname + ' | '
 
-    ms = int(data['entry'][0]['messaing'])[0]['timestamp'] / 1000.0
-    res += 'Timestamp = ' + datetime.datetime.fromtimestamp(ms).strftime('%Y-%m-%d %H:%M:%S') + ' | '
+    ms = int(data['entry'][0]['time']) / 1000.0
+    ms1 = int(data['entry'][0]['messaging'])[0]['timestamp'] / 1000.0
+    tdiff = ms - ms1
+    res += 'Timestamp = ' + datetime.datetime.fromtimestamp(ms1).strftime('%Y-%m-%d %H:%M:%S') + ', tdiff = ' + str(tdiff) + ' | '
     try:
         sticker_id = data['entry'][0]['messaging'][0]['message']['sticker_id']
         res += 'Received sticker' + ' | '
