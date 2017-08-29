@@ -1235,10 +1235,13 @@ def reply_nearest_request_location(sender):
 def reply_nearest_find(sender, locLong, locLat, payload):
     try:
         fileName = ''
+        res = ''
         if payload == 'nearest.postamats':
             fileName = 'postamats.json'
+            res = 'Ближайший Постамат:\n'
         elif payload == 'nearest.atms':
             fileName = 'atms.json'
+            res = 'Ближайший Банкомат:\n'
 
         with open('initial_data/' + fileName) as json_data:
             d = json.load(json_data)
@@ -1251,7 +1254,7 @@ def reply_nearest_find(sender, locLong, locLat, payload):
 
         items.sort(key=lambda x: x[1])
         closestLoc = items[0][0]
-        res = 'Ближайший Постамат:\n'
+
         res += closestLoc['full_name'] + '\n'
         res += 'Город: ' + closestLoc['city'] + '\n'
         res += 'Индекс: ' + closestLoc['postcode'] + '\n'
