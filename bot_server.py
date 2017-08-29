@@ -275,7 +275,7 @@ def handle_incoming_messages():
             payload = last_sender_message['payload']
             main.reply_nearest_find(sender, locLong, locLat, payload)
     except:
-        pass
+        logging.info('Failed to process location')
 
     try:
         message = data['entry'][0]['messaging'][0]['message']['text']
