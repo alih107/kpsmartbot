@@ -1246,8 +1246,7 @@ def reply_nearest_find(sender, locLong, locLat, payload):
         items = []
         for model in d:
             if model['fields']['is_active']:
-                dist = helper.get_distance_in_meters(locLat, float(model['fields']['latitude']), locLong,
-                                              float(model['fields']['longitude']))
+                dist = helper.get_distance_in_meters(locLat, float(model['fields']['latitude']), locLong, float(model['fields']['longitude']))
                 items.append((model['fields'], dist))
 
         items.sort(key=lambda x: x[1])
