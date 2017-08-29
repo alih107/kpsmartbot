@@ -130,6 +130,7 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
         reply_typing_off(sender)
 
     except:
+        logging.info('No login, trying here')
         url_login = 'https://post.kz/mail-app/api/public/v2/invoices/create'
         data = {'operatorId':'pddIin', 'data':message}
         r = session.post(url_login, json=data)
