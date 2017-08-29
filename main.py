@@ -1272,7 +1272,7 @@ def reply_nearest_find(sender, locLong, locLat, payload):
         reply(sender, 'Произошла непредвиденная ошибка, попробуйте позднее')
 
 def reply_nearest_map_location(sender, locLong, locLat, title):
-    longCommaLat = str(locLong) + ',' + str(locLat)
+    longCommaLat = str(locLat) + ',' + str(locLong)
     image_url = 'https://maps.googleapis.com/maps/api/staticmap?size=764x400&center='
     image_url += longCommaLat + '&zoom=15&markers=' + longCommaLat
     web_url = 'https://www.google.com/maps/place/' + longCommaLat
