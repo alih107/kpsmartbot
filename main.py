@@ -1233,7 +1233,7 @@ def reply_nearest_request_location(sender):
     reply(sender, 'Отправьте своё местоположение (нажмите ➕)')
 
 def reply_nearest_find(sender, locLong, locLat, payload):
-    logging.info('locLong type= ' + type(locLong) + ', locLat type = ' + type(locLat))
+    logging.info(type(locLong))
     try:
         fileName = ''
         if payload == 'nearest.postamats':
@@ -1261,4 +1261,4 @@ def reply_nearest_find(sender, locLong, locLat, payload):
         res += 'Расстояние: ' + str(items[0][1]) + ' м.'
         reply(sender, res)
     except:
-        logging.info('Error on line {}:{}'.format(sys.exc_info()[-1].tb_lineno, sys.exc_info()[-2]))
+        logging.info('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
