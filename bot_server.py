@@ -48,8 +48,9 @@ def print_facebook_data(data, last_sender_message):
 
     ms = int(data['entry'][0]['time']) / 1000.0
     ms1 = int(data['entry'][0]['messaging'][0]['timestamp']) / 1000.0
-    tdiff = ms - ms1
-    res += 'Timestamp = ' + datetime.datetime.fromtimestamp(ms1).strftime('%Y-%m-%d %H:%M:%S') + ', tdiff = ' + str(tdiff) + ' | '
+    tdiff = round(ms - ms1, 2)
+    strtimestamp = datetime.datetime.fromtimestamp(ms1).strftime('%Y-%m-%d %H:%M:%S')
+    res += 'Timestamp = ' + strtimestamp + ', tdiff = ' + str(tdiff) + ' | '
     try:
         sticker_id = data['entry'][0]['messaging'][0]['message']['sticker_id']
         res += 'Received sticker' + ' | '
@@ -106,7 +107,6 @@ def handle_incoming_messages():
         db_record = {"sender":sender, "first_name":firstname, "last_name":lastname}
         last_sender_message = collection_messages.insert_one(db_record)
 
-    logging.info(data)
     logging.info(print_facebook_data(data, last_sender_message))
     try:
         sticker_id = data['entry'][0]['messaging'][0]['message']['sticker_id']
