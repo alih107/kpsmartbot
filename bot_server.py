@@ -47,7 +47,7 @@ def print_facebook_data(data, last_sender_message):
         res += '[new user] Name = ' + firstname + ' ' + lastname + ' | '
 
     ms = int(data['entry'][0]['time']) / 1000.0
-    ms1 = int(data['entry'][0]['messaging'])[0]['timestamp'] / 1000.0
+    ms1 = int(data['entry'][0]['messaging'][0]['timestamp']) / 1000.0
     tdiff = ms - ms1
     res += 'Timestamp = ' + datetime.datetime.fromtimestamp(ms1).strftime('%Y-%m-%d %H:%M:%S') + ', tdiff = ' + str(tdiff) + ' | '
     try:
