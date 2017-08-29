@@ -271,7 +271,7 @@ def handle_incoming_messages():
         type = attachment['type']
         if type == 'location':
             coordinates = attachment['payload']['coordinates']
-            locLong = coordinates['long'],
+            locLong = coordinates['long']
             locLat = coordinates['lat']
             payload = last_sender_message['payload']
             main.reply_nearest_find(sender, locLong, locLat, payload)

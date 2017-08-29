@@ -1233,7 +1233,6 @@ def reply_nearest_request_location(sender):
     reply(sender, 'Отправьте своё местоположение (нажмите ➕)')
 
 def reply_nearest_find(sender, locLong, locLat, payload):
-    logging.info(locLong)
     try:
         fileName = ''
         if payload == 'nearest.postamats':
