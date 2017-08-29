@@ -1255,12 +1255,16 @@ def reply_nearest_find(sender, locLong, locLat, payload):
         items.sort(key=lambda x: x[1])
         closestLoc = items[0][0]
 
-        res += closestLoc['full_name'] + '\n'
-        res += 'Город: ' + closestLoc['city'] + '\n'
-        res += 'Индекс: ' + closestLoc['postcode'] + '\n'
-        if closestLoc['postcode_new'] != None:
-            res += 'Новый индекс: ' + closestLoc['postcode_new'] + '\n'
-        res += 'Расстояние: ' + str(items[0][1]) + ' м.'
+        if payload == 'nearest.postamats':
+            res += closestLoc['full_name'] + '\n'
+            res += 'Город: ' + closestLoc['city'] + '\n'
+            res += 'Индекс: ' + closestLoc['postcode'] + '\n'
+            if closestLoc['postcode_new'] != None:
+                res += 'Новый индекс: ' + closestLoc['postcode_new'] + '\n'
+            res += 'Расстояние: ' + str(items[0][1]) + ' м.'
+
+        if payload == 'nearest.atms':
+            res += closestLoc['address']
         reply(sender, res)
     except:
         reply(sender, 'Произошла непредвиденная ошибка, попробуйте позднее')
