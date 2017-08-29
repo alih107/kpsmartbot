@@ -107,7 +107,6 @@ def handle_incoming_messages():
         db_record = {"sender":sender, "first_name":firstname, "last_name":lastname}
         last_sender_message = collection_messages.insert_one(db_record)
 
-    logging.info(data)
     logging.info(print_facebook_data(data, last_sender_message))
     try:
         sticker_id = data['entry'][0]['messaging'][0]['message']['sticker_id']
@@ -267,6 +266,7 @@ def handle_incoming_messages():
         pass
 
     try:
+        logging.info(data['entry'][0]['messaging'][0]['message'])
         attachment = data['entry'][0]['messaging'][0]['message']['attachments'][0]
         type = attachment['type']
         if type == 'location':
