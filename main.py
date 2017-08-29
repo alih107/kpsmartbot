@@ -1261,10 +1261,10 @@ def reply_nearest_find(sender, locLong, locLat, payload):
             res += 'Индекс: ' + closestLoc['postcode'] + '\n'
             if closestLoc['postcode_new'] != None:
                 res += 'Новый индекс: ' + closestLoc['postcode_new'] + '\n'
-            res += 'Расстояние: ' + str(items[0][1]) + ' м.'
 
         if payload == 'nearest.atms':
-            res += closestLoc['address']
+            res += closestLoc['address'] + '\n'
+        res += 'Расстояние: ' + str(items[0][1]) + ' м.'
         reply(sender, res)
     except:
         reply(sender, 'Произошла непредвиденная ошибка, попробуйте позднее')
