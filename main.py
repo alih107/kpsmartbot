@@ -1274,8 +1274,9 @@ def reply_nearest_find(sender, locLong, locLat, payload):
             title = 'Ближайшее Отделение'
             url = 'http://test.monitor.kazpost.kz/api/jsons/find_dep.json'
             url += '&lat=' + str(locLat).replace('.', ',') + '&lng=' + str(locLong).replace('.', ',')
+            headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
             logging.info(url)
-            data = requests.get(url)
+            data = requests.get(url, headers=headers)
             logging.info(data)
 
     except:
