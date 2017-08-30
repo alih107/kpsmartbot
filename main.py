@@ -1236,38 +1236,47 @@ def reply_nearest_find(sender, locLong, locLat, payload):
     try:
         fileName = ''
         title = ''
-        if payload == 'nearest.postamats':
-            fileName = 'postamats.json'
-            title = 'Ближайший Постамат'
-        elif payload == 'nearest.atms':
-            fileName = 'atms.json'
-            title = 'Ближайший Банкомат'
 
-        with open('initial_data/' + fileName) as json_data:
-            d = json.load(json_data)
+        if payload != 'nearest.offices':
+            if payload == 'nearest.postamats':
+                fileName = 'postamats.json'
+                title = 'Ближайший Постамат'
+            elif payload == 'nearest.atms':
+                fileName = 'atms.json'
+                title = 'Ближайший Банкомат'
 
-        items = []
-        for model in d:
-            if model['fields']['is_active']:
-                dist = helper.get_distance_in_meters(locLat, float(model['fields']['latitude']), locLong, float(model['fields']['longitude']))
-                items.append((model['fields'], dist))
+            with open('initial_data/' + fileName) as json_data:
+                d = json.load(json_data)
 
-        items.sort(key=lambda x: x[1])
-        closestLoc = items[0][0]
+            items = []
+            for model in d:
+                if model['fields']['is_active']:
+                    dist = helper.get_distance_in_meters(locLat, float(model['fields']['latitude']), locLong, float(model['fields']['longitude']))
+                    items.append((model['fields'], dist))
 
-        res = title + ':\n'
-        if payload == 'nearest.postamats':
-            res += closestLoc['full_name'] + '\n'
-            res += 'Город: ' + closestLoc['city'] + '\n'
-            res += 'Индекс: ' + closestLoc['postcode'] + '\n'
-            if closestLoc['postcode_new'] != None:
-                res += 'Новый индекс: ' + closestLoc['postcode_new'] + '\n'
+            items.sort(key=lambda x: x[1])
+            closestLoc = items[0][0]
 
-        if payload == 'nearest.atms':
-            res += closestLoc['address'] + '\n'
-        res += 'Расстояние: ' + str(items[0][1]) + ' м.'
-        reply(sender, res)
-        reply_nearest_map_location(sender, closestLoc['longitude'], closestLoc['latitude'], title)
+            res = title + ':\n'
+            if payload == 'nearest.postamats':
+                res += closestLoc['full_name'] + '\n'
+                res += 'Город: ' + closestLoc['city'] + '\n'
+                res += 'Индекс: ' + closestLoc['postcode'] + '\n'
+                if closestLoc['postcode_new'] != None:
+                    res += 'Новый индекс: ' + closestLoc['postcode_new'] + '\n'
+
+            if payload == 'nearest.atms':
+                res += closestLoc['address'] + '\n'
+            res += 'Расстояние: ' + str(items[0][1]) + ' м.'
+            reply(sender, res)
+            reply_nearest_map_location(sender, closestLoc['longitude'], closestLoc['latitude'], title)
+        else:
+            title = 'Ближайшее Отделение'
+            url = 'http://test.monitor.kazpost.kz/api/jsons/find_dep.json'
+            url += '&lat=' + locLat.replace('.', ',') + '&lng=' + locLong.replace('.', ',')
+            data = requests.get(url).json()
+            logging.info(data)
+
     except:
         reply(sender, 'Произошла непредвиденная ошибка, попробуйте позднее')
 
