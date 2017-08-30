@@ -1275,12 +1275,11 @@ def reply_nearest_find(sender, locLong, locLat, payload):
             url = 'http://test.monitor.kazpost.kz/api/jsons/find_dep.json'
             url += '&lat=' + str(locLat).replace('.', ',') + '&lng=' + str(locLong).replace('.', ',')
             headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
-            logging.info(url)
-            data = requests.get(url, headers=headers)
+            data = requests.get(url, headers=headers).json()
             logging.info(data)
 
     except:
-        reply(sender, 'Произошла непредвиденная ошибка, попробуйте позднее')
+        reply(sender, 'Сервис временно недоступен, попробуйте позднее')
 
 def reply_nearest_map_location(sender, locLong, locLat, title):
     latCommaLong = str(locLat) + ',' + str(locLong)
