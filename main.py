@@ -1211,11 +1211,11 @@ def reply_nearest(sender):
                             "title": "📦 Постаматы",
                             "payload": "nearest.postamats"
                         },
-                        #{
-                        #    "type": "postback",
-                        #    "title": "🏢 Отделения",
-                        #    "payload": "nearest.offices"
-                        #},
+                        {
+                            "type": "postback",
+                            "title": "🏢 Отделения",
+                            "payload": "nearest.offices"
+                        },
                         {
                             "type": "postback",
                             "title": "🏧 Банкоматы",
