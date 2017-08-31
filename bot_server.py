@@ -130,12 +130,16 @@ def handle_incoming_messages():
     except:
         pass
 
+    # trying to read quick_reply payload
     try:
         payload = data['entry'][0]['messaging'][0]['message']['quick_reply']['payload']
         if payload == '4.IIN':
             reply(sender, "Введите 12-ти значный ИИН\n" + hint_main_menu)  
         elif payload == '4.GosNomer':
             reply(sender, gosnomer_text + "\n" + hint_main_menu)
+        elif payload == 'tracking.last':
+            main.reply_tracking(sender, data['entry'][0]['messaging'][0]['message']['text'], last_sender_message)
+            payload = 'tracking'
         elif payload == 'onai.last':
             main.reply_onai(sender, data['entry'][0]['messaging'][0]['message']['text'], last_sender_message)
             payload = 'onai.amount'
@@ -149,6 +153,7 @@ def handle_incoming_messages():
     except:
         pass
 
+    # trying to read postback payload
     try:
         payload = data['entry'][0]['messaging'][0]['postback']['payload']
         if payload == 'GET_STARTED_PAYLOAD':
@@ -161,7 +166,28 @@ def handle_incoming_messages():
         if payload == 'reroute':
             reply(sender, "[не работает] Введите трек-номер посылки\n" + hint_main_menu)
         elif payload == 'tracking':
-            reply(sender, "Введите трек-номер посылки\n" + hint_main_menu)
+            try:
+                lastTrackingNumber = last_sender_message['lastTrackingNumber']
+                data_quick_replies = {
+                    "recipient": {
+                        "id": sender
+                    },
+                    "message": {
+                        "text": "Выберите последний трекинг-номер или введите его\n" + hint_main_menu,
+                        "quick_replies": [
+                            {
+                                "content_type": "text",
+                                "title": lastTrackingNumber,
+                                "payload": "tracking.last"
+                            }
+                        ]
+                    }
+                }
+                resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
+                                     json=data_quick_replies)
+            except:
+                reply(sender, "Введите трек-номер посылки\n" + hint_main_menu)
+
         elif payload == 'extension':
             reply(sender, "[не работает] Введите трек-номер посылки\n" + hint_main_menu) 
         elif payload == 'shtrafy':
@@ -258,7 +284,7 @@ def handle_incoming_messages():
         message = data['entry'][0]['messaging'][0]['message']['text']
         payload = last_sender_message['payload']
         if payload == 'tracking':
-            main.reply_tracking(sender, message)
+            main.reply_tracking(sender, message, last_sender_message)
             return "ok"
         elif payload == '4.IIN':
             main.reply_pdd_shtrafy_iin(sender, message, last_sender_message)

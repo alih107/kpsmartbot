@@ -644,7 +644,7 @@ def reply_currencies_grafik(sender):
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_cur_grafik_buttons)
 
-def reply_tracking(sender, tracking_number):
+def reply_tracking(sender, tracking_number, last_sender_message):
     data = requests.get("https://post.kz/external-api/tracking/api/v2/" + tracking_number + "/events").json()
     data2 = requests.get("https://post.kz/external-api/tracking/api/v2/" + tracking_number).json()
     try:
@@ -652,6 +652,7 @@ def reply_tracking(sender, tracking_number):
         reply(sender, error + '\n(Чтобы узнать статус другой посылки, отправьте её трек-номер либо нажмите (y) для перехода в главное меню)')
         return "not found"
     except:
+        last_sender_message['lastTrackingNumber'] = tracking_number
         new_mapping = requests.get("https://post.kz/static/new_mappings.json").json()
         t_date = data['events'][0]['date']
         t_time = data['events'][0]['activity'][0]['time']
