@@ -1276,7 +1276,7 @@ def reply_nearest_find(sender, locLong, locLat, payload):
             url += 'lat=' + str(locLat).replace('.', ',') + '&lng=' + str(locLong).replace('.', ',')
             data = requests.get(url).json()
             reply(sender, data['answer'])
-            reply_nearest_map_location(sender, data['longitude'], data['latitude'], title)
+            reply_nearest_map_location(sender, data['longitude'].replace(',', '.'), data['latitude'].replace(',', '.'), title)
 
     except:
         reply(sender, 'Сервис временно недоступен, попробуйте позднее')
@@ -1297,7 +1297,6 @@ def reply_nearest_map_location(sender, locLong, locLat, title):
                {
                 "title":title,
                 "image_url":image_url,
-                "subtitle": "Google Maps",
                 "default_action": {
                   "type": "web_url",
                   "url": web_url
