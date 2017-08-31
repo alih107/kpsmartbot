@@ -905,12 +905,10 @@ def reply_mobile_enter_number(sender, last_sender_message):
         reply(sender, "Введите номер телефона\n" + hint_main_menu)
 
 def reply_check_mobile_number(sender, message, last_sender_message):
-    #print ('got here check mobile number')
     url_login = 'https://post.kz/mail-app/public/check/operator'
     message = message.replace(' ', '')
     message = message[-10:]
     r = requests.post(url_login, json={"phone":message})
-    logging.info (r.json())
     operator = r.json()['operator']
     
     if operator == 'error':
@@ -918,31 +916,27 @@ def reply_check_mobile_number(sender, message, last_sender_message):
         return "error"
 
     minAmount = 0
-    commission = 0
     last_sender_message['mobileOperator'] = operator
     if operator == 'tele2Wf':
         operator = 'Tele2'
         minAmount = 100
-        commission = 50
-    if operator == 'beelineWf':
+    elif operator == 'beelineWf':
         operator = 'Beeline'
         minAmount = 100
-        commission = 50
-    if operator == 'activWf':
+    elif operator == 'activWf':
         operator = 'Activ'
         minAmount = 200
-        commission = 20
-    if operator == 'kcellWf':
+    elif operator == 'kcellWf':
         operator = 'KCell'
         minAmount = 200
-        commission = 20
-    if operator == 'altelWf':
+    elif operator == 'altelWf':
         reply(sender, "Оператор Altel в данный момент не поддерживается. Введите другой номер, пожалуйста.")
+    else:
+        reply(sender, "Данный оператор сейчас не поддерживается. Введите другой номер, пожалуйста.")
 
     last_sender_message['payload'] = 'mobile.amount'
     last_sender_message['phoneToRefill'] = message
     last_sender_message['minAmount'] = minAmount
-    last_sender_message['commission'] = commission
     collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
     reply(sender, "Оператор номера: " + operator + "\nВведите сумму пополнения баланса (не менее " + str(minAmount) + " тг)")
     
@@ -1009,7 +1003,14 @@ def reply_mobile_chooseCard(sender, message, last_sender_message):
     
 def reply_mobile_csc(sender, payload, last_sender_message):
     amount = last_sender_message['amount']
-    commission = last_sender_message['commission']
+    commission = 0
+    operator = last_sender_message['mobileOperator']
+    if operator == 'activWf' or operator == 'kcellWf':
+        commission = amount / 10
+        if commission > 70:
+            commission = 70
+    elif operator == 'tele2Wf' or operator == 'beelineWf':
+        commission = 50
     phoneToRefill = last_sender_message['phoneToRefill']
     total = amount + commission
     chosenCard = last_sender_message[payload]
