@@ -1275,7 +1275,6 @@ def reply_nearest_find(sender, locLong, locLat, payload):
             url = 'http://test.monitor.kazpost.kz/api/jsons/find_dep.json?'
             url += 'lat=' + str(locLat).replace('.', ',') + '&lng=' + str(locLong).replace('.', ',')
             r = requests.get(url)
-            logging.info(r.text)
             try:
                 data = r.json()
             except:
@@ -1283,7 +1282,7 @@ def reply_nearest_find(sender, locLong, locLat, payload):
                 a = data.find('\"answer\":\"') + 10
                 b = data.find('\"}')
                 answer = data[a:b].replace('\"', '\\\"')
-                data = json.load(answer)
+                data = json.loads(answer)
             reply(sender, data['answer'])
             reply_nearest_map_location(sender, data['longitude'].replace(',', '.'), data['latitude'].replace(',', '.'), title)
 
