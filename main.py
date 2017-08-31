@@ -1274,7 +1274,10 @@ def reply_nearest_find(sender, locLong, locLat, payload):
             title = 'Ближайшее Отделение'
             url = 'http://test.monitor.kazpost.kz/api/jsons/find_dep.json?'
             url += 'lat=' + str(locLat).replace('.', ',') + '&lng=' + str(locLong).replace('.', ',')
-            data = requests.get(url).json()
+            r = requests.get(url)
+            data = r.json()
+            logging.info(r)
+            logging.info(data)
             reply(sender, data['answer'])
             reply_nearest_map_location(sender, data['longitude'].replace(',', '.'), data['latitude'].replace(',', '.'), title)
 
