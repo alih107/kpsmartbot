@@ -1279,7 +1279,11 @@ def reply_nearest_find(sender, locLong, locLat, payload):
             try:
                 data = r.json()
             except:
-                data = json.load(r.text)
+                data = r.text
+                a = data.find('\"answer\":\"') + 10
+                b = data.find('\"}')
+                answer = data[a:b].replace('\"', '\\\"')
+                data = json.load(answer)
             reply(sender, data['answer'])
             reply_nearest_map_location(sender, data['longitude'].replace(',', '.'), data['latitude'].replace(',', '.'), title)
 
