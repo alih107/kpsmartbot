@@ -653,6 +653,7 @@ def reply_tracking(sender, tracking_number, last_sender_message):
         return "not found"
     except:
         last_sender_message['lastTrackingNumber'] = tracking_number
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
         new_mapping = requests.get("https://post.kz/static/new_mappings.json").json()
         t_date = data['events'][0]['date']
         t_time = data['events'][0]['activity'][0]['time']
