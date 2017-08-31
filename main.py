@@ -1275,7 +1275,8 @@ def reply_nearest_find(sender, locLong, locLat, payload):
             url = 'http://test.monitor.kazpost.kz/api/jsons/find_dep.json?'
             url += 'lat=' + str(locLat).replace('.', ',') + '&lng=' + str(locLong).replace('.', ',')
             data = requests.get(url).json()
-            logging.info(data)
+            reply(sender, data['answer'])
+            reply_nearest_map_location(sender, data['longitude'], data['latitude'], title)
 
     except:
         reply(sender, 'Сервис временно недоступен, попробуйте позднее')
