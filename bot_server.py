@@ -85,7 +85,7 @@ def print_facebook_data(data, last_sender_message):
         pass
 
     try:
-        message = data['entry'][0]['messaging'][0]['message']['text'] + ' | '
+        message = data['entry'][0]['messaging'][0]['message']['text']
         res += 'Received message = ' + message
         try:
             res += ', payload = ' + last_sender_message['payload']
@@ -176,6 +176,8 @@ def handle_incoming_messages():
             if check_login_and_cards(sender, last_sender_message):
                 last_sender_message['lastCommand'] = payload
                 main.reply_mobile_enter_number(sender, last_sender_message)
+            else:
+                return "ok"
         elif payload == 'card2card':
             reply(sender, "Выберите карту отправителя\n" + hint_main_menu)
             main.reply_card2card_chooseSrc(sender, last_sender_message) 
@@ -198,6 +200,8 @@ def handle_incoming_messages():
             if check_login_and_cards(sender, last_sender_message):
                 last_sender_message['lastCommand'] = payload
                 main.reply_onai_enter_number(sender, last_sender_message)
+            else:
+                return "ok"
         elif payload == 'auth':
             try:
                 encodedLoginPass = last_sender_message['encodedLoginPass']
@@ -307,6 +311,7 @@ def handle_incoming_messages():
 def check_login_and_cards(sender, last_sender_message):
     try:
         encodedLoginPass = last_sender_message['encodedLoginPass']
+        assert encodedLoginPass != None
         session = requests.Session()
         headers = {"Authorization": "Basic " + encodedLoginPass, 'Content-Type': 'application/json'}
         url_login = 'https://post.kz/mail-app/api/account/'
