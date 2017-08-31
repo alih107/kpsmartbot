@@ -1282,7 +1282,9 @@ def reply_nearest_find(sender, locLong, locLat, payload):
                 a = data.find('\"answer\":\"') + 10
                 b = data.find('\"}')
                 answer = data[a:b].replace('\"', '\\\"')
-                data = json.loads(answer)
+                part1 = data.split('\"answer\":\"')[0]
+                result = part1 + '\"answer\":\"' + answer + '\"}'
+                data = json.loads(result)
             reply(sender, data['answer'])
             reply_nearest_map_location(sender, data['longitude'].replace(',', '.'), data['latitude'].replace(',', '.'), title)
 
