@@ -1276,6 +1276,7 @@ def reply_nearest_find(sender, locLong, locLat, payload):
             url += 'lat=' + str(locLat).replace('.', ',') + '&lng=' + str(locLong).replace('.', ',')
             r = requests.get(url)
             logging.info(r)
+            logging.info(r.text)
             data = r.json()
             logging.info(data)
             reply(sender, data['answer'])
