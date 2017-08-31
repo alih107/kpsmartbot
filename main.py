@@ -690,7 +690,7 @@ def reply_auth(sender, loginPass, last_sender_message):
         iin = profile_data['iin']
         mobile = profile_data['mobileNumber']
         answer = "Вы успешно авторизованы! Добро пожаловать, " + profile_data['firstName'] + "!\n"
-        answer = "В целях безопасности удалите сообщение с вашими логином и паролем"
+        answer += "В целях безопасности удалите сообщение с вашими логином и паролем"
         reply(sender, answer)
         last_sender_message['encodedLoginPass'] = encodedLoginPass
         last_sender_message['login'] = login

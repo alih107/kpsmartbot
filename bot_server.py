@@ -173,29 +173,9 @@ def handle_incoming_messages():
         elif payload == 'nearest.postamats' or payload == 'nearest.offices' or payload == 'nearest.atms':
             main.reply_nearest_request_location(sender)
         elif payload == 'balance':
-            try:
-                encodedLoginPass = last_sender_message['encodedLoginPass']
-                session = requests.Session()
-                headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type':'application/json'}
-                url_login = 'https://post.kz/mail-app/api/account/'
-                r = session.get(url_login, headers=headers)
-                assert r.status_code != 401
-            except:
-                reply(sender, "Требуется авторизация, пожалуйста, отправьте логин и пароль профиля на post.kz через пробел. Если у вас нет аккаунта то зарегистрируйтесь в https://post.kz/register")
-                last_sender_message['payload'] = 'auth'
-                collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
-                return "need auth"
-
-            hasCards = main.reply_has_cards(sender, last_sender_message)
-            if not hasCards:
-                reply(sender, "Добавьте карту в профиль post.kz в разделе \"Мои счета и карты\", пожалуйста")
-                main.reply_main_menu_buttons(sender)
-                last_sender_message['payload'] = 'mainMenu'
-                collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
-                return "need cards"
-
-            last_sender_message['lastCommand'] = payload
-            main.reply_mobile_enter_number(sender, last_sender_message)
+            if check_login_and_cards(sender, last_sender_message):
+                last_sender_message['lastCommand'] = payload
+                main.reply_mobile_enter_number(sender, last_sender_message)
         elif payload == 'card2card':
             reply(sender, "Выберите карту отправителя\n" + hint_main_menu)
             main.reply_card2card_chooseSrc(sender, last_sender_message) 
@@ -215,29 +195,9 @@ def handle_incoming_messages():
         elif payload == 'misc':
             main.reply_misc(sender)
         elif payload == 'onai':
-            try:
-                encodedLoginPass = last_sender_message['encodedLoginPass']
-                assert encodedLoginPass != None
-                session = requests.Session()
-                headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type':'application/json'}
-                url_login = 'https://post.kz/mail-app/api/account/'
-                r = session.get(url_login, headers=headers)
-                assert r.status_code != 401
-            except:
-                reply(sender, "Требуется авторизация, пожалуйста, отправьте логин и пароль профиля на post.kz через пробел. Если у вас нет аккаунта, то зарегистрируйтесь в https://post.kz/register")
-                last_sender_message['payload'] = 'auth'
-                collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
-                return "need auth"
-
-            hasCards = main.reply_has_cards(sender, last_sender_message)
-            if not hasCards:
-                reply(sender, "У вас нет подвязанной карты в профиле post.kz для оплаты пожалуйста добавьте карту https://post.kz/finance/cards/add\nТакже Вы можете переавторизоваться через Главное меню (нажмите (y) )-> Авторизация на post.kz")
-                last_sender_message['payload'] = 'mainMenu'
-                collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
-                return "need cards"
-
-            last_sender_message['lastCommand'] = payload
-            main.reply_onai_enter_number(sender, last_sender_message)  
+            if check_login_and_cards(sender, last_sender_message):
+                last_sender_message['lastCommand'] = payload
+                main.reply_onai_enter_number(sender, last_sender_message)
         elif payload == 'auth':
             try:
                 encodedLoginPass = last_sender_message['encodedLoginPass']
@@ -343,6 +303,30 @@ def handle_incoming_messages():
         pass
 
     return "ok"
- 
+
+def check_login_and_cards(sender, last_sender_message):
+    try:
+        encodedLoginPass = last_sender_message['encodedLoginPass']
+        session = requests.Session()
+        headers = {"Authorization": "Basic " + encodedLoginPass, 'Content-Type': 'application/json'}
+        url_login = 'https://post.kz/mail-app/api/account/'
+        r = session.get(url_login, headers=headers)
+        assert r.status_code != 401
+    except:
+        reply(sender, "Требуется авторизация, пожалуйста, отправьте логин и пароль профиля на post.kz через пробел. Если у вас нет аккаунта, то зарегистрируйтесь в https://post.kz/register")
+        last_sender_message['payload'] = 'auth'
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        return False
+
+    hasCards = main.reply_has_cards(sender, last_sender_message)
+    if not hasCards:
+        reply(sender, "Добавьте карту в профиль "+ last_sender_message['login'] +" на post.kz в разделе \"Мои счета и карты\", пожалуйста")
+        main.reply_main_menu_buttons(sender)
+        last_sender_message['payload'] = 'mainMenu'
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        return False
+
+    return True
+
 if __name__ == '__main__':
 	app.run(debug=True)
