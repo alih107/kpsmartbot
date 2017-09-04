@@ -3,7 +3,6 @@ import requests
 import base64
 import time
 import pymongo
-from flask import Flask, request
 from datetime import datetime
 import constants
 import logging
@@ -13,7 +12,9 @@ import json
 client = pymongo.MongoClient()
 db = client.kpsmartbot_db
 collection_messages = db.messages
-
+url = constants.url
+x_channel_id = constants.x_channel_id
+portal_id = constants.portal_id
 ACCESS_TOKEN = constants.ACCESS_TOKEN
 
 hint_main_menu = "(для перехода в главное меню нажмите кнопку (y) "
@@ -339,15 +340,11 @@ def reply_onai_startPayment(sender, message, last_sender_message):
         body['systemId'] = 'POSTKZ'
         body['details'][0]['amount'] = amount
         body['details'][0]['commission'] = 0
-        #print ('#############################################')
-        #print (body)
 
         # 5 - вызов createPayment()
         url_login5 = 'https://post.kz/mail-app/api/v2/payments/create'
         r = session.post(url_login5, json=body)
         payment_id = r.json()['paymentData']['id']
-        #print ('#############################################')
-        #print (r.json())
 
         # 6 - вызов getCards()
         url_login6 = 'https://post.kz/mail-app/api/intervale/card?device=mobile'
@@ -377,7 +374,6 @@ def reply_onai_startPayment(sender, message, last_sender_message):
         # 9 - вызов acceptPayment()
         url_login9 = 'https://post.kz/mail-app/api/intervale/payment/accept/' + token
         r = session.post(url_login9, json=sd2)
-        logging.info ('#############################################\n' + r.text)
 
         # 10 - вызов statusPayment()
         url_login10 = 'https://post.kz/mail-app/api/intervale/payment/status/' + token
@@ -414,7 +410,6 @@ def reply_onai_startPayment(sender, message, last_sender_message):
             }
             reply_typing_off(sender)
             resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_url_button)
-            logging.info(data)
             time.sleep(9)
 
         timer = 0
@@ -424,15 +419,12 @@ def reply_onai_startPayment(sender, message, last_sender_message):
             data = r.json()
             try:
                 result_status = data['result']['status']
-                logging.info ("result_status = " + result_status)
                 if result_status == 'fail':
                     reply(sender, "Платеж не был завершен успешно. Попробуйте снова")
                 elif result_status == 'success':
-                    logging.info ('got here #success')
-                    logging.info ('#######################')
-                    logging.info (r.json())
                     res = "Поздравляю! Платеж был проведен успешно, карта Онай " + onaiToRefill + " пополнена на сумму " + str(amount) + " тг.\n"
-                    res += "Номер квитанции: " + str(payment_id) + ", она доступна в профиле post.kz"
+                    res += "Номер квитанции: " + str(payment_id)
+                    res += ", она доступна в профиле post.kz в разделе История платежей"
                     reply(sender, res)
                 last_sender_message['payload'] = 'onai.finished'
                 collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
@@ -454,7 +446,6 @@ def reply_onai_startPayment(sender, message, last_sender_message):
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
         reply_typing_off(sender)
         reply_main_menu_buttons(sender)
-        logging.info ("Error occured = " + str(e))
         return "fail"
 
 def reply_card2card_enter_cardDst(sender, last_sender_message):
@@ -522,6 +513,8 @@ def reply_card2card_csc(sender, payload, last_sender_message):
         commission = 300
     lastCardDst = helper.insert_4_spaces(last_sender_message['lastCardDst'])
     total = amount + commission
+    last_sender_message['commission'] = commission
+    last_sender_message['total'] = commission
     chosenCard = last_sender_message[payload]
 
     message = "Вы ввели:\n"
@@ -534,8 +527,126 @@ def reply_card2card_csc(sender, payload, last_sender_message):
 
     reply(sender, message)
 
-def reply_card2card_startPayment(sender, payload, last_sender_message):
-    reply(sender, "Типа начал card2card...")
+def reply_card2card_startPayment(sender, message, last_sender_message):
+    reply(sender, "Идет обработка платежа...")
+    reply_typing_on(sender)
+    # 1 - авторизация на post.kz
+    try:
+        url_login = 'https://post.kz/mail-app/api/account/'
+        headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
+                   'Content-Type': 'application/json'}
+
+        session = requests.Session()
+        r = session.get(url_login, headers=headers)
+        mobileNumber = last_sender_message['mobileNumber']
+
+        # 2 - вызов getCards()
+        url_login6 = 'https://post.kz/mail-app/api/intervale/card?device=mobile'
+        sd2 = {"blockedAmount": "", "phone": mobileNumber, "paymentId": "", "returnUrl": "", "transferId": ""}
+        r = session.post(url_login6, json=sd2)
+
+        card = r.json()[last_sender_message['chosenCardIndex']]
+
+        # 3 - вызов getToken()
+        url_login4 = url + portal_id + '/token'
+        headers = {'Content-Type': 'application/x-www-form-urlencoded',
+                   'X-Channel-Id': x_channel_id,
+                   'X-IV-Authorization': 'Identifier 7' + mobileNumber}
+        r = session.post(url_login4, headers=headers)
+        token = r.json()['token']
+
+        # 4 - вызов startPayment()
+        amount = last_sender_message['amount']
+        data = {'paymentId': 'MoneyTransfer_KazPost_Card2Card',
+                'currency': 'KZT',
+                'amount': str(amount) + '00',
+                'commission': str(last_sender_message['commission']) + '00',
+                'total': str(last_sender_message['total']) + '00',
+                'src.type': 'card_id',
+                'src.cardId': card['id'],
+                'src.csc': message,
+                'dst.type': 'card',
+                'dst.pan': last_sender_message['lastCardDst'],
+                'returnUrl': 'https://transfer.post.kz/?token=' + token}
+
+        url_login5 = url + portal_id + '/payment/' + token + '/start'
+        r = session.post(url_login5, data=data, headers=headers)
+
+        # 5 - вызов statusPayment()
+
+        url_login10 = url + portal_id + '/payment/' + token
+        r = session.get(url_login10)
+        data = r.json()
+        state = data['state']
+        if state == 'redirect':
+            data_url_button = {
+                "recipient": {
+                    "id": sender
+                },
+                "message": {
+                    "attachment": {
+                        "type": "template",
+                        "payload": {
+                            "template_type": "generic",
+                            "elements": [
+                                {
+                                    "title": "Для завершения платежа, введите код 3DSecure/MasterCode, нажав кнопку ниже",
+                                    "buttons": [
+                                        {
+                                            "type": "web_url",
+                                            "title": "3DSecure/MasterCode",
+                                            "webview_height_ratio": "tall",
+                                            "url": data['url']
+                                        }
+                                    ]
+                                }
+
+                            ]
+                        }
+                    }
+                }
+            }
+            resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
+                                 json=data_url_button)
+            reply_typing_off(sender)
+
+        card_w_spaces = helper.insert_4_spaces(last_sender_message['lastCardDst'])
+        start = time.time()
+        elapsed = 0
+        while elapsed < timeout:
+            r = session.get(url_login10)
+            data = r.json()
+            try:
+                result_status = data['result']['status']
+                if result_status == 'fail':
+                    reply(sender, "Платеж не был завершен успешно. Попробуйте снова")
+                elif result_status == 'success':
+                    res = "Поздравляю! Платеж был проведен успешно, карта " + card_w_spaces + " пополнена на сумму " + str(
+                        amount) + " тг.\n"
+                    res += "Номер квитанции: " + str(data['result']['trxId'])
+                    res += ", она доступна в профиле post.kz в разделе История платежей"
+                    reply(sender, res)
+                last_sender_message['payload'] = 'card2card.finished'
+                collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+                reply_typing_off(sender)
+                reply_main_menu_buttons(sender)
+                return "ok"
+            except Exception as e:
+                pass
+            elapsed = time.time() - start
+
+        strminutes = str(timeout / 60)
+        reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
+        reply_typing_off(sender)
+        reply_main_menu_buttons(sender)
+        last_sender_message['payload'] = 'mainMenu'
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        return "time exceed"
+    except Exception as e:
+        reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
+        reply_typing_off(sender)
+        reply_main_menu_buttons(sender)
+        return "fail"
 
 def reply_balance(sender):
     data_balance_replies = {
@@ -1134,8 +1245,6 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
         # 9 - вызов acceptPayment()
         url_login9 = 'https://post.kz/mail-app/api/intervale/payment/accept/' + token + '?device=mobile'
         r = session.post(url_login9, json=sd2)
-        logging.info ('#############################################')
-        logging.info (r.text)
 
         # 10 - вызов statusPayment()
         url_login10 = 'https://post.kz/mail-app/api/intervale/payment/status/' + token + '?device=mobile'
@@ -1172,7 +1281,6 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
             }
             resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_url_button)
             reply_typing_off(sender)
-            logging.info(data)
             time.sleep(9)
 
         timer = 0
@@ -1182,15 +1290,12 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
             data = r.json()
             try:
                 result_status = data['result']['status']
-                logging.info ("result_status = " + result_status)
                 if result_status == 'fail':
                     reply(sender, "Платеж не был завершен успешно. Попробуйте снова")
                 elif result_status == 'success':
-                    logging.info ('got here #success')
-                    logging.info ('#######################')
-                    logging.info (r.json())
                     res = "Поздравляю! Платеж был проведен успешно, номер " + phoneToRefill + " пополнен на сумму " + str(amount) + " тг.\n"
-                    res += "Номер квитанции: " + str(payment_id) + ", она доступна в профиле post.kz"
+                    res += "Номер квитанции: " + str(payment_id)
+                    res += ", она доступна в профиле post.kz в разделе История платежей"
                     reply(sender, res)
                 last_sender_message['payload'] = 'mobile.finished'
                 collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
@@ -1212,7 +1317,6 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
         reply_typing_off(sender)
         reply_main_menu_buttons(sender)
-        logging.info ("Error occured = " + e.message)
         return "fail"
 
 def reply_has_cards(sender, last_sender_message):
