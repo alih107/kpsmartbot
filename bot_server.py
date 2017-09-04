@@ -133,19 +133,23 @@ def handle_incoming_messages():
     # trying to read quick_reply payload
     try:
         payload = data['entry'][0]['messaging'][0]['message']['quick_reply']['payload']
+        text = data['entry'][0]['messaging'][0]['message']['text']
         if payload == '4.IIN':
             reply(sender, "Введите 12-ти значный ИИН\n" + hint_main_menu)  
         elif payload == '4.GosNomer':
             reply(sender, gosnomer_text + "\n" + hint_main_menu)
         elif payload == 'tracking.last':
-            main.reply_tracking(sender, data['entry'][0]['messaging'][0]['message']['text'], last_sender_message)
+            main.reply_tracking(sender, text, last_sender_message)
             payload = 'tracking'
         elif payload == 'onai.last':
-            main.reply_onai(sender, data['entry'][0]['messaging'][0]['message']['text'], last_sender_message)
+            main.reply_onai(sender, text, last_sender_message)
             payload = 'onai.amount'
         elif payload == 'mobile.last':
-            main.reply_check_mobile_number(sender, data['entry'][0]['messaging'][0]['message']['text'], last_sender_message)
+            main.reply_check_mobile_number(sender, text, last_sender_message)
             payload = 'onai.amount'
+        elif payload == 'card2card.last':
+            main.reply_card2card_amount(sender, text, last_sender_message)
+            payload = 'card2card.amount'
         last_sender_message['payload'] = payload
         collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
         return "ok"

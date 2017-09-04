@@ -450,7 +450,7 @@ def reply_onai_startPayment(sender, message, last_sender_message):
 
 def reply_card2card_enter_cardDst(sender, last_sender_message):
     try:
-        lastCardDst = last_sender_message['lastCardDst']
+        lastCardDst = helper.insert_4_spaces(last_sender_message['lastCardDst'])
         data_quick_replies = {
           "recipient":{
             "id": sender
