@@ -247,7 +247,7 @@ def reply_onai_enter_number(sender, last_sender_message):
             "id": sender
           },
           "message":{
-            "text":card2card_info + "\nВыберите последнюю карту Онай или введите 13ти-значный номер карты Онай\n" + hint_main_menu,
+            "text":"Выберите последнюю карту Онай или введите 13ти-значный номер карты Онай\n" + hint_main_menu,
             "quick_replies":[
               {
                 "content_type":"text",
@@ -259,7 +259,7 @@ def reply_onai_enter_number(sender, last_sender_message):
         }
         resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_quick_replies)
     except:
-        reply(sender, card2card_info + "\nВведите 13ти-значный номер карты Онай\n" + hint_main_menu)
+        reply(sender, "Введите 13ти-значный номер карты Онай\n" + hint_main_menu)
 
 def reply_onai_amount(sender, message, last_sender_message):
     amount = 0
@@ -473,7 +473,7 @@ def reply_card2card_enter_cardDst(sender, last_sender_message):
         }
         resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_quick_replies)
     except:
-        reply(sender, "Введите 16ти-значный номер карты, куда Вы хотите перевести деньги\n" + hint_main_menu)
+        reply(sender, card2card_info + "\nВведите 16ти-значный номер карты, куда Вы хотите перевести деньги\n" + hint_main_menu)
 
 def reply_balance(sender):
     data_balance_replies = {
