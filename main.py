@@ -18,6 +18,8 @@ ACCESS_TOKEN = constants.ACCESS_TOKEN
 
 hint_main_menu = "(для перехода в главное меню нажмите кнопку (y) "
 hint_main_menu2 = "(Нажмите (y) для перехода в главное меню)"
+card2card_info = "Информация: Переводы возможны только между картами одной МПС: Visa to Visa или MasterCard to MasterCard. \
+Переводы между Visa и MasterCard возможны, только если одна из карт эмитирована банком АО \"Казкоммерцбанк\"."
 timeout = 300
 
 url_mobile_payments = 'https://post.kz/finance/payment/mobile'
@@ -245,7 +247,7 @@ def reply_onai_enter_number(sender, last_sender_message):
             "id": sender
           },
           "message":{
-            "text":"Выберите последнюю карту Онай или введите 13ти-значный номер карты Онай\n" + hint_main_menu,
+            "text":card2card_info + "\nВыберите последнюю карту Онай или введите 13ти-значный номер карты Онай\n" + hint_main_menu,
             "quick_replies":[
               {
                 "content_type":"text",
@@ -257,7 +259,7 @@ def reply_onai_enter_number(sender, last_sender_message):
         }
         resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_quick_replies)
     except:
-        reply(sender, "Введите 13ти-значный номер карты Онай\n" + hint_main_menu)
+        reply(sender, card2card_info + "\nВведите 13ти-значный номер карты Онай\n" + hint_main_menu)
 
 def reply_onai_amount(sender, message, last_sender_message):
     amount = 0
