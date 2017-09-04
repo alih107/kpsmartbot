@@ -61,19 +61,23 @@ def reply_display_cards(sender, last_sender_message):
     cards_group = []
     cards_array = []
     index = 0
+    if len(cards) > 3:
+        title = "Прокрутите влево/вправо, либо нажмите < или > для выбора других карт"
     for card in cards:
         if index % 3 == 0 and index > 0:
             cards_group.append({"title": title, "buttons": cards_array})
             cards_array = []
-        cards_array.append({"type": "postback", "title": card['pan'], "payload": str(index)})
+        card_title = card['title']
+        if len(card_title) > 20:
+            card_title = card['brand'] + ' *' + card['alias']
+        cards_array.append({"type": "postback", "title": card_title, "payload": str(index)})
         last_sender_message[str(index)] = card['pan']
         index += 1
+
 
     if (index + 1) % 3 != 0:
         cards_group.append({"title": title, "buttons": cards_array})
 
-    if index > 3:
-        title = "Прокрутите влево/вправо, либо нажмите < или > для выбора других карт"
     data_cards = {
         "recipient": {
             "id": sender
@@ -247,7 +251,7 @@ def reply_onai_enter_number(sender, last_sender_message):
             "id": sender
           },
           "message":{
-            "text":"Выберите последнюю карту Онай или введите 13ти-значный номер карты Онай\n" + hint_main_menu,
+            "text":"Выберите карту Онай или введите 13ти-значный номер карты Онай\n" + hint_main_menu,
             "quick_replies":[
               {
                 "content_type":"text",
@@ -461,7 +465,7 @@ def reply_card2card_enter_cardDst(sender, last_sender_message):
             "id": sender
           },
           "message":{
-            "text":"Выберите последнюю карту или введите 16ти-значный номер карты, куда Вы хотите перевести деньги\n" + hint_main_menu,
+            "text":card2card_info + "\n\nВыберите карту или введите 16ти-значный номер карты, на который Вы хотите перевести деньги\n" + hint_main_menu,
             "quick_replies":[
               {
                 "content_type":"text",
@@ -473,7 +477,65 @@ def reply_card2card_enter_cardDst(sender, last_sender_message):
         }
         resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_quick_replies)
     except:
-        reply(sender, card2card_info + "\nВведите 16ти-значный номер карты, куда Вы хотите перевести деньги\n" + hint_main_menu)
+        reply(sender, card2card_info + "\n\nВведите 16ти-значный номер карты, на который Вы хотите перевести деньги\n" + hint_main_menu)
+
+def reply_card2card_check_cardDst(sender, message, last_sender_message):
+    message = message.replace(' ', '')
+    if len(message) != 16:
+        reply(sender, "Вы ввели не все 16 цифр карты, попробуйте ещё раз")
+        return "cardDst.again"
+    if not helper.isAllDigits(message):
+        reply(sender, "Некоторые введенные Вами цифры не являются цифрами, попробуйте ещё раз")
+        return "cardDst.again"
+    last_sender_message['lastCardDst'] = message
+    last_sender_message['payload'] = 'card2card.amount'
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    reply(sender, "Введите сумму перевода (от 500 до 494070)\n" + hint_main_menu)
+
+def reply_card2card_amount(sender, message, last_sender_message):
+    amount = 0
+    minAmount = 500
+    maxAmount = 494070
+    try:
+        amount = int(message)
+    except:
+        reply(sender, "Вы неправильно ввели сумму перевода. Введите сумму заново")
+        return "again"
+
+    if amount < minAmount:
+        reply(sender, "Сумма перевода должна быть не менее " + str(minAmount) + " тг. Введите сумму заново")
+        return "again"
+
+    if amount > maxAmount:
+        reply(sender, "Сумма перевода должна быть не более " + str(maxAmount) + " тг. Введите сумму заново")
+        return "again"
+
+    last_sender_message['payload'] = 'card2card.chooseCard'
+    last_sender_message['amount'] = amount
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    reply_display_cards(sender, last_sender_message)
+
+def reply_card2card_csc(sender, payload, last_sender_message):
+    amount = last_sender_message['amount']
+    commission = amount * 1.2 / 100;
+    if commission < 300:
+        commission = 300
+    lastCardDst = helper.insert_4_spaces(last_sender_message['lastCardDst'])
+    total = amount + commission
+    chosenCard = last_sender_message[payload]
+
+    message = "Вы ввели:\n"
+    message += "Номер карты пополнения: " + lastCardDst + '\n'
+    message += "Сумма: " + str(amount) + " тг\n"
+    message += "Комиссия: " + str(commission) + " тг\n"
+    message += "Итого: " + str(total) + " тг\n"
+    message += "Карта: " + chosenCard + '\n\n'
+    message += "Если всё верно, введите трехзначный код CSC/CVV2 на обратной стороне карты"
+
+    reply(sender, message)
+
+def reply_card2card_startPayment(sender, payload, last_sender_message):
+    reply(sender, "Типа начал card2card...")
 
 def reply_balance(sender):
     data_balance_replies = {
@@ -908,7 +970,7 @@ def reply_mobile_enter_number(sender, last_sender_message):
             "id": sender
           },
           "message":{
-            "text":"Выберите последний номер телефона или введите его\n" + hint_main_menu,
+            "text":"Выберите номер телефона или введите его\n" + hint_main_menu,
             "quick_replies":[
               {
                 "content_type":"text",
@@ -933,29 +995,20 @@ def reply_check_mobile_number(sender, message, last_sender_message):
         reply(sender, "Вы ввели неправильный номер телефона. Попробуйте еще раз")
         return "error"
 
+    operator = operator[:-2].title()
     minAmount = 0
-    last_sender_message['mobileOperator'] = operator
-    if operator == 'tele2Wf':
-        operator = 'Tele2'
+    if operator == 'Tele2' or operator == 'Beeline':
         minAmount = 100
-    elif operator == 'beelineWf':
-        operator = 'Beeline'
-        minAmount = 100
-    elif operator == 'activWf':
-        operator = 'Activ'
+    elif operator == 'Activ' or operator == 'Kcell':
         minAmount = 200
-    elif operator == 'kcellWf':
-        operator = 'KCell'
-        minAmount = 200
-    elif operator == 'altelWf':
-        reply(sender, "Оператор Altel в данный момент не поддерживается. Введите другой номер, пожалуйста.")
     else:
-        reply(sender, "Данный оператор сейчас не поддерживается. Введите другой номер, пожалуйста.")
+        reply(sender, "Оператор " + operator +" сейчас не поддерживается. Введите другой номер, пожалуйста.")
 
+    last_sender_message['mobileOperator'] = operator
     last_sender_message['payload'] = 'mobile.amount'
     last_sender_message['phoneToRefill'] = message
     last_sender_message['minAmount'] = minAmount
-    collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
     reply(sender, "Оператор номера: " + operator + "\nВведите сумму пополнения баланса (не менее " + str(minAmount) + " тг)")
     
 def reply_mobile_amount(sender, message, last_sender_message):
@@ -974,7 +1027,7 @@ def reply_mobile_amount(sender, message, last_sender_message):
     last_sender_message['payload'] = 'mobile.chooseCard'
     last_sender_message['amount'] = amount
     collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
-    reply_mobile_chooseCard(sender, message, last_sender_message)
+    reply_display_cards(sender, message, last_sender_message)
 
 def reply_mobile_csc(sender, payload, last_sender_message):
     amount = last_sender_message['amount']

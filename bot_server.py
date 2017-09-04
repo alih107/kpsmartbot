@@ -251,6 +251,9 @@ def handle_incoming_messages():
             elif lastCommand == 'onai':
                 main.reply_onai_csc(sender, payload, last_sender_message)
                 payload = 'onai.startPayment'
+            elif lastCommand == 'card2card':
+                main.reply_card2card_csc(sender, payload, last_sender_message)
+                payload = 'card2card.startPayment'
         elif payload == 'auth.delete':
             try:
                 res = last_sender_message['encodedLoginPass']
@@ -301,6 +304,15 @@ def handle_incoming_messages():
         elif payload == 'balance':
             main.reply_check_mobile_number(sender, message, last_sender_message)
             return "ok"
+        elif payload == 'card2card':
+            main.reply_card2card_check_cardDst(sender, message, last_sender_message)
+            return "ok"
+        elif payload == 'card2card.amount':
+            main.reply_card2card_amount(sender, message, last_sender_message)
+            return "ok"
+        elif payload == 'card2card.chooseCard':
+            main.reply_display_cards(sender, last_sender_message)
+            return "ok"
         elif payload == 'mobile.amount':
             main.reply_mobile_amount(sender, message, last_sender_message)
             return "ok"
@@ -313,7 +325,7 @@ def handle_incoming_messages():
             t.start()
             logging.info('main.reply_mobile_startPayment called with a new thread')
             return "ok"
-        elif payload == 'mobile.finished' or payload =='onai.finished':
+        elif payload == 'mobile.finished' or payload == 'onai.finished':
             return "ok"
         elif payload == 'onai':
             main.reply_onai(sender, message, last_sender_message)
@@ -326,6 +338,12 @@ def handle_incoming_messages():
             t.setDaemon(True)
             t.start()
             logging.info('main.reply_onai_startPayment called with a new thread')
+            return "ok"
+        elif payload == 'card2card.startPayment':
+            t = threading.Thread(target=main.reply_card2card_startPayment, args=(sender, message, last_sender_message,))
+            t.setDaemon(True)
+            t.start()
+            logging.info('main.reply_card2card_startPayment called with a new thread')
             return "ok"
         main.reply_main_menu_buttons(sender)
         last_sender_message['payload'] = 'mainMenu'

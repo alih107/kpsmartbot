@@ -12,3 +12,23 @@ def get_distance_in_meters(lat1, lat2, lon1, lon2):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     d = radius * c
     return round(d)
+
+def insert_4_spaces(card):
+    res = ''
+    index = 0
+    for c in card:
+        res += c
+        index += 1
+        if index % 4 == 0 and index < 16:
+            res += ' '
+
+    return res
+
+def isAllDigits(card):
+    for c in card:
+        try:
+            a = int(c)
+        except:
+            return False
+
+    return True
