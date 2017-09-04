@@ -75,7 +75,6 @@ def reply_display_cards(sender, last_sender_message):
         last_sender_message[str(index)] = card['pan']
         index += 1
 
-
     if (index + 1) % 3 != 0:
         cards_group.append({"title": title, "buttons": cards_array})
 
