@@ -47,6 +47,7 @@ def reply_typing_off(sender):
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
 
 def reply_display_cards(sender, last_sender_message):
+    logging.info('got into reply display cards')
     session = requests.Session()
     headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type': 'application/json'}
     url_login = 'https://post.kz/mail-app/api/account/'
