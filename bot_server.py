@@ -149,6 +149,7 @@ def handle_incoming_messages():
             payload = 'onai.amount'
         elif payload == 'card2card.last':
             main.reply_card2card_check_cardDst(sender, text, last_sender_message)
+            payload = 'card2card.amount'
         last_sender_message['payload'] = payload
         collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
         return "ok"
