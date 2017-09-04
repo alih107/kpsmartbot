@@ -75,8 +75,7 @@ def reply_display_cards(sender, last_sender_message):
         last_sender_message[str(index)] = card['pan']
         index += 1
 
-    if (index + 1) % 3 != 0:
-        cards_group.append({"title": title, "buttons": cards_array})
+    cards_group.append({"title": title, "buttons": cards_array})
 
     data_cards = {
         "recipient": {
@@ -92,8 +91,6 @@ def reply_display_cards(sender, last_sender_message):
             }
         }
     }
-    logging.info('trying to send data_cards')
-    logging.info(data_cards)
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_cards)
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
