@@ -43,13 +43,51 @@ def reply_typing_off(sender):
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
 
-def reply_get_started_button(sender):
-    data = { 
-      "get_started":{
-        "payload":"GET_STARTED_PAYLOAD"
-      }
+def reply_display_cards(sender, last_sender_message):
+    session = requests.Session()
+    headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type': 'application/json'}
+    url_login = 'https://post.kz/mail-app/api/account/'
+    r = session.get(url_login, headers=headers)
+
+    url_login6 = 'https://post.kz/mail-app/api/intervale/card?device=mobile'
+    sd2 = {"blockedAmount": "", "phone": last_sender_message['mobileNumber'], "paymentId": "", "returnUrl": "",
+           "transferId": ""}
+    r = session.post(url_login6, json=sd2)
+    cards = r.json()
+
+    title = "Выберите карту"
+    cards_group = []
+    cards_array = []
+    index = 0
+    for card in cards:
+        if index % 3 == 0 and index > 0:
+            cards_group.append({"title": title, "buttons": cards_array})
+            cards_array = []
+        cards_array.append({"type": "postback", "title": card['pan'], "payload": str(index)})
+        last_sender_message[str(index)] = card['pan']
+        index += 1
+
+    if (index + 1) % 3 != 0:
+        cards_group.append({"title": title, "buttons": cards_array})
+
+    if index > 3:
+        title = "Прокрутите влево/вправо, либо нажмите < или > для выбора других карт"
+    data_cards = {
+        "recipient": {
+            "id": sender
+        },
+        "message": {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": cards_group
+                }
+            }
+        }
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)    
+    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_cards)
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
 def reply_pdd_shtrafy(sender):
     data_quick_replies = {
@@ -237,50 +275,7 @@ def reply_onai_amount(sender, message, last_sender_message):
     last_sender_message['payload'] = 'onai.chooseCard'
     last_sender_message['amount'] = amount
     collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
-    reply_onai_chooseCard(sender, message, last_sender_message)
-
-def reply_onai_chooseCard(sender, message, last_sender_message):
-    session = requests.Session()
-    headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type':'application/json'}
-    url_login = 'https://post.kz/mail-app/api/account/'
-    r = session.get(url_login, headers=headers)
-    
-    url_login6 = 'https://post.kz/mail-app/api/intervale/card?device=mobile'
-    sd2 = {"blockedAmount":"","phone":last_sender_message['mobileNumber'],"paymentId":"","returnUrl":"","transferId":""}
-    r = session.post(url_login6, json=sd2)
-    cards = r.json()
-
-    title = "Прокрутите влево/вправо, либо нажмите < или > для выбора других карт"
-    cards_group = []
-    cards_array = []
-    index = 0
-    for card in cards:
-        if index % 3 == 0 and index > 0:
-            cards_group.append({"title":title, "buttons":cards_array})
-            cards_array = []
-        cards_array.append({"type":"postback", "title":card['pan'], "payload":str(index)})
-        last_sender_message[str(index)] = card['pan']
-        index += 1
-
-    if (index+1) % 3 != 0:
-        cards_group.append({"title":title, "buttons":cards_array})
-
-    data_cards = {
-      "recipient": {
-        "id": sender
-      },
-      "message": {
-        "attachment": {
-          "type": "template",
-          "payload": {
-            "template_type": "generic",
-            "elements": cards_group
-          }
-        }
-      }
-    }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_cards)
-    collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+    reply_display_cards(sender, last_sender_message)
 
 def reply_onai_csc(sender, payload, last_sender_message):
     amount = last_sender_message['amount']
@@ -783,11 +778,11 @@ def reply_main_menu_buttons(sender):
             "elements": [
               {
                 "title": title,
-                "buttons": [  
+                "buttons": [
                   {
                     "type": "postback",
-                    "title": "🚗 Штрафы ПДД",
-                    "payload": "shtrafy"
+                    "title": "💳 Перевод на карту",
+                    "payload": "card2card"
                   },
                   {
                     "type": "postback",
@@ -823,12 +818,11 @@ def reply_main_menu_buttons(sender):
               },              
               {
                 "title": "Платежи",
-                "buttons": [  
+                "buttons": [
                   {
-                    "type": "web_url",
-                    "title": "💳 Перевод на карту",
-                    "url":"https://transfer.post.kz/money-transfer/card-to-card",
-                    "webview_height_ratio":"full"
+                    "type": "postback",
+                    "title": "🚗 Штрафы ПДД",
+                    "payload": "shtrafy"
                   },
                   {
                     "type": "web_url",
@@ -958,49 +952,6 @@ def reply_mobile_amount(sender, message, last_sender_message):
     collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
     reply_mobile_chooseCard(sender, message, last_sender_message)
 
-def reply_mobile_chooseCard(sender, message, last_sender_message):
-    session = requests.Session()
-    headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type':'application/json'}
-    url_login = 'https://post.kz/mail-app/api/account/'
-    r = session.get(url_login, headers=headers)
-    
-    url_login6 = 'https://post.kz/mail-app/api/intervale/card?device=mobile'
-    sd2 = {"blockedAmount":"","phone":last_sender_message['mobileNumber'],"paymentId":"","returnUrl":"","transferId":""}
-    r = session.post(url_login6, json=sd2)
-    cards = r.json()
-
-    title = "Прокрутите влево/вправо, либо нажмите < или > для выбора других карт"
-    cards_group = []
-    cards_array = []
-    index = 0
-    for card in cards:
-        if index % 3 == 0 and index > 0:
-            cards_group.append({"title":title, "buttons":cards_array})
-            cards_array = []
-        cards_array.append({"type":"postback", "title":card['pan'], "payload":str(index)})
-        last_sender_message[str(index)] = card['pan']
-        index += 1
-
-    if (index+1) % 3 != 0:
-        cards_group.append({"title":title, "buttons":cards_array})
-
-    data_cards = {
-      "recipient": {
-        "id": sender
-      },
-      "message": {
-        "attachment": {
-          "type": "template",
-          "payload": {
-            "template_type": "generic",
-            "elements": cards_group
-          }
-        }
-      }
-    }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_cards)
-    collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
-    
 def reply_mobile_csc(sender, payload, last_sender_message):
     amount = last_sender_message['amount']
     commission = 0

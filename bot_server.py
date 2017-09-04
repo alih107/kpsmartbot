@@ -205,8 +205,11 @@ def handle_incoming_messages():
             else:
                 return "ok"
         elif payload == 'card2card':
-            reply(sender, "Выберите карту отправителя\n" + hint_main_menu)
-            main.reply_card2card_chooseSrc(sender, last_sender_message) 
+            if check_login_and_cards(sender, last_sender_message):
+                last_sender_message['lastCommand'] = payload
+                main.reply_card2card_chooseSrc(sender, last_sender_message)
+            else:
+                return "ok"
         elif payload == 'card2cash':
             reply(sender, "[не работает] Введите номер карты отправителя в формате\n0000 0000 0000 0000\n" + hint_main_menu)
         elif payload == 'courier':
@@ -302,7 +305,7 @@ def handle_incoming_messages():
             main.reply_mobile_amount(sender, message, last_sender_message)
             return "ok"
         elif payload == 'mobile.chooseCard':
-            main.reply_mobile_chooseCard(sender, message, last_sender_message)
+            main.reply_display_cards(sender, last_sender_message)
             return "ok"
         elif payload == 'mobile.startPayment':
             t = threading.Thread(target=main.reply_mobile_startPayment, args=(sender, message, last_sender_message,))
