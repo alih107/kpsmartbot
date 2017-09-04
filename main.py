@@ -451,6 +451,28 @@ def reply_onai_startPayment(sender, message, last_sender_message):
         logging.info ("Error occured = " + str(e))
         return "fail"
 
+def reply_card2card_enter_cardDst(sender, last_sender_message):
+    try:
+        lastCardDst = last_sender_message['lastCardDst']
+        data_quick_replies = {
+          "recipient":{
+            "id": sender
+          },
+          "message":{
+            "text":"Выберите последнюю карту или введите 16ти-значный номер карты, куда Вы хотите перевести деньги\n" + hint_main_menu,
+            "quick_replies":[
+              {
+                "content_type":"text",
+                "title":lastCardDst,
+                "payload":"card2card.last"
+              }
+            ]
+          }
+        }
+        resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_quick_replies)
+    except:
+        reply(sender, "Введите 16ти-значный номер карты, куда Вы хотите перевести деньги\n" + hint_main_menu)
+
 def reply_balance(sender):
     data_balance_replies = {
       "recipient":{

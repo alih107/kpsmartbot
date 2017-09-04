@@ -207,7 +207,7 @@ def handle_incoming_messages():
         elif payload == 'card2card':
             if check_login_and_cards(sender, last_sender_message):
                 last_sender_message['lastCommand'] = payload
-                main.reply_card2card_chooseSrc(sender, last_sender_message)
+                main.reply_card2card_enter_cardDst(sender, last_sender_message)
             else:
                 return "ok"
         elif payload == 'card2cash':
