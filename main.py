@@ -1061,6 +1061,11 @@ def reply_main_menu_buttons(sender):
                     "type": "postback",
                     "title": "Авторизация",
                     "payload": "auth"
+                  },
+                  {
+                    "type": "postback",
+                    "title": "Отправить обратно гифку",
+                    "payload": "gifsend"
                   }
                 ]
               }

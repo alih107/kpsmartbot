@@ -120,8 +120,8 @@ def handle_incoming_messages():
         db_record = {"sender":sender, "first_name":firstname, "last_name":lastname}
         last_sender_message = collection_messages.insert_one(db_record)
 
-    #logging.info(print_facebook_data(data, last_sender_message))
-    logging.info(data)
+    logging.info(print_facebook_data(data, last_sender_message))
+    #logging.info(data)
     try:
         sticker_id = data['entry'][0]['messaging'][0]['message']['sticker_id']
         last_sender_message['payload'] = 'mainMenu'
@@ -170,6 +170,22 @@ def handle_incoming_messages():
 
         if payload == 'reroute':
             reply(sender, "[не работает] Введите трек-номер посылки\n" + hint_main_menu)
+        elif payload == 'gifsend':
+            data_quick_replies = {
+                "recipient": {
+                    "id": sender
+                },
+                "message": {
+                    "attachment": {
+                      "type": "image",
+                      "payload": {
+                        "url": "https://www.wired.com/images_blogs/design/2013/09/tumblr_inline_mjx5ioXh8l1qz4rgp.gif"
+                      }
+                    }
+                  }
+            }
+            resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
+                                 json=data_quick_replies)
         elif payload == 'tracking':
             try:
                 lastTrackingNumber = last_sender_message['lastTrackingNumber']
