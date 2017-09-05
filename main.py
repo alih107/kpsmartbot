@@ -96,6 +96,38 @@ def reply_display_cards(sender, last_sender_message):
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_cards)
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
+def reply_send_redirect_url(sender, url):
+    data_url_button = {
+        "recipient": {
+            "id": sender
+        },
+        "message": {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": [
+                        {
+                            "title": "Для завершения платежа, введите код 3DSecure/MasterCode, нажав кнопку ниже",
+                            "buttons": [
+                                {
+                                    "type": "web_url",
+                                    "title": "3DSecure/MasterCode",
+                                    "webview_height_ratio": "tall",
+                                    "url": url
+                                }
+                            ]
+                        }
+
+                    ]
+                }
+            }
+        }
+    }
+    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
+                         json=data_url_button)
+    reply_typing_off(sender)
+
 def reply_pdd_shtrafy(sender):
     data_quick_replies = {
       "recipient":{
@@ -381,35 +413,7 @@ def reply_onai_startPayment(sender, message, last_sender_message):
         data = r.json()
         state = data['state']
         if state == 'redirect':
-            data_url_button = {
-              "recipient": {
-                "id": sender
-              },
-              "message": {
-                "attachment": {
-                  "type": "template",
-                  "payload": {
-                    "template_type": "generic",
-                    "elements": [
-                      {
-                        "title": "Для завершения платежа, введите код 3DSecure/MasterCode, нажав кнопку ниже",
-                        "buttons": [
-                          {
-                            "type": "web_url",
-                            "title": "3DSecure/MasterCode",
-                            "webview_height_ratio": "tall",
-                            "url":data['url']
-                          }
-                        ]
-                      }
-                      
-                    ]
-                  }
-                }
-              }
-            }
-            reply_typing_off(sender)
-            resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_url_button)
+            reply_send_redirect_url(sender, data['url'])
             time.sleep(9)
 
         timer = 0
@@ -579,36 +583,7 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
         data = r.json()
         state = data['state']
         if state == 'redirect':
-            data_url_button = {
-                "recipient": {
-                    "id": sender
-                },
-                "message": {
-                    "attachment": {
-                        "type": "template",
-                        "payload": {
-                            "template_type": "generic",
-                            "elements": [
-                                {
-                                    "title": "Для завершения платежа, введите код 3DSecure/MasterCode, нажав кнопку ниже",
-                                    "buttons": [
-                                        {
-                                            "type": "web_url",
-                                            "title": "3DSecure/MasterCode",
-                                            "webview_height_ratio": "tall",
-                                            "url": data['url']
-                                        }
-                                    ]
-                                }
-
-                            ]
-                        }
-                    }
-                }
-            }
-            resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
-                                 json=data_url_button)
-            reply_typing_off(sender)
+            reply_send_redirect_url(sender, data['url'])
 
         card_w_spaces = helper.insert_4_spaces(last_sender_message['lastCardDst'])
         start = time.time()
@@ -1257,35 +1232,7 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
         data = r.json()
         state = data['state']
         if state == 'redirect':
-            data_url_button = {
-              "recipient": {
-                "id": sender
-              },
-              "message": {
-                "attachment": {
-                  "type": "template",
-                  "payload": {
-                    "template_type": "generic",
-                    "elements": [
-                      {
-                        "title": "Для завершения платежа, введите код 3DSecure/MasterCode, нажав кнопку ниже",
-                        "buttons": [
-                          {
-                            "type": "web_url",
-                            "title": "3DSecure/MasterCode",
-                            "webview_height_ratio": "tall",
-                            "url":data['url']
-                          }
-                        ]
-                      }
-                      
-                    ]
-                  }
-                }
-              }
-            }
-            resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_url_button)
-            reply_typing_off(sender)
+            reply_send_redirect_url(sender, data['url'])
             time.sleep(9)
 
         timer = 0
