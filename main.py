@@ -74,7 +74,7 @@ def reply_display_cards(sender, last_sender_message):
         if len(card_title) > 20:
             card_title = card['brand'] + ' *' + card['alias']
         cards_array.append({"type": "postback", "title": card_title, "payload": str(index)})
-        last_sender_message[str(index)] = card['pan']
+        last_sender_message[str(index)] = card_title
         index += 1
 
     cards_group.append({"title": title, "buttons": cards_array})
