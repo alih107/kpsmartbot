@@ -65,6 +65,8 @@ def reply_display_cards(sender, last_sender_message):
     if len(cards) > 3:
         title = "Прокрутите влево/вправо, либо нажмите < или > для выбора других карт"
     for card in cards:
+        if card['state'] == 'UNREGISTERED':
+            continue
         if index % 3 == 0 and index > 0:
             cards_group.append({"title": title, "buttons": cards_array})
             cards_array = []
@@ -1064,7 +1066,7 @@ def reply_main_menu_buttons(sender):
                   },
                   {
                     "type": "postback",
-                    "title": "Отправить обратно гифку",
+                    "title": "Отправить гифку",
                     "payload": "gifsend"
                   }
                 ]
