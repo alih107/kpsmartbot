@@ -19,8 +19,8 @@ ACCESS_TOKEN = constants.ACCESS_TOKEN
 
 hint_main_menu = "(для перехода в главное меню нажмите кнопку (y) "
 hint_main_menu2 = "(Нажмите (y) для перехода в главное меню)"
-card2card_info = "Информация: Переводы возможны только между картами одной МПС: Visa to Visa или MasterCard to MasterCard. \
-Переводы между Visa и MasterCard возможны, только если одна из карт эмитирована банком АО \"Казкоммерцбанк\"."
+card2card_info = "Информация:\nПереводы возможны только между картами одной МПС: Visa to Visa или MasterCard to MasterCard. \
+\nПереводы между Visa и MasterCard возможны, только если одна из карт эмитирована банком АО \"Казкоммерцбанк\"."
 timeout = 300
 
 url_mobile_payments = 'https://post.kz/finance/payment/mobile'
