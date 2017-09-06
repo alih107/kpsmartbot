@@ -1,4 +1,7 @@
+import sys
+import linecache
 import math
+
 def get_distance_in_meters(lat1, lat2, lon1, lon2):
     """
     Расстояние между 2 точками Земли в метрах.
@@ -32,3 +35,12 @@ def isAllDigits(card):
             return False
 
     return True
+
+def PrintException():
+    exc_type, exc_obj, tb = sys.exc_info()
+    f = tb.tb_frame
+    lineno = tb.tb_lineno
+    filename = f.f_code.co_filename
+    linecache.checkcache(filename)
+    line = linecache.getline(filename, lineno, f.f_globals)
+    return 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj)
