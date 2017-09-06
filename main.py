@@ -559,6 +559,7 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
         sd2 = {"blockedAmount": "", "phone": mobileNumber, "paymentId": "", "returnUrl": "", "transferId": ""}
         r = session.post(url_login6, json=sd2)
         card = r.json()[last_sender_message['chosenCardIndex']]
+        logging.info(card)
 
         # 3 - вызов getToken()
         url_login4 = url + portal_id + '/token'
