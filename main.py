@@ -277,13 +277,13 @@ def reply_onai(sender, message, last_sender_message):
 
 def reply_onai_enter_number(sender, last_sender_message):
     try:
-        lastOnaiNumber = last_sender_message['onaiToRefill']
+        lastOnaiNumber = helper.insert_5_spaces_onai(last_sender_message['onaiToRefill'])
         data_quick_replies = {
           "recipient":{
             "id": sender
           },
           "message":{
-            "text":"Выберите карту Онай или введите 13ти-значный номер карты Онай\n" + hint_main_menu,
+            "text":"Выберите карту Онай или введите 19ти-значный номер карты Онай\n" + hint_main_menu,
             "quick_replies":[
               {
                 "content_type":"text",
@@ -295,7 +295,7 @@ def reply_onai_enter_number(sender, last_sender_message):
         }
         resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_quick_replies)
     except:
-        reply(sender, "Введите 13ти-значный номер карты Онай\n" + hint_main_menu)
+        reply(sender, "Введите 19ти-значный номер карты Онай\n" + hint_main_menu)
 
 def reply_onai_amount(sender, message, last_sender_message):
     amount = 0

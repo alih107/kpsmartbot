@@ -22,9 +22,19 @@ def insert_4_spaces(card):
     for c in card:
         res += c
         index += 1
-        if index % 4 == 0 and index < 16:
+        if index in [4, 8, 12]:
             res += ' '
 
+    return res
+
+def insert_5_spaces_onai(onai):
+    res = ''
+    index = 0
+    for c in onai:
+        res += c
+        index += 1
+        if index in [4, 6, 11, 15]:
+            res += ' '
     return res
 
 def isAllDigits(card):
