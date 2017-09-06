@@ -591,6 +591,7 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
         url_login10 = url + portal_id + '/payment/' + token
         r = session.get(url_login10)
         data = r.json()
+        logging.info(r.text)
         state = data['state']
         if state == 'redirect':
             reply_send_redirect_url(sender, data['url'])
