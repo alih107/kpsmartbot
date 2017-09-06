@@ -559,14 +559,12 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
         sd2 = {"blockedAmount": "", "phone": mobileNumber, "paymentId": "", "returnUrl": "", "transferId": ""}
         r = session.post(url_login6, json=sd2)
         card = r.json()[last_sender_message['chosenCardIndex']]
-        logging.info(card)
 
         # 3 - вызов getToken()
         url_login4 = url + portal_id + '/token'
         headers = {'Content-Type': 'application/x-www-form-urlencoded',
                    'X-Channel-Id': x_channel_id,
-                   'X-IV-Authorization': 'Identifier 7' + mobileNumber}
-        logging.info(headers)
+                   'X-IV-Authorization': 'Identifier ' + mobileNumber}
         r = session.post(url_login4, headers=headers)
         token = r.json()['token']
 
@@ -584,17 +582,14 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
                 'dst.pan': last_sender_message['lastCardDst'],
                 'returnUrl': 'https://transfer.post.kz/?token=' + token}
 
-        logging.info(data)
         url_login5 = url + portal_id + '/payment/' + token + '/start'
         r = session.post(url_login5, data=data, headers=headers)
-        logging.info(r.text)
 
         # 5 - вызов statusPayment()
 
         url_login10 = url + portal_id + '/payment/' + token
         r = session.get(url_login10)
         data = r.json()
-        logging.info(r.text)
         state = data['state']
         if state == 'redirect':
             reply_send_redirect_url(sender, data['url'])
@@ -635,7 +630,7 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
         reply_typing_off(sender)
         reply_main_menu_buttons(sender)
-        logging.info(PrintException())
+        logging.error(PrintException())
         return "fail"
 
 def reply_balance(sender):
