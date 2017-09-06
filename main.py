@@ -277,7 +277,7 @@ def reply_onai(sender, message, last_sender_message):
 
 def reply_onai_enter_number(sender, last_sender_message):
     try:
-        lastOnaiNumber = helper.insert_5_spaces_onai(last_sender_message['onaiToRefill'])
+        lastOnaiNumber = helper.insert_space_onai(last_sender_message['onaiToRefill'])
         data_quick_replies = {
           "recipient":{
             "id": sender

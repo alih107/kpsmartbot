@@ -27,13 +27,13 @@ def insert_4_spaces(card):
 
     return res
 
-def insert_5_spaces_onai(onai):
+def insert_space_onai(onai):
     res = ''
     index = 0
     for c in onai:
         res += c
         index += 1
-        if index in [4, 6, 11, 15]:
+        if index == 15:
             res += ' '
     return res
 
