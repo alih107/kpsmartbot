@@ -1,4 +1,5 @@
 import sys
+import linecache
 import requests
 import base64
 import time
@@ -24,6 +25,15 @@ card2card_info = "Информация:\nПереводы возможны то�
 timeout = 300
 
 url_mobile_payments = 'https://post.kz/finance/payment/mobile'
+
+def PrintException():
+    exc_type, exc_obj, tb = sys.exc_info()
+    f = tb.tb_frame
+    lineno = tb.tb_lineno
+    filename = f.f_code.co_filename
+    linecache.checkcache(filename)
+    line = linecache.getline(filename, lineno, f.f_globals)
+    return 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj)
 
 def reply(sender, msg):
     data = {
@@ -621,6 +631,7 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
         reply_typing_off(sender)
         reply_main_menu_buttons(sender)
+        logging.info(PrintException())
         return "fail"
 
 def reply_balance(sender):
