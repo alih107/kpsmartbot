@@ -577,17 +577,17 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
         # 5 - вызов statusPayment()
 
         url_login10 = url + portal_id + '/payment/' + token
-        r = session.get(url_login10)
+        r = session.post(url_login10, headers=headers)
         data = r.json()
         state = data['state']
         if state == 'redirect':
             reply_send_redirect_url(sender, data['url'])
 
         card_w_spaces = helper.insert_4_spaces(last_sender_message['lastCardDst'])
-        start = time.time()
-        elapsed = 0
-        while elapsed < timeout:
-            r = session.get(url_login10)
+        timer = 0
+        while timer < timeout:
+            time.sleep(1)
+            r = session.post(url_login10, headers=headers)
             data = r.json()
             try:
                 result_status = data['result']['status']
@@ -606,7 +606,7 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
                 return "ok"
             except Exception as e:
                 pass
-            elapsed = time.time() - start
+            timer += 1
 
         strminutes = str(timeout / 60)
         reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
