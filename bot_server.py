@@ -67,6 +67,8 @@ def print_facebook_data(data, last_sender_message):
             locLat = coordinates['lat']
             latCommaLong = str(locLat) + ',' + str(locLong)
             res += 'Received location = ' + latCommaLong + '; payload = ' + last_sender_message['payload']
+        if type == 'audio':
+            res += 'Received audio'
     except:
         pass
 
@@ -120,14 +122,18 @@ def handle_incoming_messages():
         db_record = {"sender":sender, "first_name":firstname, "last_name":lastname}
         last_sender_message = collection_messages.insert_one(db_record)
 
-    #logging.info(print_facebook_data(data, last_sender_message))
-    logging.info(data)
+    logging.info(print_facebook_data(data, last_sender_message))
+    #logging.info(data)
 
-    handle_sticker(sender, data, last_sender_message)
-    handle_quickreply_payload(sender, data, last_sender_message)
-    handle_postback_payload(sender, data, last_sender_message)
-    handle_attachments(sender, data, last_sender_message)
-    handle_text_messages(sender, data, last_sender_message)
+    res = handle_sticker(sender, data, last_sender_message)
+    if res == 'try next':
+        res = handle_quickreply_payload(sender, data, last_sender_message)
+    if res == 'try next':
+        res = handle_postback_payload(sender, data, last_sender_message)
+    if res == 'try next':
+        res = handle_attachments(sender, data, last_sender_message)
+    if res == 'try next':
+        res = handle_text_messages(sender, data, last_sender_message)
 
     return "ok"
 
@@ -181,7 +187,7 @@ def handle_quickreply_payload(sender, data, last_sender_message):
         return "ok"
 
     except:
-        pass
+        return "try next"
 
 def handle_postback_payload(sender, data, last_sender_message):
     try:
@@ -318,7 +324,7 @@ def handle_postback_payload(sender, data, last_sender_message):
         return "ok"
 
     except:
-        pass
+        return "try next"
 
 def handle_attachments(sender, data, last_sender_message):
     try:
@@ -331,7 +337,7 @@ def handle_attachments(sender, data, last_sender_message):
             payload = last_sender_message['payload']
             main.reply_nearest_find(sender, locLong, locLat, payload)
     except:
-        pass
+        return "try next"
 
 def handle_text_messages(sender, data, last_sender_message):
     try:
@@ -399,7 +405,7 @@ def handle_text_messages(sender, data, last_sender_message):
         return "ok"
 
     except:
-        pass
+        return "try next"
 
 def handle_sticker(sender, data, last_sender_message):
     try:
@@ -409,7 +415,7 @@ def handle_sticker(sender, data, last_sender_message):
         main.reply_main_menu_buttons(sender)
         return "ok"
     except:
-        pass
+        return "try next"
 
 if __name__ == '__main__':
 	app.run(debug=True)
