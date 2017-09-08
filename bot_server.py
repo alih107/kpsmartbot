@@ -314,7 +314,8 @@ def handle_postback_payload(sender, data, last_sender_message):
                 reply(sender, "Авторизация успешна удалена")
             except:
                 reply(sender, "Авторизации нет")
-
+        elif payload == 'addcard':
+            main.reply_addcard_entercard(sender, last_sender_message)
         else:
             logging.info ("Ne raspoznana komanda")
 

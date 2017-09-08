@@ -1406,3 +1406,6 @@ def reply_nearest_map_location(sender, locLong, locLat, title):
 
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
                          json=data_misc_buttons)
+
+def reply_addcard_entercard(sender, last_sender_message):
+    reply(sender, 'Вот ваш список карт. Введите 16ти-значный номер карты')
