@@ -120,23 +120,48 @@ def handle_incoming_messages():
         db_record = {"sender":sender, "first_name":firstname, "last_name":lastname}
         last_sender_message = collection_messages.insert_one(db_record)
 
-    logging.info(print_facebook_data(data, last_sender_message))
-    #logging.info(data)
-    try:
-        sticker_id = data['entry'][0]['messaging'][0]['message']['sticker_id']
-        last_sender_message['payload'] = 'mainMenu'
-        collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
-        main.reply_main_menu_buttons(sender)
-        return "ok"    
-    except:
-        pass
+    #logging.info(print_facebook_data(data, last_sender_message))
+    logging.info(data)
 
-    # trying to read quick_reply payload
+    handle_sticker(sender, data, last_sender_message)
+    handle_quickreply_payload(sender, data, last_sender_message)
+    handle_postback_payload(sender, data, last_sender_message)
+    handle_attachments(sender, data, last_sender_message)
+    handle_text_messages(sender, data, last_sender_message)
+
+    return "ok"
+
+def check_login_and_cards(sender, last_sender_message):
+    try:
+        encodedLoginPass = last_sender_message['encodedLoginPass']
+        assert encodedLoginPass != None
+        session = requests.Session()
+        headers = {"Authorization": "Basic " + encodedLoginPass, 'Content-Type': 'application/json'}
+        url_login = 'https://post.kz/mail-app/api/account/'
+        r = session.get(url_login, headers=headers)
+        assert r.status_code != 401
+    except:
+        reply(sender, "Требуется авторизация, пожалуйста, отправьте логин и пароль профиля на post.kz через пробел. Если у вас нет аккаунта, то зарегистрируйтесь в https://post.kz/register")
+        last_sender_message['payload'] = 'auth'
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        return False
+
+    hasCards = main.reply_has_cards(sender, last_sender_message)
+    if not hasCards:
+        reply(sender, "Добавьте карту в профиль "+ last_sender_message['login'] +" на post.kz в разделе \"Мои счета и карты\", пожалуйста")
+        main.reply_main_menu_buttons(sender)
+        last_sender_message['payload'] = 'mainMenu'
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        return False
+
+    return True
+
+def handle_quickreply_payload(sender, data, last_sender_message):
     try:
         payload = data['entry'][0]['messaging'][0]['message']['quick_reply']['payload']
         text = data['entry'][0]['messaging'][0]['message']['text']
         if payload == '4.IIN':
-            reply(sender, "Введите 12-ти значный ИИН\n" + hint_main_menu)  
+            reply(sender, "Введите 12-ти значный ИИН\n" + hint_main_menu)
         elif payload == '4.GosNomer':
             reply(sender, gosnomer_text + "\n" + hint_main_menu)
         elif payload == 'tracking.last':
@@ -152,13 +177,13 @@ def handle_incoming_messages():
             main.reply_card2card_check_cardDst(sender, text, last_sender_message)
             payload = 'card2card.amount'
         last_sender_message['payload'] = payload
-        collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
         return "ok"
-         
+
     except:
         pass
 
-    # trying to read postback payload
+def handle_postback_payload(sender, data, last_sender_message):
     try:
         payload = data['entry'][0]['messaging'][0]['postback']['payload']
         if payload == 'GET_STARTED_PAYLOAD':
@@ -210,9 +235,9 @@ def handle_incoming_messages():
                 reply(sender, "Введите трек-номер посылки\n" + hint_main_menu)
 
         elif payload == 'extension':
-            reply(sender, "[не работает] Введите трек-номер посылки\n" + hint_main_menu) 
+            reply(sender, "[не работает] Введите трек-номер посылки\n" + hint_main_menu)
         elif payload == 'shtrafy':
-            main.reply_pdd_shtrafy(sender) 
+            main.reply_pdd_shtrafy(sender)
         elif payload == 'komuslugi':
             main.reply_komuslugi_cities(sender)
         elif payload == 'nearest':
@@ -290,11 +315,12 @@ def handle_incoming_messages():
 
         last_sender_message['payload'] = payload
         collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
-        return "ok" 
+        return "ok"
 
     except:
         pass
 
+def handle_attachments(sender, data, last_sender_message):
     try:
         attachment = data['entry'][0]['messaging'][0]['message']['attachments'][0]
         type = attachment['type']
@@ -307,6 +333,7 @@ def handle_incoming_messages():
     except:
         pass
 
+def handle_text_messages(sender, data, last_sender_message):
     try:
         message = data['entry'][0]['messaging'][0]['message']['text']
         payload = last_sender_message['payload']
@@ -315,10 +342,10 @@ def handle_incoming_messages():
             return "ok"
         elif payload == '4.IIN':
             main.reply_pdd_shtrafy_iin(sender, message, last_sender_message)
-            return "ok"  
+            return "ok"
         elif payload == '4.GosNomer':
             main.reply_pdd_shtrafy_gosnomer(sender, message, last_sender_message)
-            return "ok"  
+            return "ok"
         elif payload == 'auth':
             main.reply_auth(sender, message, last_sender_message)
             return "ok"
@@ -374,32 +401,15 @@ def handle_incoming_messages():
     except:
         pass
 
-    return "ok"
-
-def check_login_and_cards(sender, last_sender_message):
+def handle_sticker(sender, data, last_sender_message):
     try:
-        encodedLoginPass = last_sender_message['encodedLoginPass']
-        assert encodedLoginPass != None
-        session = requests.Session()
-        headers = {"Authorization": "Basic " + encodedLoginPass, 'Content-Type': 'application/json'}
-        url_login = 'https://post.kz/mail-app/api/account/'
-        r = session.get(url_login, headers=headers)
-        assert r.status_code != 401
-    except:
-        reply(sender, "Требуется авторизация, пожалуйста, отправьте логин и пароль профиля на post.kz через пробел. Если у вас нет аккаунта, то зарегистрируйтесь в https://post.kz/register")
-        last_sender_message['payload'] = 'auth'
-        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
-        return False
-
-    hasCards = main.reply_has_cards(sender, last_sender_message)
-    if not hasCards:
-        reply(sender, "Добавьте карту в профиль "+ last_sender_message['login'] +" на post.kz в разделе \"Мои счета и карты\", пожалуйста")
-        main.reply_main_menu_buttons(sender)
+        sticker_id = data['entry'][0]['messaging'][0]['message']['sticker_id']
         last_sender_message['payload'] = 'mainMenu'
-        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
-        return False
-
-    return True
+        collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+        main.reply_main_menu_buttons(sender)
+        return "ok"
+    except:
+        pass
 
 if __name__ == '__main__':
 	app.run(debug=True)

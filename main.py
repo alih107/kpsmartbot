@@ -1040,8 +1040,8 @@ def reply_main_menu_buttons(sender):
                   },
                   {
                     "type": "postback",
-                    "title": "Отправить гифку",
-                    "payload": "gifsend"
+                    "title": "Добавить карту",
+                    "payload": "addcard"
                   }
                 ]
               }
