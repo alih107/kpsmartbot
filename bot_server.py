@@ -331,12 +331,15 @@ def handle_attachments(sender, data, last_sender_message):
     try:
         attachment = data['entry'][0]['messaging'][0]['message']['attachments'][0]
         type = attachment['type']
+        payload = last_sender_message['payload']
         if type == 'location':
-            coordinates = attachment['payload']['coordinates']
-            locLong = coordinates['long']
-            locLat = coordinates['lat']
-            payload = last_sender_message['payload']
-            main.reply_nearest_find(sender, locLong, locLat, payload)
+            if payload == 'nearest.postamats' or payload == 'nearest.offices' or payload == 'nearest.atms':
+                coordinates = attachment['payload']['coordinates']
+                locLong = coordinates['long']
+                locLat = coordinates['lat']
+                main.reply_nearest_find(sender, locLong, locLat, payload)
+            else:
+                reply(sender, "А для чего Вы мне отправили своё местоположение?")
     except:
         return "try next"
 
