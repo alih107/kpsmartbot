@@ -1543,10 +1543,11 @@ def reply_addcard_startAdding(sender, message, last_sender_message):
             r = session.post(url_login4, json=data)
             d = r.json()
             if d['state'] == 'result':
-                if d['state']['result'] == 'success':
+                status = d['result']['status']
+                if status == 'success':
                     res = "Поздравляю! Карта успешно добавлена!"
                     reply(sender, res)
-                if d['state']['result'] == 'fail':
+                if status == 'fail':
                     reply(sender, "Карта не была добавлена. Попробуйте снова")
                 last_sender_message['payload'] = 'mobile.finished'
                 collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
