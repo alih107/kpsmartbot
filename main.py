@@ -1563,6 +1563,7 @@ def reply_addcard_startAdding(sender, message, last_sender_message):
         return "time exceed"
 
     except Exception as e:
+        logging.info(helper.PrintException())
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
         reply_typing_off(sender)
         reply_main_menu_buttons(sender)
