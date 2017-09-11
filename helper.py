@@ -54,3 +54,12 @@ def PrintException():
     linecache.checkcache(filename)
     line = linecache.getline(filename, lineno, f.f_globals)
     return 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj)
+
+def check_csc(csc):
+    try:
+        number = int(csc)
+        if number < 0 or number > 999:
+            return False
+    except:
+        return False
+    return True

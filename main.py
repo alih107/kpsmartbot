@@ -14,6 +14,7 @@ collection_messages = db.messages
 url = constants.url
 x_channel_id = constants.x_channel_id
 portal_id = constants.portal_id
+portal_id_2 = constants.portal_id_2
 ACCESS_TOKEN = constants.ACCESS_TOKEN
 
 hint_main_menu = "(для перехода в главное меню нажмите кнопку (y) "
@@ -329,6 +330,9 @@ def reply_onai_csc(sender, payload, last_sender_message):
     reply(sender, message)
 
 def reply_onai_startPayment(sender, message, last_sender_message):
+    if not helper.check_csc(message):
+        reply(sender, "Вы неправильно ввели трёхзначный код CSC/CVV2 на обратной стороне карты, введите заново")
+        return "ok"
     reply(sender, "Идет обработка платежа...")
     reply_typing_on(sender)
     # 1 - авторизация на post.kz
@@ -531,6 +535,9 @@ def reply_card2card_csc(sender, payload, last_sender_message):
     reply(sender, message)
 
 def reply_card2card_startPayment(sender, message, last_sender_message):
+    if not helper.check_csc(message):
+        reply(sender, "Вы неправильно ввели трёхзначный код CSC/CVV2 на обратной стороне карты, введите заново")
+        return "ok"
     reply(sender, "Идет обработка платежа...")
     reply_typing_on(sender)
     # 1 - авторизация на post.kz
@@ -1452,3 +1459,70 @@ def reply_addcard_checkexpiredate(sender, message, last_sender_message):
     message = message.replace(' ', '')
     message = message.replace('.', '')
     message = message.replace('/', '')
+    if len(message) != 4:
+        reply(sender, "Вы должны ввести 4 цифры (2 на месяц, 2 на год), попробуйте ещё раз")
+        return "addcard.expiredateagain"
+    if not helper.isAllDigits(message):
+        reply(sender, "Некоторые введенные Вами цифры не являются цифрами, попробуйте ещё раз")
+        return "addcard.expiredateagain"
+    last_sender_message['addcard_expiredate'] = message
+    last_sender_message['payload'] = 'addcard.cardowner'
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    reply(sender, "Введите имя и фамилию на карте латинскими буквами\n" + hint_main_menu)
+
+def reply_addcard_checkcardowner(sender, message, last_sender_message):
+    last_sender_message['addcard_cardowner'] = message
+    res = 'Проверьте данные:\n'
+    res += 'Номер карты: ' + helper.insert_4_spaces(last_sender_message['addcard_cardnumber']) + '\n'
+    res += 'Срок действия:' + last_sender_message['addcard_expiredate'][:2] + '/' + \
+                              last_sender_message['addcard_expiredate'][2:] + '\n'
+    res += 'Имя на карте: ' + last_sender_message['addcard_cardowner'] + '\n'
+    res += '\nЕсли всё верно, введите трехзначный код CSC/CVV2 на обратной стороне карты, чтобы добавить эту карту'
+    last_sender_message['payload'] = 'addcard.csc'
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    reply(sender, res)
+
+def reply_addcard_startAdding(sender, message, last_sender_message):
+    if not helper.check_csc(message):
+        reply(sender, "Вы неправильно ввели трёхзначный код CSC/CVV2 на обратной стороне карты, введите заново")
+        return "ok"
+    reply(sender, "Идет обработка добавления карты...")
+    reply_typing_on(sender)
+    try:
+        # 1 - авторизация на post.kz
+        url_login = 'https://post.kz/mail-app/api/account/'
+        headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
+                   'Content-Type': 'application/json'}
+
+        # 2 - создаём токен
+        session = requests.Session()
+        r = session.get(url_login, headers=headers)
+        mobileNumber = r.json()['mobileNumber']
+
+        # 3 - инициируем start registration
+        url_login2 = 'https://post.kz/mail-app/api/intervale/token'
+        data = {"phone": mobileNumber}
+        r = session.post(url_login2, json=data)
+        token = r.json()['token']
+
+        # 4 - передаём все данные карты для регистрации карты
+        url_login3 = 'https://post.kz/mail-app/api/intervale/card/registration/start/' + token
+        data = {"phone": mobileNumber, "returnUrl": "https://post.kz/static/return.html"}
+        r = session.post(url_login3, json=data)
+
+        # 4 - передаём все данные карты для регистрации карты
+        url_login5 = 'https://openapi-entry.intervale.ru/api/v3/'+ portal_id_2 +'/card/registration/'
+        url_login5 += token + '/card-page-submit?fallback=https%3A%2F%2Fpost.kz%2Fstatic%2Freturn.html'
+        data = {'pan': last_sender_message['addcard_cardnumber'],
+                'expiry': last_sender_message['addcard_expiredate'],
+                'csc': message,
+                'cardholder': last_sender_message['addcard_cardowner'].lower(),
+                'pageType': 'reg'}
+        r = session.post(url_login5, data=data)
+        result = r.json()
+
+    except Exception as e:
+        reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
+        reply_typing_off(sender)
+        reply_main_menu_buttons(sender)
+        return "fail"

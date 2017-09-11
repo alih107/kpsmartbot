@@ -427,6 +427,15 @@ def handle_text_messages(sender, data, last_sender_message):
         elif payload == 'addcard.expiredate':
             main.reply_addcard_checkexpiredate(sender, message, last_sender_message)
             return "ok"
+        elif payload == 'addcard.cardowner':
+            main.reply_addcard_checkcardowner(sender, message, last_sender_message)
+            return "ok"
+        elif payload == 'addcard.csc':
+            t = threading.Thread(target=main.reply_addcard_startAdding, args=(sender, message, last_sender_message,))
+            t.setDaemon(True)
+            t.start()
+            logging.info('main.reply_addcard_startAdding called with a new thread')
+            return "ok"
         main.reply_main_menu_buttons(sender)
         last_sender_message['payload'] = 'mainMenu'
         collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
