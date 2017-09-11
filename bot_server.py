@@ -162,6 +162,22 @@ def check_login_and_cards(sender, last_sender_message):
 
     return True
 
+def check_login(sender, last_sender_message):
+    try:
+        encodedLoginPass = last_sender_message['encodedLoginPass']
+        assert encodedLoginPass != None
+        session = requests.Session()
+        headers = {"Authorization": "Basic " + encodedLoginPass, 'Content-Type': 'application/json'}
+        url_login = 'https://post.kz/mail-app/api/account/'
+        r = session.get(url_login, headers=headers)
+        assert r.status_code != 401
+        return True
+    except:
+        reply(sender, "Требуется авторизация, пожалуйста, отправьте логин и пароль профиля на post.kz через пробел. Если у вас нет аккаунта, то зарегистрируйтесь в https://post.kz/register")
+        last_sender_message['payload'] = 'auth'
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        return False
+
 def handle_quickreply_payload(sender, data, last_sender_message):
     try:
         payload = data['entry'][0]['messaging'][0]['message']['quick_reply']['payload']
@@ -315,10 +331,12 @@ def handle_postback_payload(sender, data, last_sender_message):
             except:
                 reply(sender, "Авторизации нет")
         elif payload == 'addcard':
-            main.reply_addcard_entercard(sender, last_sender_message)
+            if check_login(sender, last_sender_message):
+                main.reply_addcard_entercard(sender, last_sender_message)
+            else:
+                return "ok"
         else:
-            logging.info ("Ne raspoznana komanda")
-
+            logging.info("Ne raspoznana komanda")
 
         last_sender_message['payload'] = payload
         collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)

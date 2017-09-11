@@ -1282,6 +1282,18 @@ def reply_has_cards(sender, last_sender_message):
     cardsCount = len(r.json())
     return cardsCount > 0
 
+def get_cards_json(last_sender_message):
+    session = requests.Session()
+    headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type': 'application/json'}
+    url_login = 'https://post.kz/mail-app/api/account/'
+    r = session.get(url_login, headers=headers)
+
+    url_login6 = 'https://post.kz/mail-app/api/intervale/card?device=mobile'
+    sd2 = {"blockedAmount": "", "phone": last_sender_message['mobileNumber'], "paymentId": "", "returnUrl": "",
+           "transferId": ""}
+    r = session.post(url_login6, json=sd2)
+    return r.json()
+
 def reply_nearest(sender):
     data_misc_buttons = {
         "recipient": {"id": sender},
@@ -1408,4 +1420,8 @@ def reply_nearest_map_location(sender, locLong, locLat, title):
                          json=data_misc_buttons)
 
 def reply_addcard_entercard(sender, last_sender_message):
-    reply(sender, 'Вот ваш список карт. Введите 16ти-значный номер карты')
+    cards = get_cards_json(last_sender_message)
+    if len(cards) > 0:
+        reply(sender, 'Вот ваш список карт. Введите 16ти-значный номер карты')
+    else:
+        reply(sender, 'Введите 16ти-значный номер карты')
