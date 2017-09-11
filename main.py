@@ -1123,11 +1123,11 @@ def reply_mobile_csc(sender, payload, last_sender_message):
     amount = last_sender_message['amount']
     commission = 0
     operator = last_sender_message['mobileOperator']
-    if operator == 'activWf' or operator == 'kcellWf':
+    if operator == 'Activ' or operator == 'Kcell':
         commission = amount / 10
-        if commission > 70:
+        if commission < 70:
             commission = 70
-    elif operator == 'tele2Wf' or operator == 'beelineWf':
+    elif operator == 'Tele2' or operator == 'Beeline':
         commission = 50
     phoneToRefill = last_sender_message['phoneToRefill']
     total = amount + commission
@@ -1434,3 +1434,21 @@ def reply_addcard_entercard(sender, last_sender_message):
         reply(sender, res)
     else:
         reply(sender, 'Введите 16ти-значный номер карты')
+
+def reply_addcard_checkcard(sender, message, last_sender_message):
+    message = message.replace(' ', '')
+    if len(message) != 16:
+        reply(sender, "Вы ввели не все 16 цифр карты, попробуйте ещё раз")
+        return "addcard.again"
+    if not helper.isAllDigits(message):
+        reply(sender, "Некоторые введенные Вами цифры не являются цифрами, попробуйте ещё раз")
+        return "addcard.again"
+    last_sender_message['addcard_cardnumber'] = message
+    last_sender_message['payload'] = 'addcard.expiredate'
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    reply(sender, "Введите месяц и год срока действия карты (например, 0418)\n" + hint_main_menu)
+
+def reply_addcard_checkexpiredate(sender, message, last_sender_message):
+    message = message.replace(' ', '')
+    message = message.replace('.', '')
+    message = message.replace('/', '')
