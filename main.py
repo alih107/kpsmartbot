@@ -1422,6 +1422,15 @@ def reply_nearest_map_location(sender, locLong, locLat, title):
 def reply_addcard_entercard(sender, last_sender_message):
     cards = get_cards_json(last_sender_message)
     if len(cards) > 0:
-        reply(sender, 'Вот ваш список карт. Введите 16ти-значный номер карты')
+        res = 'Список добавленных карт:\n'
+        for card in cards:
+            if card['state'] == 'UNREGISTERED':
+                continue
+            card_title = card['title']
+            if len(card_title) > 20:
+                card_title = card['brand'] + ' *' + card['alias']
+            res += card_title + '\n'
+        res += '\nВведите 16ти-значный номер карты'
+        reply(sender, res)
     else:
         reply(sender, 'Введите 16ти-значный номер карты')
