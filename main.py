@@ -1474,7 +1474,7 @@ def reply_addcard_checkcardowner(sender, message, last_sender_message):
     last_sender_message['addcard_cardowner'] = message
     res = 'Проверьте данные:\n'
     res += 'Номер карты: ' + helper.insert_4_spaces(last_sender_message['addcard_cardnumber']) + '\n'
-    res += 'Срок действия:' + last_sender_message['addcard_expiredate'][:2] + '/' + \
+    res += 'Срок действия: ' + last_sender_message['addcard_expiredate'][:2] + '/' + \
                               last_sender_message['addcard_expiredate'][2:] + '\n'
     res += 'Имя на карте: ' + last_sender_message['addcard_cardowner'] + '\n'
     res += '\nЕсли всё верно, введите трехзначный код CSC/CVV2 на обратной стороне карты, чтобы добавить эту карту'
@@ -1520,6 +1520,47 @@ def reply_addcard_startAdding(sender, message, last_sender_message):
                 'pageType': 'reg'}
         r = session.post(url_login5, data=data)
         result = r.json()
+        try:
+            if result['error'] == 'ALREADY_REGISTERED':
+                reply(sender, "Эта карта уже добавлена в вашем профиле на post.kz")
+                reply_main_menu_buttons(sender)
+                return "ALREADY_REGISTERED"
+        except:
+            pass
+
+        # 5 - дергаём статус, вытаскиваем url для 3DSecure
+        url_login4 = 'https://post.kz/mail-app/api/intervale/card/registration/status/' + token
+        data = {"phone": mobileNumber}
+        r = session.post(url_login4, json=data)
+        d = r.json()
+        if d['state'] == 'redirect':
+            reply_send_redirect_url(sender, d['url'])
+            time.sleep(9)
+
+        timer = 0
+        while timer < timeout:
+            time.sleep(1)
+            r = session.post(url_login4, json=data)
+            d = r.json()
+            if d['state'] == 'result':
+                if d['state']['result'] == 'success':
+                    res = "Поздравляю! Карта успешно добавлена!"
+                    reply(sender, res)
+                if d['state']['result'] == 'fail':
+                    reply(sender, "Карта не была добавлена. Попробуйте снова")
+                last_sender_message['payload'] = 'mobile.finished'
+                collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+                reply_typing_off(sender)
+                reply_main_menu_buttons(sender)
+                return "ok"
+
+        strminutes = str(timeout / 60)
+        reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
+        reply_typing_off(sender)
+        reply_main_menu_buttons(sender)
+        last_sender_message['payload'] = 'mainMenu'
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        return "time exceed"
 
     except Exception as e:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
