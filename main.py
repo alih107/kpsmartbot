@@ -1125,7 +1125,7 @@ def reply_mobile_csc(sender, payload, last_sender_message):
     operator = last_sender_message['mobileOperator']
     if operator == 'Activ' or operator == 'Kcell':
         commission = amount / 10
-        if commission < 70:
+        if commission > 70:
             commission = 70
     elif operator == 'Tele2' or operator == 'Beeline':
         commission = 50
