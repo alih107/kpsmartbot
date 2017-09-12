@@ -1291,10 +1291,12 @@ def reply_has_cards(sender, last_sender_message):
     url_login6 = 'https://post.kz/mail-app/api/intervale/card?device=mobile'
     sd2 = {"blockedAmount":"","phone":last_sender_message['mobileNumber'],"paymentId":"","returnUrl":"","transferId":""}
     r = session.post(url_login6, json=sd2)
+    if r.status_code != 200:
+        reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
     cardsCount = len(r.json())
     return cardsCount > 0
 
-def get_cards_json(last_sender_message):
+def get_cards_json(sender, last_sender_message):
     session = requests.Session()
     headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type': 'application/json'}
     url_login = 'https://post.kz/mail-app/api/account/'
@@ -1304,6 +1306,8 @@ def get_cards_json(last_sender_message):
     sd2 = {"blockedAmount": "", "phone": last_sender_message['mobileNumber'], "paymentId": "", "returnUrl": "",
            "transferId": ""}
     r = session.post(url_login6, json=sd2)
+    if r.status_code != 200:
+        reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
     return r.json()
 
 def reply_nearest(sender):
@@ -1446,7 +1450,7 @@ def reply_nearest_map_location(sender, locLong, locLat, title):
                          json=data_misc_buttons)
 
 def reply_addcard_entercard(sender, last_sender_message):
-    cards = get_cards_json(last_sender_message)
+    cards = get_cards_json(sender, last_sender_message)
     if len(cards) > 0:
         res = 'Список добавленных карт:\n'
         for card in cards:
