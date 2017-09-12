@@ -449,6 +449,7 @@ def handle_text_messages(sender, data, last_sender_message):
             res += "Сейчас бот отключен. Чтобы включить, нажмите кнопку (y)"
             last_sender_message['isBotActive'] = False
             reply(sender, res)
+            return "ok"
         main.reply_main_menu_buttons(sender)
         last_sender_message['payload'] = 'mainMenu'
         collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
@@ -504,7 +505,7 @@ def handle_messages_when_deactivated(sender, data, last_sender_message):
             reply(sender, "Бот включен")
             main.reply_main_menu_buttons(sender)
         if payload == 'deactivate.bot':
-            reply(sender, "Если Вы хотите включить бота, нажмите кнопку (y)")
+            reply(sender, "Хорошо! Если Вы хотите включить бота, нажмите кнопку (y)")
     except:
         return
 
