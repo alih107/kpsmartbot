@@ -1293,6 +1293,7 @@ def reply_has_cards(sender, last_sender_message):
     r = session.post(url_login6, json=sd2)
     if r.status_code != 200:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
+        reply_main_menu_buttons(sender)
     cardsCount = len(r.json())
     return cardsCount > 0
 
@@ -1308,6 +1309,7 @@ def get_cards_json(sender, last_sender_message):
     r = session.post(url_login6, json=sd2)
     if r.status_code != 200:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
+        reply_main_menu_buttons(sender)
     return r.json()
 
 def reply_nearest(sender):
