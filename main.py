@@ -1032,7 +1032,7 @@ def reply_main_menu_buttons(sender):
                   },
                   {
                     "type": "postback",
-                    "title": "✉️ Отправить сообщение",
+                    "title": "Отправить сообщение",
                     "payload": "send.message"
                   }
                 ]
