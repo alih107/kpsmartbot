@@ -500,7 +500,7 @@ def handle_messages_when_deactivated(sender, data, last_sender_message):
     try:
         payload = data['entry'][0]['messaging'][0]['message']['quick_reply']['payload']
         if payload == 'activate.bot':
-            last_sender_message['isActiveBot'] = True
+            last_sender_message['isBotActive'] = True
             collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
             reply(sender, "Бот включен")
             main.reply_main_menu_buttons(sender)
