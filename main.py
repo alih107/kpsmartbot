@@ -1029,6 +1029,11 @@ def reply_main_menu_buttons(sender):
                     "type": "postback",
                     "title": "📁 Прочее",
                     "payload": "misc"
+                  },
+                  {
+                    "type": "postback",
+                    "title": "✉️ Отправить сообщение",
+                    "payload": "send.message"
                   }
                 ]
               },
@@ -1335,7 +1340,21 @@ def reply_nearest(sender):
                          json=data_misc_buttons)
 
 def reply_nearest_request_location(sender):
-    reply(sender, 'Отправьте своё местоположение (нажмите ➕)')
+    data_quick_replies = {
+        "recipient": {
+            "id": sender
+        },
+        "message": {
+            "text": "Отправьте своё местоположение",
+            "quick_replies": [
+                {
+                    "content_type": "location",
+                }
+            ]
+        }
+    }
+    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
+                         json=data_quick_replies)
 
 def reply_nearest_find(sender, locLong, locLat, payload):
     try:

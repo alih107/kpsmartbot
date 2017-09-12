@@ -119,11 +119,17 @@ def handle_incoming_messages():
     last_sender_message = collection_messages.find_one({"sender": sender})
     if last_sender_message == None:
         firstname, lastname = get_firstname_lastname(sender)
-        db_record = {"sender":sender, "first_name":firstname, "last_name":lastname}
+        db_record = {"sender": sender, "first_name": firstname, "last_name": lastname, "isBotActive": True}
         last_sender_message = collection_messages.insert_one(db_record)
 
     logging.info(print_facebook_data(data, last_sender_message))
     #logging.info(data)
+    if not 'isBotActive' in last_sender_message:
+        last_sender_message['isBotActive'] = True
+
+    if not last_sender_message['isBotActive']:
+        handle_messages_when_deactivated(sender, data, last_sender_message)
+        return "ok"
 
     res = handle_sticker(sender, data, last_sender_message)
     if res == 'try next':
@@ -335,6 +341,8 @@ def handle_postback_payload(sender, data, last_sender_message):
                 main.reply_addcard_entercard(sender, last_sender_message)
             else:
                 return "ok"
+        elif payload == 'send.message':
+            reply(sender, "Пожалуйста, отправьте сообщение, который Вас интересует")
         else:
             logging.info("Ne raspoznana komanda")
 
@@ -436,6 +444,11 @@ def handle_text_messages(sender, data, last_sender_message):
             t.start()
             logging.info('main.reply_addcard_startAdding called with a new thread')
             return "ok"
+        elif payload == 'send.message':
+            res = "Спасибо, Ваше сообщение принято! Ожидайте ответа от операторов\n"
+            res += "Сейчас бот отключен. Чтобы включить, нажмите кнопку (y)"
+            last_sender_message['isBotActive'] = False
+            reply(sender, res)
         main.reply_main_menu_buttons(sender)
         last_sender_message['payload'] = 'mainMenu'
         collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
@@ -453,6 +466,47 @@ def handle_sticker(sender, data, last_sender_message):
         return "ok"
     except:
         return "try next"
+
+def handle_messages_when_deactivated(sender, data, last_sender_message):
+    try:
+        sticker_id = data['entry'][0]['messaging'][0]['message']['sticker_id']
+        data_quick_replies = {
+            "recipient": {
+                "id": sender
+            },
+            "message": {
+                "text": "Вы хотите включить бота?",
+                "quick_replies": [
+                    {
+                        "content_type": "text",
+                        "title": "Да, включить бота",
+                        "payload": "activate.bot"
+                    },
+                    {
+                        "content_type": "text",
+                        "title": "Нет",
+                        "payload": "deactivate.bot"
+                    }
+                ]
+            }
+        }
+        resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
+                             json=data_quick_replies)
+        return
+    except:
+        pass
+
+    try:
+        payload = data['entry'][0]['messaging'][0]['message']['quick_reply']['payload']
+        if payload == 'activate.bot':
+            last_sender_message['isActiveBot'] = True
+            collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+            reply(sender, "Бот включен")
+            main.reply_main_menu_buttons(sender)
+        if payload == 'deactivate.bot':
+            reply(sender, "Если Вы хотите включить бота, нажмите кнопку (y)")
+    except:
+        return
 
 if __name__ == '__main__':
 	app.run(debug=True)
