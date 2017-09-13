@@ -217,10 +217,10 @@ def handle_postback_payload(sender, data, last_sender_message):
         if payload == 'GET_STARTED_PAYLOAD':
             fn, ln = get_firstname_lastname(sender)
             result = "Добро пожаловать в бот АО КазПочта, " + ln + " " + fn + "!\n"
-            result += "Это небольшое видео о том, как пользоваться ботом"
+            result += "Это небольшое видео о том, как пользоваться ботом.\n"
+            result += "Чтобы открыть главное меню, нажмите (y)"
             main.reply_gif_1(sender)
             reply(sender, result)
-            main.reply_main_menu_buttons(sender)
             return "ok"
 
         if payload == 'reroute':
