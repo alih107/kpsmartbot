@@ -950,7 +950,7 @@ def reply_misc(sender):
 
 def reply_main_menu_buttons(sender):
     url = "https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN
-    title = "Прокрутите влево/вправо, либо нажмите < или > для других команд"
+    title = "Прокрутите влево/вправо, либо нажмите < или > для других команд (y)"
     data_main_menu_buttons = {
       "recipient": {
         "id": sender
