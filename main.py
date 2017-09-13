@@ -1457,7 +1457,7 @@ def reply_addcard_entercard(sender, last_sender_message):
     if len(cards) > 0:
         res = 'Список добавленных карт:\n'
         for card in cards:
-            if card['state'] == 'UNREGISTERED':
+            if card['state'] != 'REGISTERED':
                 continue
             card_title = card['title']
             if len(card_title) > 20:
