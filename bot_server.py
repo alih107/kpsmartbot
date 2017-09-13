@@ -121,6 +121,7 @@ def handle_incoming_messages():
         firstname, lastname = get_firstname_lastname(sender)
         db_record = {"sender": sender, "first_name": firstname, "last_name": lastname, "isBotActive": True}
         last_sender_message = collection_messages.insert_one(db_record)
+        reply_intro(sender)
 
     logging.info(print_facebook_data(data, last_sender_message))
     #logging.info(data)
@@ -211,16 +212,20 @@ def handle_quickreply_payload(sender, data, last_sender_message):
     except:
         return "try next"
 
+def reply_intro(sender):
+    fn, ln = get_firstname_lastname(sender)
+    result = "Добро пожаловать в бот АО КазПочта, " + ln + " " + fn + "!\n"
+    result += "Это небольшое видео о том, как пользоваться ботом.\n"
+    result += "Чтобы открыть главное меню, нажмите (y)"
+    main.reply_gif_desktop(sender)
+    main.reply_gif_mobile(sender)
+    reply(sender, result)
+
 def handle_postback_payload(sender, data, last_sender_message):
     try:
         payload = data['entry'][0]['messaging'][0]['postback']['payload']
         if payload == 'GET_STARTED_PAYLOAD':
-            fn, ln = get_firstname_lastname(sender)
-            result = "Добро пожаловать в бот АО КазПочта, " + ln + " " + fn + "!\n"
-            result += "Это небольшое видео о том, как пользоваться ботом.\n"
-            result += "Чтобы открыть главное меню, нажмите (y)"
-            main.reply_gif_1(sender)
-            reply(sender, result)
+            reply_intro(sender)
             return "ok"
 
         if payload == 'reroute':

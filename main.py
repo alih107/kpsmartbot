@@ -32,10 +32,17 @@ def reply(sender, msg):
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
 
-def reply_gif_1(sender):
+def reply_gif_desktop(sender):
     data = {
         "recipient": {"id": sender},
         "message": {"attachment": {"type": "image", "payload": {'attachment_id': '347327995722569'}}}
+    }
+    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
+
+def reply_gif_mobile(sender):
+    data = {
+        "recipient": {"id": sender},
+        "message": {"attachment": {"type": "image", "payload": {'attachment_id': '347364952385540'}}}
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
 
