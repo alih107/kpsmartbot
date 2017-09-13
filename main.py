@@ -1052,7 +1052,7 @@ def reply_main_menu_buttons(sender):
                   },
                   {
                     "type": "postback",
-                    "title": "Добавить карту",
+                    "title": "Мои карты",
                     "payload": "addcard"
                   }
                 ]
@@ -1294,6 +1294,7 @@ def reply_has_cards(sender, last_sender_message):
     if r.status_code != 200:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
         reply_main_menu_buttons(sender)
+        return False
     cardsCount = len(r.json())
     return cardsCount > 0
 
@@ -1462,7 +1463,7 @@ def reply_addcard_entercard(sender, last_sender_message):
             if len(card_title) > 20:
                 card_title = card['brand'] + ' *' + card['alias']
             res += card_title + '\n'
-        res += '\nВведите 16ти-значный номер карты'
+        res += '\nЕсли Вы хотите добавить карту, введите 16ти-значный номер карты'
         reply(sender, res)
     else:
         reply(sender, 'Введите 16ти-значный номер карты')
