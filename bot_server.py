@@ -117,11 +117,13 @@ def handle_incoming_messages():
     data = request.json
     sender = data['entry'][0]['messaging'][0]['sender']['id']
     last_sender_message = collection_messages.find_one({"sender": sender})
+    isIntroSent = False
     if last_sender_message == None:
         firstname, lastname = get_firstname_lastname(sender)
         db_record = {"sender": sender, "first_name": firstname, "last_name": lastname, "isBotActive": True}
         last_sender_message = collection_messages.insert_one(db_record)
         reply_intro(sender)
+        isIntroSent = True
 
     logging.info(print_facebook_data(data, last_sender_message))
     #logging.info(data)
@@ -136,7 +138,7 @@ def handle_incoming_messages():
     if res == 'try next':
         res = handle_quickreply_payload(sender, data, last_sender_message)
     if res == 'try next':
-        res = handle_postback_payload(sender, data, last_sender_message)
+        res = handle_postback_payload(sender, data, last_sender_message, isIntroSent)
     if res == 'try next':
         res = handle_attachments(sender, data, last_sender_message)
     if res == 'try next':
@@ -221,11 +223,12 @@ def reply_intro(sender):
     main.reply_gif_mobile(sender)
     reply(sender, result)
 
-def handle_postback_payload(sender, data, last_sender_message):
+def handle_postback_payload(sender, data, last_sender_message, isIntroSent):
     try:
         payload = data['entry'][0]['messaging'][0]['postback']['payload']
         if payload == 'GET_STARTED_PAYLOAD':
-            reply_intro(sender)
+            if not isIntroSent:
+                reply_intro(sender)
             return "ok"
 
         if payload == 'reroute':
