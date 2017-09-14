@@ -456,12 +456,14 @@ def reply_onai_startPayment(sender, message, last_sender_message):
                 pass
             timer += 1
 
-        strminutes = str(timeout / 60)
-        reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
-        reply_typing_off(sender)
-        reply_main_menu_buttons(sender)
-        last_sender_message['payload'] = 'mainMenu'
-        collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+        last_sender_message = collection_messages.find_one({"sender": sender})
+        if last_sender_message['payload'] == 'onai.startPayment':
+            strminutes = str(timeout // 60)
+            reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
+            reply_typing_off(sender)
+            reply_main_menu_buttons(sender)
+            last_sender_message['payload'] = 'mainMenu'
+            collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
         return "time exceed"
     except Exception as e:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
@@ -629,12 +631,14 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
                 pass
             timer += 1
 
-        strminutes = str(timeout / 60)
-        reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
-        reply_typing_off(sender)
-        reply_main_menu_buttons(sender)
-        last_sender_message['payload'] = 'mainMenu'
-        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        last_sender_message = collection_messages.find_one({"sender": sender})
+        if last_sender_message['payload'] == 'card2card.startPayment':
+            strminutes = str(timeout // 60)
+            reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
+            reply_typing_off(sender)
+            reply_main_menu_buttons(sender)
+            last_sender_message['payload'] = 'mainMenu'
+            collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
         return "time exceed"
     except Exception as e:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
@@ -1283,12 +1287,14 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
                 pass
             timer += 1
 
-        strminutes = str(timeout / 60)
-        reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
-        reply_typing_off(sender)
-        reply_main_menu_buttons(sender)
-        last_sender_message['payload'] = 'mainMenu'
-        collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+        last_sender_message = collection_messages.find_one({"sender": sender})
+        if last_sender_message['payload'] == 'mobile.startPayment':
+            strminutes = str(timeout // 60)
+            reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
+            reply_typing_off(sender)
+            reply_main_menu_buttons(sender)
+            last_sender_message['payload'] = 'mainMenu'
+            collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
         return "time exceed"
     except Exception as e:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
@@ -1595,12 +1601,14 @@ def reply_addcard_startAdding(sender, message, last_sender_message):
                 reply_main_menu_buttons(sender)
                 return "ok"
 
-        strminutes = str(timeout / 60)
-        reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
-        reply_typing_off(sender)
-        reply_main_menu_buttons(sender)
-        last_sender_message['payload'] = 'mainMenu'
-        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        last_sender_message = collection_messages.find_one({"sender": sender})
+        if last_sender_message['payload'] == 'addcard.csc':
+            strminutes = str(timeout // 60)
+            reply(sender, "Прошло больше " + strminutes + " минут: добавление карты отменяется")
+            reply_typing_off(sender)
+            reply_main_menu_buttons(sender)
+            last_sender_message['payload'] = 'mainMenu'
+            collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
         return "time exceed"
 
     except Exception as e:
