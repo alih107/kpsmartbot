@@ -1195,6 +1195,7 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
         r = session.post(url_login2, json=sd2)
         data = r.json()
 
+        logging.info(data)
         subscriptionId = str(data['subscriptionData']['id'])
         invoiceId = data['subscriptionData']['invoiceIds'][0]
 
