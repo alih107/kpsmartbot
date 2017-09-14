@@ -72,6 +72,10 @@ def reply_display_cards(sender, last_sender_message):
            "transferId": ""}
     r = session.post(url_login6, json=sd2)
     cards = r.json()
+    if r.status_code != 200:
+        reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
+        reply_main_menu_buttons(sender)
+        return "again"
 
     title = "Выберите карту"
     cards_group = []
@@ -80,7 +84,7 @@ def reply_display_cards(sender, last_sender_message):
     if len(cards) > 3:
         title = "Прокрутите влево/вправо, либо нажмите < или > для выбора других карт"
     for card in cards:
-        if card['state'] == 'UNREGISTERED':
+        if card['state'] != 'REGISTERED':
             continue
         if index % 3 == 0 and index > 0:
             cards_group.append({"title": title, "buttons": cards_array})
