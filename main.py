@@ -22,6 +22,7 @@ hint_main_menu2 = "(Нажмите (y) для перехода в главное
 card2card_info = "Информация:\nПереводы возможны только между картами одной МПС: Visa to Visa или MasterCard to MasterCard. \
 \nПереводы между Visa и MasterCard возможны, только если одна из карт эмитирована банком АО \"Казкоммерцбанк\"."
 timeout = 300
+operators_dict = {'Tele2':'tele2Wf', 'Beeline':'beelineWf', 'Activ':'activWf', 'Kcell':'kcellWf'}
 
 url_mobile_payments = 'https://post.kz/finance/payment/mobile'
 
@@ -1191,11 +1192,10 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
         operatorId = last_sender_message['mobileOperator']
         phoneToRefill = last_sender_message['phoneToRefill']
         amount = last_sender_message['amount']
-        sd2 = {"id":"","login":login,"operatorId":operatorId,"data":phoneToRefill,"name":"","invoiceIds":""}
+        sd2 = {"id":"","login":login,"operatorId":operators_dict[operatorId],"data":phoneToRefill,"name":"","invoiceIds":""}
         r = session.post(url_login2, json=sd2)
         data = r.json()
 
-        logging.info(data)
         subscriptionId = str(data['subscriptionData']['id'])
         invoiceId = data['subscriptionData']['invoiceIds'][0]
 
