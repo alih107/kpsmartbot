@@ -1297,6 +1297,7 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
             collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
         return "time exceed"
     except Exception as e:
+        logging.info(helper.PrintException())
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
         reply_typing_off(sender)
         reply_main_menu_buttons(sender)
