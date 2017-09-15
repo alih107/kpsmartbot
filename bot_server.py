@@ -448,6 +448,9 @@ def handle_text_messages(sender, data, last_sender_message):
         elif payload == 'addcard.cardowner':
             main.reply_addcard_checkcardowner(sender, message, last_sender_message)
             return "ok"
+        elif payload == 'addcard.confirmation':
+            main.card_registration_confirm(sender, message, last_sender_message)
+            return "ok"
         elif payload == 'addcard.csc':
             t = threading.Thread(target=main.reply_addcard_startAdding, args=(sender, message, last_sender_message,))
             t.setDaemon(True)

@@ -1588,6 +1588,16 @@ def reply_addcard_startAdding(sender, message, last_sender_message):
         if d['state'] == 'redirect':
             reply_send_redirect_url(sender, d['url'])
             time.sleep(9)
+        if d['state'] == 'confirmation':
+            message = 'Для подтверждения карты, введите сумму, блокированную на вашей карте.\n \
+                        Блокированную сумму можно узнать через интернет-банкинг или call-центр вашего банка.\n \
+                        Осталось попыток: 3'
+            reply(sender, message)
+            last_sender_message['token'] = token
+            last_sender_message['mobileNumber'] = mobileNumber
+            last_sender_message['payload'] = 'addcard.confirmation'
+            collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+            return "confirmation"
 
         timer = 0
         while timer < timeout:
@@ -1623,3 +1633,14 @@ def reply_addcard_startAdding(sender, message, last_sender_message):
         reply_typing_off(sender)
         reply_main_menu_buttons(sender)
         return "fail"
+
+def card_registration_confirm(sender, message, last_sender_message):
+    token = last_sender_message['token']
+    phone = last_sender_message['mobileNumber']
+    url = 'https://post.kz/mail-app/api/intervale/card/registration/confirm/' + token
+    data = {
+        'blockedAmount': message,
+        'phone': phone
+    }
+    r = requests.post(url, json=data)
+    logging.info(r.json())
