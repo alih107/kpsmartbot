@@ -2,6 +2,9 @@ import sys
 import linecache
 import math
 import requests
+import constants
+
+ACCESS_TOKEN = constants.ACCESS_TOKEN
 
 def reply(user_id, msg):
     data = {
