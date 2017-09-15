@@ -23,6 +23,6 @@ def handle_voice_message(sender, voice_url):
                     message = resp['_text']
                 logging.info("Message = " + message)
             except:
-                pass
+                logging.error(helper.PrintException())
     except:
         logging.error(helper.PrintException())
