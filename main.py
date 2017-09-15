@@ -1589,9 +1589,9 @@ def reply_addcard_startAdding(sender, message, last_sender_message):
             reply_send_redirect_url(sender, d['url'])
             time.sleep(9)
         if d['state'] == 'confirmation':
-            message = 'Для подтверждения карты, введите сумму, блокированную на вашей карте.\n \
-                        Блокированную сумму можно узнать через интернет-банкинг или call-центр вашего банка.\n \
-                        Осталось попыток: 3'
+            message = 'Для подтверждения карты, введите сумму, блокированную на вашей карте.\n'
+            message +='Блокированную сумму можно узнать через интернет-банкинг или call-центр вашего банка.\n'
+            message += 'Осталось попыток: 3'
             reply(sender, message)
             last_sender_message['token'] = token
             last_sender_message['mobileNumber'] = mobileNumber
@@ -1611,7 +1611,7 @@ def reply_addcard_startAdding(sender, message, last_sender_message):
                     reply(sender, res)
                 if status == 'fail':
                     reply(sender, "Карта не была добавлена. Попробуйте снова")
-                last_sender_message['payload'] = 'mobile.finished'
+                last_sender_message['payload'] = 'addcard.finished'
                 collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
                 reply_typing_off(sender)
                 reply_main_menu_buttons(sender)
@@ -1655,4 +1655,19 @@ def card_registration_confirm(sender, message, last_sender_message):
         'phone': phone
     }
     r = session.post(url, json=data)
-    logging.info(r.json())
+    d = r.json()
+    if d['state'] == 'confirmation':
+        reply(sender, "Вы ввели неправильную сумму, осталось " + str(d['attempts']) + " попытки. Введите сумму ещё раз")
+        return "wrongamount"
+    if d['state'] == 'result':
+        status = d['result']['status']
+        if status == 'success':
+            res = "Поздравляю! Карта успешно добавлена!"
+            reply(sender, res)
+        if status == 'fail':
+            reply(sender, "Карта не была добавлена. Попробуйте снова")
+        last_sender_message['payload'] = 'addcard.finished'
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        reply_typing_off(sender)
+        reply_main_menu_buttons(sender)
+        return "ok"
