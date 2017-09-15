@@ -1,6 +1,14 @@
 import sys
 import linecache
 import math
+import requests
+
+def reply(user_id, msg):
+    data = {
+        "recipient": {"id": user_id},
+        "message": {"text": msg}
+    }
+    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
 
 def get_distance_in_meters(lat1, lat2, lon1, lon2):
     """

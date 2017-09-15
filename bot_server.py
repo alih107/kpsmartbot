@@ -1,4 +1,5 @@
 import main
+import voice_assistant
 from flask import Flask, request
 import requests
 import pymongo
@@ -381,6 +382,8 @@ def handle_attachments(sender, data, last_sender_message):
                 main.reply_nearest_find(sender, locLong, locLat, payload)
             else:
                 reply(sender, "А для чего Вы мне отправили своё местоположение?")
+        if type == 'audio':
+            voice_assistant.handle_voice_message(sender, data)
     except:
         return "try next"
 
