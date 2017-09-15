@@ -1,12 +1,14 @@
 import helper
 import requests
 import logging
+import constants
 from wit import Wit
 from pydub import AudioSegment
 
-client = Wit('TCLMX5YEBCRG5TO2TLW3VJCOGFOWMOJW')
+wit_token = constants.wit_token
+client = Wit(wit_token)
 
-def handle_voice_message(sender, voice_url):
+def handle_voice_message(sender, voice_url, last_sender_message):
     try:
         helper.reply(sender, "Я получил аудио-сообщение!")
         g = requests.get(voice_url, stream=True)
@@ -23,6 +25,6 @@ def handle_voice_message(sender, voice_url):
                     message = resp['_text']
                 logging.info("Message = " + message)
             except:
-                logging.error(helper.PrintException())
+                helper.reply(sender, "Извините, я не понял что Вы сказали")
     except:
         logging.error(helper.PrintException())
