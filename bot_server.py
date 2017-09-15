@@ -383,7 +383,7 @@ def handle_attachments(sender, data, last_sender_message):
             else:
                 reply(sender, "А для чего Вы мне отправили своё местоположение?")
         if type == 'audio':
-            voice_assistant.handle_voice_message(sender, data)
+            voice_assistant.handle_voice_message(sender, attachment['payload']['url'])
     except:
         return "try next"
 
