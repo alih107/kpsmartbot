@@ -8,9 +8,10 @@ def handle_voice_message(sender, voice_url):
     try:
         helper.reply(sender, "Я получил аудио-сообщение!")
         g = requests.get(voice_url, stream=True)
-        logging.info(g)
         voice_filename = "voice_" + sender + ".ogg"
+        voice_filename_mp3 = "voice_" + sender + ".mp3"
         with open(voice_filename, "wb") as o:
             o.write(g.content)
+        AudioSegment.from_ogg(voice_filename).export(voice_filename_mp3, format="mp3")
     except:
         logging.error(helper.PrintException())
