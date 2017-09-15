@@ -210,6 +210,7 @@ def handle_quickreply_payload(sender, data, last_sender_message):
         elif payload == 'auth.delete.yes':
             last_sender_message['encodedLoginPass'] = None
             reply(sender, "Авторизация успешна удалена")
+            main.reply_main_menu_buttons(sender)
         elif payload == 'auth.delete.no':
             main.reply_main_menu_buttons(sender)
         last_sender_message['payload'] = payload
