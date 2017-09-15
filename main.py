@@ -1635,12 +1635,24 @@ def reply_addcard_startAdding(sender, message, last_sender_message):
         return "fail"
 
 def card_registration_confirm(sender, message, last_sender_message):
+    message = message.replace('.','')
+    message = message.replace(' ', '')
+    # 1 - авторизация на post.kz
+    url_login = 'https://post.kz/mail-app/api/account/'
+    headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
+               'Content-Type': 'application/json'}
+
+    # 2 - создаём токен
+    session = requests.Session()
+    r = session.get(url_login, headers=headers)
+
+    phone = r.json()['mobileNumber']
     token = last_sender_message['token']
-    phone = last_sender_message['mobileNumber']
+    # phone = last_sender_message['mobileNumber']
     url = 'https://post.kz/mail-app/api/intervale/card/registration/confirm/' + token
     data = {
         'blockedAmount': message,
         'phone': phone
     }
-    r = requests.post(url, json=data)
+    r = session.post(url, json=data)
     logging.info(r.json())
