@@ -5,7 +5,7 @@ from wit import Wit
 from pydub import AudioSegment
 
 def handle_voice_message(sender, data):
-    logging.info("Handling audio...")
+    logging.info(data)
     try:
         helper.reply(sender, "Я получил аудио-сообщение!")
     except:
