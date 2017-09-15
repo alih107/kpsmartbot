@@ -207,6 +207,11 @@ def handle_quickreply_payload(sender, data, last_sender_message):
         elif payload == 'card2card.last':
             main.reply_card2card_check_cardDst(sender, text, last_sender_message)
             payload = 'card2card.amount'
+        elif payload == 'auth.delete.yes':
+            last_sender_message['encodedLoginPass'] = None
+            reply(sender, "Авторизация успешна удалена")
+        elif payload == 'auth.delete.no':
+            main.reply_main_menu_buttons(sender)
         last_sender_message['payload'] = payload
         collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
         return "ok"
@@ -342,8 +347,7 @@ def handle_postback_payload(sender, data, last_sender_message, isIntroSent):
             try:
                 res = last_sender_message['encodedLoginPass']
                 assert res != None
-                last_sender_message['encodedLoginPass'] = None
-                reply(sender, "Авторизация успешна удалена")
+                main.reply_auth_delete(sender)
             except:
                 reply(sender, "Авторизации нет")
         elif payload == 'addcard':

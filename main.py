@@ -1671,3 +1671,27 @@ def card_registration_confirm(sender, message, last_sender_message):
         reply_typing_off(sender)
         reply_main_menu_buttons(sender)
         return "ok"
+
+def reply_auth_delete(sender):
+    data_quick_replies = {
+        "recipient": {
+            "id": sender
+        },
+        "message": {
+            "text": "Вы хотите удалить авторизацию?",
+            "quick_replies": [
+                {
+                    "content_type": "text",
+                    "title": "Да",
+                    "payload": "auth.delete.yes"
+                },
+                {
+                    "content_type": "text",
+                    "title": "Нет",
+                    "payload": "auth.delete.no"
+                }
+            ]
+        }
+    }
+    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
+                         json=data_quick_replies)
