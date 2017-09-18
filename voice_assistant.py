@@ -55,7 +55,7 @@ def handle_intent(sender, last_sender_message, value):
             helper.reply(sender, "Здравствуйте, " + last_sender_message['first_name'] + "!")
             return
         if value == 'postamat':
-            helper.reply(sender, helper.what_is_postamat)
+            helper.reply(sender, helper.postamat)
             return
         if value == 'hybridpost_def':
             helper.reply(sender, helper.hybridpost_def)
@@ -65,15 +65,34 @@ def handle_intent(sender, last_sender_message, value):
             return
         if value == 'trackbynumber_query':
             helper.reply(sender, helper.trackbynumber_query)
+            return
         if value == 'fastmail_options':
             helper.reply(sender, helper.fastmail_options)
+            return
         if value == 'postamat_how':
             helper.reply(sender, helper.postamat_how)
+            return
         if value == 'hybridpost_time':
             helper.reply(sender, helper.hybridpost_time)
+            return
         if value == 'postamat_info_access':
             helper.reply(sender, helper.postamat_info_access)
-
+            return
+        if value == 'hybridpost_info':
+            helper.reply(sender, helper.hybridpost_info)
+            return
+        if value == 'trackbynumber':
+            helper.reply(sender, helper.trackbynumber)
+            return
+        if value == 'redirect':
+            helper.reply(sender, helper.redirect)
+            return
+        if value == 'redirect_why':
+            helper.reply(sender, helper.redirect_why)
+            return
+        if value == 'package_how_long':
+            helper.reply(sender, helper.package_how_long)
+            return
         if value == 'COMMAND_exchange_rates':
             main.reply_currencies_kursy(sender)
             return
