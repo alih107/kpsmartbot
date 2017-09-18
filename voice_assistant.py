@@ -65,6 +65,15 @@ def handle_intent(sender, last_sender_message, value):
             return
         if value == 'trackbynumber_query':
             helper.reply(sender, helper.trackbynumber_query)
+        if value == 'fastmail_options':
+            helper.reply(sender, helper.fastmail_options)
+        if value == 'postamat_how':
+            helper.reply(sender, helper.postamat_how)
+        if value == 'hybridpost_time':
+            helper.reply(sender, helper.hybridpost_time)
+        if value == 'postamat_info_access':
+            helper.reply(sender, helper.postamat_info_access)
+
         if value == 'COMMAND_exchange_rates':
             main.reply_currencies_kursy(sender)
             return
