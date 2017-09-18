@@ -10,9 +10,7 @@ wit_token = constants.wit_token
 client = Wit(wit_token)
 
 def handle_voice_message(sender, voice_url, last_sender_message):
-    logging.info('Audio thread starting...')
     try:
-        helper.reply(sender, "Я получил аудио-сообщение!")
         helper.reply_typing_on(sender)
         g = requests.get(voice_url, stream=True)
         voice_filename = "voice_" + sender + ".mp4"
@@ -26,9 +24,9 @@ def handle_voice_message(sender, voice_url, last_sender_message):
                 logging.info('Yay, got Wit.ai response: ' + str(resp))
                 if "_text" in resp:
                     message = resp['_text']
-                logging.info("Message = " + message)
+                handle_entities(sender, last_sender_message, resp)
             except:
-                helper.reply(sender, "Извините, я не понял что Вы сказали")
+                helper.reply(sender, "Извините, я не поняла что Вы сказали")
         helper.reply_typing_off(sender)
         try:
             os.remove(voice_filename)
@@ -37,3 +35,20 @@ def handle_voice_message(sender, voice_url, last_sender_message):
             pass
     except:
         logging.error(helper.PrintException())
+
+def handle_entities(sender, last_sender_message, resp):
+    entities = resp['entities']
+    try:
+        i = entities['intent']
+        if i['confidence'] > 0.7:
+            handle_intent(sender, last_sender_message, i['value'])
+            return
+    except:
+        pass
+
+
+def handle_intent(sender, last_sender_message, value):
+    if value == 'greeting':
+        helper.reply(sender, "Здравствуйте, " + last_sender_message['first_name'])
+        return
+
