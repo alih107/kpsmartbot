@@ -28,6 +28,7 @@ def handle_voice_message(sender, voice_url, last_sender_message):
                     message = resp['_text']
                 handle_entities(sender, last_sender_message, resp)
             except:
+                logging.info(helper.PrintException())
                 helper.reply(sender, "Извините, я не поняла что Вы сказали")
         helper.reply_typing_off(sender)
         try:
@@ -66,7 +67,7 @@ def handle_intent(sender, last_sender_message, value):
         if value == 'COMMAND_exchange_rates':
             main.reply_currencies_kursy(sender)
             return
-
+        helper.reply(sender, "Я не поняла Вашу команду")
     except:
         logging.error(helper.PrintException())
 
