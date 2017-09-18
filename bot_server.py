@@ -296,10 +296,7 @@ def handle_postback_payload(sender, data, last_sender_message, isIntroSent):
             else:
                 return "ok"
         elif payload == 'card2card':
-            if check_login_and_cards(sender, last_sender_message):
-                last_sender_message['lastCommand'] = payload
-                main.reply_card2card_enter_cardDst(sender, last_sender_message)
-            else:
+            if not call_card2card(sender, last_sender_message, payload):
                 return "ok"
         elif payload == 'card2cash':
             reply(sender, "[не работает] Введите номер карты отправителя в формате\n0000 0000 0000 0000\n" + hint_main_menu)
@@ -531,6 +528,13 @@ def handle_messages_when_deactivated(sender, data, last_sender_message):
             reply(sender, "Хорошо! Если Вы хотите включить бота, нажмите кнопку (y)")
     except:
         return
+
+def call_card2card(sender, last_sender_message, payload):
+    if check_login_and_cards(sender, last_sender_message):
+        last_sender_message['lastCommand'] = payload
+        main.reply_card2card_enter_cardDst(sender, last_sender_message)
+        return True
+    return False
 
 if __name__ == '__main__':
 	app.run(debug=True)

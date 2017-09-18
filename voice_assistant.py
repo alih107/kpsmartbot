@@ -1,3 +1,4 @@
+import bot_server
 import main
 import helper
 import requests
@@ -99,6 +100,8 @@ def handle_intent(sender, last_sender_message, value):
         if value == 'COMMAND_go_home':
             main.reply_main_menu_buttons(sender)
             return
+        if value == 'COMMAND_card2card':
+            bot_server.call_card2card(sender, last_sender_message, 'card2card')
         helper.reply(sender, "Я не поняла Вашу команду")
     except:
         logging.error(helper.PrintException())
