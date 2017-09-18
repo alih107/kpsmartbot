@@ -10,6 +10,7 @@ wit_token = constants.wit_token
 client = Wit(wit_token)
 
 def handle_voice_message(sender, voice_url, last_sender_message):
+    logging.info('Audio thread starting...')
     try:
         helper.reply(sender, "Я получил аудио-сообщение!")
         helper.reply_typing_on(sender)

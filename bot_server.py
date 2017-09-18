@@ -386,6 +386,7 @@ def handle_attachments(sender, data, last_sender_message):
             t = threading.Thread(target=voice_assistant.handle_voice_message,
                                  args=(sender, attachment['payload']['url'], last_sender_message,))
             t.setDaemon(True)
+            logging.info('Audio thread starting...')
             t.start()
     except:
         return "try next"
