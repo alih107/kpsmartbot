@@ -96,6 +96,9 @@ def handle_intent(sender, last_sender_message, value):
         if value == 'COMMAND_exchange_rates':
             main.reply_currencies_kursy(sender)
             return
+        if value == 'COMMAND_go_home':
+            main.reply_main_menu_buttons(sender)
+            return
         helper.reply(sender, "Я не поняла Вашу команду")
     except:
         logging.error(helper.PrintException())
