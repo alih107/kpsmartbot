@@ -37,6 +37,7 @@ def handle_voice_message(sender, voice_url, last_sender_message):
         logging.error(helper.PrintException())
 
 def handle_entities(sender, last_sender_message, resp):
+    logging.info('1')
     try:
         entities = resp['entities']
         i = entities['intent']
@@ -48,6 +49,7 @@ def handle_entities(sender, last_sender_message, resp):
 
 
 def handle_intent(sender, last_sender_message, value):
+    logging.info('2')
     try:
         if value == 'greeting':
             helper.reply(sender, "Здравствуйте, " + last_sender_message['first_name'])
