@@ -37,18 +37,21 @@ def handle_voice_message(sender, voice_url, last_sender_message):
         logging.error(helper.PrintException())
 
 def handle_entities(sender, last_sender_message, resp):
-    entities = resp['entities']
     try:
+        entities = resp['entities']
         i = entities['intent']
         if i['confidence'] > 0.7:
             handle_intent(sender, last_sender_message, i['value'])
             return
     except:
-        pass
+        helper.PrintException()
 
 
 def handle_intent(sender, last_sender_message, value):
-    if value == 'greeting':
-        helper.reply(sender, "Здравствуйте, " + last_sender_message['first_name'])
-        return
+    try:
+        if value == 'greeting':
+            helper.reply(sender, "Здравствуйте, " + last_sender_message['first_name'])
+            return
+    except:
+        helper.PrintException()
 
