@@ -63,6 +63,8 @@ def handle_intent(sender, last_sender_message, value):
         if value == 'supermarket':
             helper.reply(sender, helper.what_is_supermarket)
             return
+        if value == 'trackbynumber_query':
+            helper.reply(sender, helper.trackbynumber_query)
         if value == 'COMMAND_exchange_rates':
             main.reply_currencies_kursy(sender)
             return
