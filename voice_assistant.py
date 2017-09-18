@@ -45,7 +45,7 @@ def handle_entities(sender, last_sender_message, resp):
             handle_intent(sender, last_sender_message, i['value'])
             return
     except:
-        helper.PrintException()
+        logging.error(helper.PrintException())
 
 
 def handle_intent(sender, last_sender_message, value):
@@ -55,5 +55,5 @@ def handle_intent(sender, last_sender_message, value):
             helper.reply(sender, "Здравствуйте, " + last_sender_message['first_name'])
             return
     except:
-        helper.PrintException()
+        logging.error(helper.PrintException())
 
