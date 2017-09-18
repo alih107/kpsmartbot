@@ -290,10 +290,7 @@ def handle_postback_payload(sender, data, last_sender_message, isIntroSent):
         elif payload == 'nearest.postamats' or payload == 'nearest.offices' or payload == 'nearest.atms':
             main.reply_nearest_request_location(sender)
         elif payload == 'balance':
-            if check_login_and_cards(sender, last_sender_message):
-                last_sender_message['lastCommand'] = payload
-                main.reply_mobile_enter_number(sender, last_sender_message)
-            else:
+            if not call_balance(sender, last_sender_message, payload):
                 return "ok"
         elif payload == 'card2card':
             if not call_card2card(sender, last_sender_message, payload):
@@ -533,6 +530,13 @@ def call_card2card(sender, last_sender_message, payload):
     if check_login_and_cards(sender, last_sender_message):
         last_sender_message['lastCommand'] = payload
         main.reply_card2card_enter_cardDst(sender, last_sender_message)
+        return True
+    return False
+
+def call_balance(sender, last_sender_message, payload):
+    if check_login_and_cards(sender, last_sender_message):
+        last_sender_message['lastCommand'] = payload
+        main.reply_mobile_enter_number(sender, last_sender_message)
         return True
     return False
 

@@ -103,6 +103,9 @@ def handle_intent(sender, last_sender_message, value):
         if value == 'COMMAND_card2card':
             bot_server.call_card2card(sender, last_sender_message, 'card2card')
             return
+        if value == 'COMMAND_paymobile':
+            bot_server.call_balance(sender, last_sender_message, 'balance')
+            return
         helper.reply(sender, "Я не поняла Вашу команду")
     except:
         logging.error(helper.PrintException())
