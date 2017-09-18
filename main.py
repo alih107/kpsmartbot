@@ -866,7 +866,7 @@ def reply_tracking(sender, tracking_number, last_sender_message):
 
 def reply_currencies_kursy(sender):
     data = requests.get("https://post.kz/mail-app/info/remote/currencies/ops").json()
-    result = "Курс валют на " + datetime.now().strftime('%d.%m.%Y %H:%M:%S') + " (время западное GMT +5)\n" 
+    result = "Курс валют на " + datetime.now().strftime('%d.%m.%Y %H:%M:%S') + " (время астанинское GMT +6)\n"
     result += "USD: " + data['usdBuy'] + " / " + data['usdSell'] + '\n'
     result += "EUR: " + data['eurBuy'] + " / " + data['eurSell'] + '\n'
     result += "RUB: " + data['rurBuy'] + " / " + data['rurSell']

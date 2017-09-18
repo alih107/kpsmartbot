@@ -55,12 +55,17 @@ def handle_intent(sender, last_sender_message, value):
             return
         if value == 'postamat':
             helper.reply(sender, helper.what_is_postamat)
+            return
         if value == 'hybridpost_def':
             helper.reply(sender, helper.hybridpost_def)
+            return
         if value == 'supermarket':
             helper.reply(sender, helper.what_is_supermarket)
+            return
         if value == 'COMMAND_exchange_rates':
+            logging.info('COMMAND_exchange_rates')
             main.reply_currencies_kursy(sender)
+            return
 
     except:
         logging.error(helper.PrintException())
