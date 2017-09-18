@@ -2,6 +2,7 @@ import helper
 import requests
 import logging
 import constants
+import os
 from wit import Wit
 from pydub import AudioSegment
 
@@ -26,5 +27,7 @@ def handle_voice_message(sender, voice_url, last_sender_message):
                 logging.info("Message = " + message)
             except:
                 helper.reply(sender, "Извините, я не понял что Вы сказали")
+        os.remove(voice_filename)
+        os.remove(voice_filename_mp3)
     except:
         logging.error(helper.PrintException())
