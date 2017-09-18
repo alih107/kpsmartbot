@@ -1,3 +1,4 @@
+import main
 import helper
 import requests
 import logging
@@ -58,6 +59,9 @@ def handle_intent(sender, last_sender_message, value):
             helper.reply(sender, helper.hybridpost_def)
         if value == 'supermarket':
             helper.reply(sender, helper.what_is_supermarket)
+        if value == 'COMMAND_exchange_rates':
+            main.reply_currencies_kursy(sender)
+
     except:
         logging.error(helper.PrintException())
 

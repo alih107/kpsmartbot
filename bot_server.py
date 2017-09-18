@@ -309,7 +309,6 @@ def handle_postback_payload(sender, data, last_sender_message, isIntroSent):
             main.reply_currencies(sender)
         elif payload == '10.kursy':
             main.reply_currencies_kursy(sender)
-            main.reply_main_menu_buttons(sender)
         elif payload == '10.grafik':
             main.reply_currencies_grafik(sender)
         elif payload == 'closest':
