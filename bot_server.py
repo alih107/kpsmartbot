@@ -383,7 +383,10 @@ def handle_attachments(sender, data, last_sender_message):
             else:
                 reply(sender, "А для чего Вы мне отправили своё местоположение?")
         if type == 'audio':
-            voice_assistant.handle_voice_message(sender, attachment['payload']['url'], last_sender_message)
+            t = threading.Thread(target=voice_assistant.handle_voice_message,
+                                 args=(sender, attachment['payload']['url'], last_sender_message,))
+            t.setDaemon(True)
+            t.start()
     except:
         return "try next"
 

@@ -12,6 +12,7 @@ client = Wit(wit_token)
 def handle_voice_message(sender, voice_url, last_sender_message):
     try:
         helper.reply(sender, "Я получил аудио-сообщение!")
+        helper.reply_typing_on(sender)
         g = requests.get(voice_url, stream=True)
         voice_filename = "voice_" + sender + ".mp4"
         voice_filename_mp3 = "voice_" + sender + ".mp3"
@@ -27,7 +28,11 @@ def handle_voice_message(sender, voice_url, last_sender_message):
                 logging.info("Message = " + message)
             except:
                 helper.reply(sender, "Извините, я не понял что Вы сказали")
-        os.remove(voice_filename)
-        os.remove(voice_filename_mp3)
+        helper.reply_typing_off(sender)
+        try:
+            os.remove(voice_filename)
+            os.remove(voice_filename_mp3)
+        except:
+            pass
     except:
         logging.error(helper.PrintException())

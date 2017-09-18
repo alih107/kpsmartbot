@@ -6,6 +6,20 @@ import constants
 
 ACCESS_TOKEN = constants.ACCESS_TOKEN
 
+def reply_typing_on(sender):
+    data = {
+        "recipient": {"id": sender},
+        "sender_action": "typing_on"
+    }
+    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
+
+def reply_typing_off(sender):
+    data = {
+        "recipient": {"id": sender},
+        "sender_action": "typing_off"
+    }
+    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
+
 def reply(user_id, msg):
     data = {
         "recipient": {"id": user_id},
