@@ -40,10 +40,10 @@ def handle_entities(sender, last_sender_message, resp):
     logging.info('1')
     try:
         entities = resp['entities']
-        i = entities['intent']
-        if i['confidence'] > 0.7:
-            handle_intent(sender, last_sender_message, i['value'])
-            return
+        for i in entities['intent']:
+            if i['confidence'] > 0.7:
+                handle_intent(sender, last_sender_message, i['value'])
+                return
     except:
         logging.error(helper.PrintException())
 
