@@ -1150,7 +1150,9 @@ def reply_check_mobile_number(sender, message, last_sender_message):
 
     last_sender_message['minAmount'] = minAmount
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
-    reply(sender, "Оператор номера: " + operator + "\nВведите сумму пополнения баланса (не менее " + str(minAmount) + " тг)")
+
+    title = "Оператор номера: " + operator + "\nВведите сумму пополнения баланса (не менее " + str(minAmount) + " тг)"
+    reply(sender, title)
 
 def reply_mobile_delete(sender, last_sender_message):
     phonesToRefill = last_sender_message['phonesToRefill']

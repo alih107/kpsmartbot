@@ -37,6 +37,10 @@ def verify():
 
     return "Hello world", 200
 
+@app.route('/', methods=['GET'])
+def verify_helloworld():
+    return "Hello, Nursultan! Matrix is watching you...", 200
+
 def print_facebook_data(data, last_sender_message):
     sender = data['entry'][0]['messaging'][0]['sender']['id']
     res = 'Sender id = ' + sender + ' | '
