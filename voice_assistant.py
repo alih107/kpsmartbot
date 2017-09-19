@@ -46,6 +46,7 @@ def handle_entities(sender, last_sender_message, resp):
             if i['confidence'] > 0.5:
                 handle_intent(sender, last_sender_message, i['value'])
                 return
+        helper.reply(sender, "Я не уверена, что именно Вы хотите")
     except:
         helper.reply(sender, "Я не поняла Вашу команду")
         logging.error(helper.PrintException())
