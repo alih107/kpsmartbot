@@ -95,7 +95,7 @@ def handle_intent(sender, last_sender_message, value):
         elif value == 'COMMAND_sendmessage':
             bot_server.call_sendmessage(sender, last_sender_message, 'send.message')
         elif value == 'info_post':
-            main.reply_tracking(sender, message, last_sender_message)
+            bot_server.call_tracking(sender, last_sender_message, 'tracking')
         else:
             helper.reply(sender, "Я не поняла Вашу команду")
     except:

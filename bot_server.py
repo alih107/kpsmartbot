@@ -240,45 +240,8 @@ def handle_postback_payload(sender, data, last_sender_message, isIntroSent):
 
         if payload == 'reroute':
             reply(sender, "[не работает] Введите трек-номер посылки\n" + hint_main_menu)
-        elif payload == 'gifsend':
-            data_quick_replies = {
-                "recipient": {
-                    "id": sender
-                },
-                "message": {
-                    "attachment": {
-                      "type": "image",
-                      "payload": {
-                        "url": "https://www.wired.com/images_blogs/design/2013/09/tumblr_inline_mjx5ioXh8l1qz4rgp.gif"
-                      }
-                    }
-                  }
-            }
-            resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
-                                 json=data_quick_replies)
         elif payload == 'tracking':
-            try:
-                lastTrackingNumber = last_sender_message['lastTrackingNumber']
-                data_quick_replies = {
-                    "recipient": {
-                        "id": sender
-                    },
-                    "message": {
-                        "text": "Выберите последний трекинг-номер или введите его\n" + hint_main_menu,
-                        "quick_replies": [
-                            {
-                                "content_type": "text",
-                                "title": lastTrackingNumber,
-                                "payload": "tracking.last"
-                            }
-                        ]
-                    }
-                }
-                resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
-                                     json=data_quick_replies)
-            except:
-                reply(sender, "Введите трек-номер посылки\n" + hint_main_menu)
-
+            call_tracking(sender, last_sender_message, payload)
         elif payload == 'extension':
             reply(sender, "[не работает] Введите трек-номер посылки\n" + hint_main_menu)
         elif payload == 'shtrafy':
@@ -547,6 +510,31 @@ def call_onai(sender, last_sender_message, payload):
 
 def call_sendmessage(sender, last_sender_message, payload):
     reply(sender, "Пожалуйста, отправьте сообщение, которое Вас интересует")
+    last_sender_message['payload'] = payload
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+
+def call_tracking(sender, last_sender_message, payload):
+    try:
+        lastTrackingNumber = last_sender_message['lastTrackingNumber']
+        data_quick_replies = {
+            "recipient": {
+                "id": sender
+            },
+            "message": {
+                "text": "Выберите последний трекинг-номер или введите его\n" + hint_main_menu,
+                "quick_replies": [
+                    {
+                        "content_type": "text",
+                        "title": lastTrackingNumber,
+                        "payload": "tracking.last"
+                    }
+                ]
+            }
+        }
+        resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
+                             json=data_quick_replies)
+    except:
+        reply(sender, "Введите трек-номер посылки\n" + hint_main_menu)
     last_sender_message['payload'] = payload
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
