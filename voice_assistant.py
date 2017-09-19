@@ -57,60 +57,62 @@ def handle_intent(sender, last_sender_message, value):
         if value == 'greeting':
             helper.reply(sender, "Здравствуйте, " + last_sender_message['first_name'] + "!")
             return
-        if value == 'postamat':
+        elif value == 'postamat':
             helper.reply(sender, helper.postamat)
             return
-        if value == 'hybridpost_def':
+        elif value == 'hybridpost_def':
             helper.reply(sender, helper.hybridpost_def)
             return
-        if value == 'supermarket':
+        elif value == 'supermarket':
             helper.reply(sender, helper.what_is_supermarket)
             return
-        if value == 'trackbynumber_query':
+        elif value == 'trackbynumber_query':
             helper.reply(sender, helper.trackbynumber_query)
             return
-        if value == 'fastmail_options':
+        elif value == 'fastmail_options':
             helper.reply(sender, helper.fastmail_options)
             return
-        if value == 'postamat_how':
+        elif value == 'postamat_how':
             helper.reply(sender, helper.postamat_how)
             return
-        if value == 'hybridpost_time':
+        elif value == 'hybridpost_time':
             helper.reply(sender, helper.hybridpost_time)
             return
-        if value == 'postamat_info_access':
+        elif value == 'postamat_info_access':
             helper.reply(sender, helper.postamat_info_access)
             return
-        if value == 'hybridpost_info':
+        elif value == 'hybridpost_info':
             helper.reply(sender, helper.hybridpost_info)
             return
-        if value == 'trackbynumber':
+        elif value == 'trackbynumber':
             helper.reply(sender, helper.trackbynumber)
             return
-        if value == 'redirect':
+        elif value == 'redirect':
             helper.reply(sender, helper.redirect)
             return
-        if value == 'redirect_why':
+        elif value == 'redirect_why':
             helper.reply(sender, helper.redirect_why)
             return
-        if value == 'package_how_long':
+        elif value == 'package_how_long':
             helper.reply(sender, helper.package_how_long)
             return
-        if value == 'COMMAND_exchange_rates':
+        elif value == 'COMMAND_exchange_rates':
             main.reply_currencies_kursy(sender)
             return
-        if value == 'COMMAND_go_home':
+        elif value == 'COMMAND_go_home':
             main.reply_main_menu_buttons(sender)
             return
-        if value == 'COMMAND_card2card':
+        elif value == 'COMMAND_card2card':
             bot_server.call_card2card(sender, last_sender_message, 'card2card')
             return
-        if value == 'COMMAND_paymobile':
+        elif value == 'COMMAND_paymobile':
             bot_server.call_balance(sender, last_sender_message, 'balance')
             return
-        if value == 'COMMAND_payonai':
+        elif value == 'COMMAND_payonai':
             bot_server.call_onai(sender, last_sender_message, 'onai')
             return
+        elif value == 'COMMAND_sendmessage':
+            bot_server.call_sendmessage(sender, last_sender_message, 'send.message')
         else:
             helper.reply(sender, "Я не поняла Вашу команду")
     except:

@@ -348,7 +348,8 @@ def handle_postback_payload(sender, data, last_sender_message, isIntroSent):
             else:
                 return "ok"
         elif payload == 'send.message':
-            reply(sender, "Пожалуйста, отправьте сообщение, который Вас интересует")
+            call_sendmessage(sender, last_sender_message, payload)
+            return "ok"
         else:
             logging.info("Ne raspoznana komanda")
 
@@ -543,6 +544,11 @@ def call_onai(sender, last_sender_message, payload):
         main.reply_onai_enter_number(sender, last_sender_message)
         return True
     return False
+
+def call_sendmessage(sender, last_sender_message, payload):
+    reply(sender, "Пожалуйста, отправьте сообщение, которое Вас интересует")
+    last_sender_message['payload'] = payload
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
 if __name__ == '__main__':
 	app.run(debug=True)
