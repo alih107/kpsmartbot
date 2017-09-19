@@ -106,6 +106,9 @@ def handle_intent(sender, last_sender_message, value):
         if value == 'COMMAND_paymobile':
             bot_server.call_balance(sender, last_sender_message, 'balance')
             return
+        if value == 'COMMAND_payonai':
+            bot_server.call_onai(sender, last_sender_message, 'onai')
+            return
         helper.reply(sender, "Я не поняла Вашу команду")
     except:
         logging.error(helper.PrintException())

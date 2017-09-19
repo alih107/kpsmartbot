@@ -310,10 +310,7 @@ def handle_postback_payload(sender, data, last_sender_message, isIntroSent):
         elif payload == 'misc':
             main.reply_misc(sender)
         elif payload == 'onai':
-            if check_login_and_cards(sender, last_sender_message):
-                last_sender_message['lastCommand'] = payload
-                main.reply_onai_enter_number(sender, last_sender_message)
-            else:
+            if not call_onai(sender, last_sender_message, payload):
                 return "ok"
         elif payload == 'auth':
             try:
@@ -537,6 +534,13 @@ def call_balance(sender, last_sender_message, payload):
     if check_login_and_cards(sender, last_sender_message):
         last_sender_message['lastCommand'] = payload
         main.reply_mobile_enter_number(sender, last_sender_message)
+        return True
+    return False
+
+def call_onai(sender, last_sender_message, payload):
+    if check_login_and_cards(sender, last_sender_message):
+        last_sender_message['lastCommand'] = payload
+        main.reply_onai_enter_number(sender, last_sender_message)
         return True
     return False
 
