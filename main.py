@@ -23,6 +23,9 @@ card2card_info = "Информация:\nПереводы возможны то�
 \nПереводы между Visa и MasterCard возможны, только если одна из карт эмитирована банком АО \"Казкоммерцбанк\"."
 timeout = 300
 operators_dict = {'Tele2':'tele2Wf', 'Beeline':'beelineWf', 'Activ':'activWf', 'Kcell':'kcellWf'}
+to_find_dict = {'nearest.postamats': 'ближайший постамат',
+                'nearest.offices': 'ближайшее отделение',
+                'nearest.atms': 'ближайший банкомат'}
 
 url_mobile_payments = 'https://post.kz/finance/payment/mobile'
 
@@ -1372,13 +1375,13 @@ def reply_nearest(sender):
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
                          json=data_misc_buttons)
 
-def reply_nearest_request_location(sender):
+def reply_nearest_request_location(sender, payload):
     data_quick_replies = {
         "recipient": {
             "id": sender
         },
         "message": {
-            "text": "Отправьте своё местоположение",
+            "text": "Отправьте своё местоположение, чтобы найти " + to_find_dict[payload],
             "quick_replies": [
                 {
                     "content_type": "location",

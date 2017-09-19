@@ -544,7 +544,7 @@ def call_addcard(sender, last_sender_message, payload):
     return False
 
 def call_request_nearest_location(sender, last_sender_message, payload):
-    main.reply_nearest_request_location(sender)
+    main.reply_nearest_request_location(sender, payload)
     last_sender_message['payload'] = payload
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
