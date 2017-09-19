@@ -230,6 +230,7 @@ def reply_intro(sender):
     main.reply_gif_mobile(sender)
     reply(sender, result)
 
+# кнопки главного меню
 def handle_postback_payload(sender, data, last_sender_message, isIntroSent):
     try:
         payload = data['entry'][0]['messaging'][0]['postback']['payload']
@@ -237,7 +238,6 @@ def handle_postback_payload(sender, data, last_sender_message, isIntroSent):
             if not isIntroSent:
                 reply_intro(sender)
             return "ok"
-
         if payload == 'reroute':
             reply(sender, "[не работает] Введите трек-номер посылки\n" + hint_main_menu)
         elif payload == 'tracking':
@@ -306,9 +306,7 @@ def handle_postback_payload(sender, data, last_sender_message, isIntroSent):
             except:
                 reply(sender, "Авторизации нет")
         elif payload == 'addcard':
-            if check_login(sender, last_sender_message):
-                main.reply_addcard_entercard(sender, last_sender_message)
-            else:
+            if not call_addcard(sender, last_sender_message, payload):
                 return "ok"
         elif payload == 'send.message':
             call_sendmessage(sender, last_sender_message, payload)
@@ -537,6 +535,12 @@ def call_tracking(sender, last_sender_message, payload):
         reply(sender, "Введите трек-номер посылки\n" + hint_main_menu)
     last_sender_message['payload'] = payload
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+
+def call_addcard(sender, last_sender_message, payload):
+    if check_login(sender, last_sender_message):
+        main.reply_addcard_entercard(sender, last_sender_message)
+        return True
+    return False
 
 if __name__ == '__main__':
 	app.run(debug=True)
