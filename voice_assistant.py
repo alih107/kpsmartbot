@@ -47,6 +47,7 @@ def handle_entities(sender, last_sender_message, resp):
                 handle_intent(sender, last_sender_message, i['value'])
                 return
     except:
+        helper.reply(sender, "Я не поняла Вашу команду")
         logging.error(helper.PrintException())
 
 
@@ -109,7 +110,8 @@ def handle_intent(sender, last_sender_message, value):
         if value == 'COMMAND_payonai':
             bot_server.call_onai(sender, last_sender_message, 'onai')
             return
-        helper.reply(sender, "Я не поняла Вашу команду")
+        else:
+            helper.reply(sender, "Я не поняла Вашу команду")
     except:
         logging.error(helper.PrintException())
 
