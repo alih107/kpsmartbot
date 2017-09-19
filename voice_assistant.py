@@ -98,6 +98,8 @@ def handle_intent(sender, last_sender_message, value):
             bot_server.call_addcard(sender, last_sender_message, 'addcard')
         elif value == 'info_post':
             bot_server.call_tracking(sender, last_sender_message, 'tracking')
+        elif value == 'how_are_you':
+            helper.reply(sender, "У меня всё замечательно!")
         else:
             helper.reply(sender, "Я не поняла Вашу команду")
     except:
