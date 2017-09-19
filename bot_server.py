@@ -251,7 +251,8 @@ def handle_postback_payload(sender, data, last_sender_message, isIntroSent):
         elif payload == 'nearest':
             main.reply_nearest(sender)
         elif payload == 'nearest.postamats' or payload == 'nearest.offices' or payload == 'nearest.atms':
-            main.reply_nearest_request_location(sender)
+            call_request_nearest_location(sender, last_sender_message, payload)
+            return "ok"
         elif payload == 'balance':
             if not call_balance(sender, last_sender_message, payload):
                 return "ok"
@@ -541,6 +542,11 @@ def call_addcard(sender, last_sender_message, payload):
         main.reply_addcard_entercard(sender, last_sender_message)
         return True
     return False
+
+def call_request_nearest_location(sender, last_sender_message, payload):
+    main.reply_nearest_request_location(sender)
+    last_sender_message['payload'] = payload
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
 if __name__ == '__main__':
 	app.run(debug=True)

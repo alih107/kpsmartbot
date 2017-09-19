@@ -153,7 +153,7 @@ def reply_pdd_shtrafy(sender):
         "id": sender
       },
       "message":{
-        "text":" Выберите:\n" + hint_main_menu2,
+        "text":" Выберите способ просмотра штрафов ПДД:\n" + hint_main_menu2,
         "quick_replies":[
           {
             "content_type":"text",
