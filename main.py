@@ -1096,17 +1096,10 @@ def reply_mobile_enter_number(sender, last_sender_message):
         phonesToRefill = last_sender_message['phonesToRefill']
         logging.info(phonesToRefill)
         buttons = []
-        button = {"content_type": "text", "payload": "mobile.last"}
         for phone in phonesToRefill:
-            button["title"] = phone
-            logging.info(button)
-            buttons.append(button)
+            buttons.append({"content_type": "text", "payload": "mobile.last", "title": phone})
 
-        button["payload"] = "mobile.delete"
-        button["title"] = "Удалить номер"
-        buttons.append(button)
-
-        logging.info(buttons)
+        buttons.append({"content_type": "text", "payload": "mobile.delete", "title": "Удалить номер"})
 
         one_button = [
               {
