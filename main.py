@@ -1094,6 +1094,7 @@ def reply_main_menu_buttons(sender):
 def reply_mobile_enter_number(sender, last_sender_message):
     try:
         phonesToRefill = last_sender_message['phonesToRefill']
+        assert len(phonesToRefill) > 0
         buttons = []
         for phone in phonesToRefill:
             buttons.append({"content_type": "text", "payload": "mobile.last", "title": phone})
