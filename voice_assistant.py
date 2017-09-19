@@ -96,6 +96,8 @@ def handle_intent(sender, last_sender_message, value):
             bot_server.call_sendmessage(sender, last_sender_message, 'send.message')
         elif value == 'COMMAND_my_cards':
             bot_server.call_addcard(sender, last_sender_message, 'addcard')
+        elif value == 'penalties_pdd':
+            main.reply_pdd_shtrafy(sender)
         elif value == 'info_post':
             bot_server.call_tracking(sender, last_sender_message, 'tracking')
         elif value == 'how_are_you':
