@@ -16,6 +16,7 @@ x_channel_id = constants.x_channel_id
 portal_id = constants.portal_id
 portal_id_2 = constants.portal_id_2
 ACCESS_TOKEN = constants.ACCESS_TOKEN
+fb_url = "https://graph.facebook.com/v2.6/me/messages?access_token="
 
 hint_main_menu = "(для перехода в главное меню нажмите кнопку (y) "
 hint_main_menu2 = "(Нажмите (y) для перехода в главное меню)"
@@ -115,7 +116,7 @@ def reply_display_cards(sender, last_sender_message):
             }
         }
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_cards)
+    requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_cards)
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
 def reply_send_redirect_url(sender, url):
@@ -171,7 +172,7 @@ def reply_pdd_shtrafy(sender):
         ]
       }
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_quick_replies)
+    requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
 
 def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
     try:
@@ -1092,22 +1093,12 @@ def reply_main_menu_buttons(sender):
 
 def reply_mobile_enter_number(sender, last_sender_message):
     try:
-        lastPhoneToRefill = last_sender_message['phoneToRefill']
         phonesToRefill = last_sender_message['phonesToRefill']
-        logging.info(phonesToRefill)
         buttons = []
         for phone in phonesToRefill:
             buttons.append({"content_type": "text", "payload": "mobile.last", "title": phone})
 
         buttons.append({"content_type": "text", "payload": "mobile.delete", "title": "Удалить номер"})
-
-        one_button = [
-              {
-                "content_type":"text",
-                "title":lastPhoneToRefill,
-                "payload":"mobile.last"
-              }
-            ]
 
         data_quick_replies = {
           "recipient": {
@@ -1118,7 +1109,7 @@ def reply_mobile_enter_number(sender, last_sender_message):
             "quick_replies": buttons
           }
         }
-        resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_quick_replies)
+        requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
     except:
         reply(sender, "Введите номер телефона\n" + hint_main_menu)
 
@@ -1159,7 +1150,31 @@ def reply_check_mobile_number(sender, message, last_sender_message):
     last_sender_message['minAmount'] = minAmount
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
     reply(sender, "Оператор номера: " + operator + "\nВведите сумму пополнения баланса (не менее " + str(minAmount) + " тг)")
-    
+
+def reply_mobile_delete(sender, last_sender_message):
+    phonesToRefill = last_sender_message['phonesToRefill']
+    buttons = []
+    for phone in phonesToRefill:
+        buttons.append({"content_type": "text", "payload": "mobile.delete.phone", "title": phone})
+
+    data_quick_replies = {
+        "recipient": {
+            "id": sender
+        },
+        "message": {
+            "text": "Выберите номер телефона, чтобы его удалить",
+            "quick_replies": buttons
+        }
+    }
+    requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
+
+def reply_mobile_delete_phone(sender, text, last_sender_message):
+    last_sender_message['phonesToRefill'].remove(text)
+    reply(sender, "Номер успешно удалён")
+    reply_mobile_enter_number(sender, last_sender_message)
+    last_sender_message['payload'] = 'balance'
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+
 def reply_mobile_amount(sender, message, last_sender_message):
     amount = 0
     minAmount = last_sender_message['minAmount']
@@ -1393,7 +1408,7 @@ def reply_nearest(sender):
             }
         }
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
+    resp = requests.post(fb_url + ACCESS_TOKEN,
                          json=data_misc_buttons)
 
 def reply_nearest_request_location(sender, payload):
@@ -1410,8 +1425,7 @@ def reply_nearest_request_location(sender, payload):
             ]
         }
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
-                         json=data_quick_replies)
+    resp = requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
 
 def reply_nearest_find(sender, locLong, locLat, payload):
     try:
@@ -1499,7 +1513,7 @@ def reply_nearest_map_location(sender, locLong, locLat, title):
       }
     }
 
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
+    resp = requests.post(fb_url + ACCESS_TOKEN,
                          json=data_misc_buttons)
 
 def reply_addcard_entercard(sender, last_sender_message):
@@ -1717,5 +1731,4 @@ def reply_auth_delete(sender):
             ]
         }
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
-                         json=data_quick_replies)
+    resp = requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)

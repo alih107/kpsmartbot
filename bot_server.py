@@ -37,7 +37,6 @@ def verify():
 
     return "Hello world", 200
 
-
 def print_facebook_data(data, last_sender_message):
     sender = data['entry'][0]['messaging'][0]['sender']['id']
     res = 'Sender id = ' + sender + ' | '
@@ -101,7 +100,6 @@ def print_facebook_data(data, last_sender_message):
 
     return res
 
-
 def reply(user_id, msg):
     data = {
         "recipient": {"id": user_id},
@@ -109,14 +107,12 @@ def reply(user_id, msg):
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
 
-
 def get_firstname_lastname(user_id):
     call_string = "https://graph.facebook.com/v2.6/" + user_id + "?fields=first_name,last_name&access_token=" + ACCESS_TOKEN
     resp = requests.get(call_string).json()
     fn = resp["first_name"]
     ln = resp["last_name"]
     return fn, ln
-
 
 @app.route('/kpsmartbot', methods=['POST'])
 def handle_incoming_messages():
@@ -194,6 +190,15 @@ def check_login(sender, last_sender_message):
         collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
         return False
 
+def reply_intro(sender):
+    fn, ln = get_firstname_lastname(sender)
+    result = "Добро пожаловать в бот АО КазПочта, " + ln + " " + fn + "!\n"
+    result += "Это небольшое видео о том, как пользоваться ботом.\n"
+    result += "Чтобы открыть главное меню, нажмите (y)"
+    main.reply_gif_desktop(sender)
+    main.reply_gif_mobile(sender)
+    reply(sender, result)
+
 def handle_quickreply_payload(sender, data, last_sender_message):
     try:
         payload = data['entry'][0]['messaging'][0]['message']['quick_reply']['payload']
@@ -210,7 +215,13 @@ def handle_quickreply_payload(sender, data, last_sender_message):
             payload = 'onai.amount'
         elif payload == 'mobile.last':
             main.reply_check_mobile_number(sender, text, last_sender_message)
-            payload = 'onai.amount'
+            return "ok"
+        elif payload == 'mobile.delete':
+            main.reply_mobile_delete(sender, last_sender_message)
+            return "ok"
+        elif payload == 'mobile.delete.phone':
+            main.reply_mobile_delete_phone(sender, text, last_sender_message)
+            return "ok"
         elif payload == 'card2card.last':
             main.reply_card2card_check_cardDst(sender, text, last_sender_message)
             payload = 'card2card.amount'
@@ -226,15 +237,6 @@ def handle_quickreply_payload(sender, data, last_sender_message):
 
     except:
         return "try next"
-
-def reply_intro(sender):
-    fn, ln = get_firstname_lastname(sender)
-    result = "Добро пожаловать в бот АО КазПочта, " + ln + " " + fn + "!\n"
-    result += "Это небольшое видео о том, как пользоваться ботом.\n"
-    result += "Чтобы открыть главное меню, нажмите (y)"
-    main.reply_gif_desktop(sender)
-    main.reply_gif_mobile(sender)
-    reply(sender, result)
 
 # кнопки главного меню
 def handle_postback_payload(sender, data, last_sender_message, isIntroSent):
