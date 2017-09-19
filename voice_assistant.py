@@ -98,15 +98,15 @@ def handle_intent(sender, last_sender_message, value):
             bot_server.call_addcard(sender, last_sender_message, 'addcard')
         elif value == 'COMMAND_nearest':
             main.reply_nearest(sender)
-        elif value == 'COMMANDS_nearest_postamat':
+        elif value == 'COMMANDS_nearest_postamat' or value == 'find_postamat':
             bot_server.call_request_nearest_location(sender, last_sender_message, 'nearest.postamats')
-        elif value == 'COMMANDS_nearest_office':
+        elif value == 'COMMANDS_nearest_office' or value == 'find_dep':
             bot_server.call_request_nearest_location(sender, last_sender_message, 'nearest.offices')
         elif value == 'COMMANDS_nearest_atm':
             bot_server.call_request_nearest_location(sender, last_sender_message, 'nearest.atms')
         elif value == 'COMMAND_nearest':
             main.reply_nearest(sender)
-        elif value == 'penalties_pdd':
+        elif value == 'penalties_pdd' or value == 'COMMAND_penalties':
             main.reply_pdd_shtrafy(sender)
         elif value == 'info_post':
             bot_server.call_tracking(sender, last_sender_message, 'tracking')

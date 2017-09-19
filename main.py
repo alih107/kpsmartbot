@@ -1131,10 +1131,21 @@ def reply_check_mobile_number(sender, message, last_sender_message):
         minAmount = 200
     else:
         reply(sender, "Оператор " + operator +" сейчас не поддерживается. Введите другой номер, пожалуйста.")
+        return "other operator"
 
     last_sender_message['mobileOperator'] = operator
     last_sender_message['payload'] = 'mobile.amount'
     last_sender_message['phoneToRefill'] = message
+
+    try:
+        if not "phonesToRefill" in last_sender_message:
+            last_sender_message['phonesToRefill'] = []
+        if not message in last_sender_message['phonesToRefill']:
+            last_sender_message['phonesToRefill'].append(message)
+        logging.info(last_sender_message['phonesToRefill'])
+    except:
+        logging.error(helper.PrintException())
+
     last_sender_message['minAmount'] = minAmount
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
     reply(sender, "Оператор номера: " + operator + "\nВведите сумму пополнения баланса (не менее " + str(minAmount) + " тг)")
