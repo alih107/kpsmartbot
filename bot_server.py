@@ -25,6 +25,7 @@ hint_main_menu = "(для перехода в главное меню нажми
 mobile_codes = ['tele2Wf', 'beelineWf', 'activWf', 'kcellWf']
 digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30']
 
+
 @app.route('/kpsmartbot', methods=['GET'])
 def verify():
     # when the endpoint is registered as a webhook, it must echo back
@@ -35,6 +36,7 @@ def verify():
         return request.args["hub.challenge"], 200
 
     return "Hello world", 200
+
 
 def print_facebook_data(data, last_sender_message):
     sender = data['entry'][0]['messaging'][0]['sender']['id']
@@ -99,6 +101,7 @@ def print_facebook_data(data, last_sender_message):
 
     return res
 
+
 def reply(user_id, msg):
     data = {
         "recipient": {"id": user_id},
@@ -106,12 +109,14 @@ def reply(user_id, msg):
     }
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
 
+
 def get_firstname_lastname(user_id):
     call_string = "https://graph.facebook.com/v2.6/" + user_id + "?fields=first_name,last_name&access_token=" + ACCESS_TOKEN
     resp = requests.get(call_string).json()
     fn = resp["first_name"]
     ln = resp["last_name"]
     return fn, ln
+
 
 @app.route('/kpsmartbot', methods=['POST'])
 def handle_incoming_messages():
@@ -121,7 +126,8 @@ def handle_incoming_messages():
     isIntroSent = False
     if last_sender_message == None:
         firstname, lastname = get_firstname_lastname(sender)
-        db_record = {"sender": sender, "first_name": firstname, "last_name": lastname, "isBotActive": True}
+        db_record = {"sender": sender, "first_name": firstname, "last_name": lastname,
+                     "isBotActive": True, 'phonesToRefill': []}
         last_sender_message = collection_messages.insert_one(db_record)
         reply_intro(sender)
         isIntroSent = True

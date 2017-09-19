@@ -1093,19 +1093,34 @@ def reply_main_menu_buttons(sender):
 def reply_mobile_enter_number(sender, last_sender_message):
     try:
         lastPhoneToRefill = last_sender_message['phoneToRefill']
-        data_quick_replies = {
-          "recipient":{
-            "id": sender
-          },
-          "message":{
-            "text":"Выберите номер телефона или введите его\n" + hint_main_menu,
-            "quick_replies":[
+        phonesToRefill = last_sender_message['phonesToRefill']
+        buttons = []
+        for phone in phonesToRefill:
+            button = {}
+            button["content_type"] = "text"
+            button["payload"] = "mobile.last"
+            button["title"] = phone
+            buttons.append(button)
+        button["content_type"] = "text"
+        button["payload"] = "mobile.delete"
+        button["title"] = "Удалить номер"
+        buttons.append(button)
+
+        one_button = [
               {
                 "content_type":"text",
                 "title":lastPhoneToRefill,
                 "payload":"mobile.last"
               }
             ]
+
+        data_quick_replies = {
+          "recipient": {
+            "id": sender
+          },
+          "message": {
+            "text": "Выберите номер телефона или введите его\n" + hint_main_menu,
+            "quick_replies": buttons
           }
         }
         resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_quick_replies)
@@ -1140,7 +1155,7 @@ def reply_check_mobile_number(sender, message, last_sender_message):
     try:
         if not "phonesToRefill" in last_sender_message:
             last_sender_message['phonesToRefill'] = []
-        if not message in last_sender_message['phonesToRefill']:
+        if not message in last_sender_message['phonesToRefill'] and len(last_sender_message['phonesToRefill']) < 10:
             last_sender_message['phonesToRefill'].append(message)
         logging.info(last_sender_message['phonesToRefill'])
     except:
