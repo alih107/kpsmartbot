@@ -43,7 +43,7 @@ def handle_entities(sender, last_sender_message, resp):
     try:
         entities = resp['entities']
         for i in entities['intent']:
-            if i['confidence'] > 0.7:
+            if i['confidence'] > 0.5:
                 handle_intent(sender, last_sender_message, i['value'])
                 return
     except:
