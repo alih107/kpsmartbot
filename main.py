@@ -484,16 +484,16 @@ def reply_card2card_enter_cardDst(sender, last_sender_message):
     try:
         lastCardDst = helper.insert_4_spaces(last_sender_message['lastCardDst'])
         data_quick_replies = {
-          "recipient":{
+          "recipient": {
             "id": sender
           },
-          "message":{
-            "text":card2card_info + "\n\nВыберите карту или введите 16ти-значный номер карты, на который Вы хотите перевести деньги\n" + hint_main_menu,
-            "quick_replies":[
+          "message": {
+            "text": card2card_info + "\n\nВыберите карту или введите 16ти-значный номер карты, на который Вы хотите перевести деньги\n" + hint_main_menu,
+            "quick_replies": [
               {
-                "content_type":"text",
-                "title":lastCardDst,
-                "payload":"card2card.last"
+                "content_type": "text",
+                "title": lastCardDst,
+                "payload": "card2card.last"
               }
             ]
           }
