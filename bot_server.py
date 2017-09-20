@@ -38,10 +38,6 @@ def verify():
 
     return "Wake up, Neo... The Matrix has you", 200
 
-@app.route('/', methods=['GET'])
-def verify_helloworld():
-    return "Hello, Nursultan! Matrix is watching you...", 200
-
 def print_facebook_data(data, last_sender_message):
     sender = data['entry'][0]['messaging'][0]['sender']['id']
     res = 'Sender id = ' + sender + ' | '
@@ -121,6 +117,7 @@ def get_firstname_lastname(user_id):
 
 @app.route('/kpsmartbot', methods=['POST'])
 def handle_incoming_messages():
+    logging.info('1 | ' + str(datetime.datetime.now()))
     data = request.json
     sender = data['entry'][0]['messaging'][0]['sender']['id']
     last_sender_message = collection_messages.find_one({"sender": sender})
@@ -133,6 +130,7 @@ def handle_incoming_messages():
         reply_intro(sender)
         isIntroSent = True
 
+    logging.info('2 | ' + str(datetime.datetime.now()))
     logging.info(print_facebook_data(data, last_sender_message))
     #logging.info(data)
     if not 'isBotActive' in last_sender_message:
@@ -142,14 +140,19 @@ def handle_incoming_messages():
         handle_messages_when_deactivated(sender, data, last_sender_message)
         return "ok"
 
+    logging.info('3 | ' + str(datetime.datetime.now()))
     res = handle_sticker(sender, data, last_sender_message)
     if res == 'try next':
+        logging.info('4 | ' + str(datetime.datetime.now()))
         res = handle_quickreply_payload(sender, data, last_sender_message)
     if res == 'try next':
+        logging.info('5 | ' + str(datetime.datetime.now()))
         res = handle_postback_payload(sender, data, last_sender_message, isIntroSent)
     if res == 'try next':
+        logging.info('6 | ' + str(datetime.datetime.now()))
         res = handle_attachments(sender, data, last_sender_message)
     if res == 'try next':
+        logging.info('7 | ' + str(datetime.datetime.now()))
         res = handle_text_messages(sender, data, last_sender_message)
 
     return "ok"
@@ -545,7 +548,7 @@ def call_disable_bot(sender, last_sender_message, payload):
             "quick_replies": [
                 {
                     "content_type": "text",
-                    "title": "Да",
+                    "title": "Да, отключить бота",
                     "payload": "disable.bot.yes"
                 },
                 {

@@ -2,7 +2,7 @@ import requests
 import base64
 import time
 import pymongo
-from datetime import datetime
+import datetime
 import constants
 import logging
 import helper
@@ -870,7 +870,7 @@ def reply_tracking(sender, tracking_number, last_sender_message):
 
 def reply_currencies_kursy(sender):
     data = requests.get("https://post.kz/mail-app/info/remote/currencies/ops").json()
-    result = "Курс валют на " + datetime.now().strftime('%d.%m.%Y %H:%M:%S') + " (время астанинское GMT +6)\n"
+    result = "Курс валют на " + datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S') + " (время астанинское GMT +6)\n"
     result += "USD: " + data['usdBuy'] + " / " + data['usdSell'] + '\n'
     result += "EUR: " + data['eurBuy'] + " / " + data['eurSell'] + '\n'
     result += "RUB: " + data['rurBuy'] + " / " + data['rurSell']
@@ -969,6 +969,7 @@ def reply_misc(sender):
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_misc_buttons)
 
 def reply_main_menu_buttons(sender):
+    logging.info('8 | ' + str(datetime.datetime.now()))
     data_main_menu_buttons = {
       "recipient": {
         "id": sender
@@ -1087,6 +1088,7 @@ def reply_main_menu_buttons(sender):
         }
       }
     }
+    logging.info('9 | ' + str(datetime.datetime.now()))
     resp = requests.post(fb_url + ACCESS_TOKEN, json=data_main_menu_buttons)
 
 def reply_mobile_enter_number(sender, last_sender_message):
