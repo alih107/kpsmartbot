@@ -498,7 +498,8 @@ def reply_card2card_enter_cardDst(sender, last_sender_message):
             ]
           }
         }
-        resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_quick_replies)
+        requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
+        logging.info('2 | ' + str(datetime.datetime.now()))
     except:
         reply(sender, card2card_info + "\n\nВведите 16ти-значный номер карты, на который Вы хотите перевести деньги\n" + hint_main_menu)
 
@@ -1088,7 +1089,7 @@ def reply_main_menu_buttons(sender):
         }
       }
     }
-    logging.info('9 | ' + str(datetime.datetime.now()))
+    #logging.info('9 | ' + str(datetime.datetime.now()))
     resp = requests.post(fb_url + ACCESS_TOKEN, json=data_main_menu_buttons)
 
 def reply_mobile_enter_number(sender, last_sender_message):
