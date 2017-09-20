@@ -13,7 +13,8 @@ app = Flask(__name__)
 client = pymongo.MongoClient()
 db = client.kpsmartbot_db
 collection_messages = db.messages
-logging.basicConfig(filename='botserver.log',level=logging.INFO,format='[%(levelname)s] (%(threadName)-10s) %(message)s')
+logging.basicConfig(filename='botserver.log', level=logging.INFO,
+                    format='[%(levelname)s] (%(threadName)-10s) %(message)s')
 
 ACCESS_TOKEN = constants.ACCESS_TOKEN
 fb_url = main.fb_url
@@ -106,7 +107,9 @@ def reply(user_id, msg):
         "recipient": {"id": user_id},
         "message": {"text": msg}
     }
+    logging.info('before request.post for reply | ' + str(datetime.datetime.now()))
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
+    logging.info('after  request.post for reply | ' + str(datetime.datetime.now()))
 
 def get_firstname_lastname(user_id):
     call_string = "https://graph.facebook.com/v2.6/" + user_id + "?fields=first_name,last_name&access_token=" + ACCESS_TOKEN
