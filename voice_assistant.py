@@ -106,6 +106,8 @@ def handle_intent(sender, last_sender_message, value):
             bot_server.call_request_nearest_location(sender, last_sender_message, 'nearest.atms')
         elif value == 'COMMAND_nearest':
             main.reply_nearest(sender)
+        elif value == 'COMMAND_disable_bot':
+            bot_server.call_disable_bot(sender, last_sender_message, 'disable.bot')
         elif value == 'penalties_pdd' or value == 'COMMAND_penalties':
             main.reply_pdd_shtrafy(sender)
         elif value == 'info_post':

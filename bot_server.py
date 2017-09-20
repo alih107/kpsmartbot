@@ -16,6 +16,7 @@ collection_messages = db.messages
 logging.basicConfig(filename='botserver.log',level=logging.INFO,format='[%(levelname)s] (%(threadName)-10s) %(message)s')
 
 ACCESS_TOKEN = constants.ACCESS_TOKEN
+fb_url = main.fb_url
 
 gosnomer_text = """Введите номер авто и номер техпаспорта через пробел
 Правильный формат запроса: [номер авто] [номер техпаспорта]
@@ -35,7 +36,7 @@ def verify():
             return "Verification token mismatch", 403
         return request.args["hub.challenge"], 200
 
-    return "Hello world", 200
+    return "Wake up, Neo... The Matrix has you", 200
 
 @app.route('/', methods=['GET'])
 def verify_helloworld():
@@ -235,6 +236,13 @@ def handle_quickreply_payload(sender, data, last_sender_message):
             main.reply_main_menu_buttons(sender)
         elif payload == 'auth.delete.no':
             main.reply_main_menu_buttons(sender)
+        elif payload == 'disable.bot.yes':
+            res = "Бот отключен. Чтобы включить, нажмите кнопку (y)"
+            last_sender_message['isBotActive'] = False
+            reply(sender, res)
+        elif payload == 'disable.bot.no':
+            reply(sender, "Бот остался включенным")
+            main.reply_main_menu_buttons(sender)
         last_sender_message['payload'] = payload
         collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
         return "ok"
@@ -321,6 +329,9 @@ def handle_postback_payload(sender, data, last_sender_message, isIntroSent):
         elif payload == 'addcard':
             if not call_addcard(sender, last_sender_message, payload):
                 return "ok"
+        elif payload == 'disable.bot':
+            call_disable_bot(sender, last_sender_message, payload)
+            return "ok"
         elif payload == 'send.message':
             call_sendmessage(sender, last_sender_message, payload)
             return "ok"
@@ -441,7 +452,7 @@ def handle_text_messages(sender, data, last_sender_message):
             return "ok"
         main.reply_main_menu_buttons(sender)
         last_sender_message['payload'] = 'mainMenu'
-        collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
         return "ok"
 
     except:
@@ -521,6 +532,31 @@ def call_onai(sender, last_sender_message, payload):
 
 def call_sendmessage(sender, last_sender_message, payload):
     reply(sender, "Пожалуйста, отправьте сообщение, которое Вас интересует")
+    last_sender_message['payload'] = payload
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+
+def call_disable_bot(sender, last_sender_message, payload):
+    data_quick_replies = {
+        "recipient": {
+            "id": sender
+        },
+        "message": {
+            "text": "Вы хотите отключить бота?",
+            "quick_replies": [
+                {
+                    "content_type": "text",
+                    "title": "Да",
+                    "payload": "disable.bot.yes"
+                },
+                {
+                    "content_type": "text",
+                    "title": "Нет",
+                    "payload": "disable.bot.no"
+                }
+            ]
+        }
+    }
+    requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
     last_sender_message['payload'] = payload
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 

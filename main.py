@@ -23,7 +23,7 @@ hint_main_menu2 = "(Нажмите (y) для перехода в главное
 card2card_info = "Информация:\nПереводы возможны только между картами одной МПС: Visa to Visa или MasterCard to MasterCard. \
 \nПереводы между Visa и MasterCard возможны, только если одна из карт эмитирована банком АО \"Казкоммерцбанк\"."
 timeout = 300
-operators_dict = {'Tele2':'tele2Wf', 'Beeline':'beelineWf', 'Activ':'activWf', 'Kcell':'kcellWf'}
+operators_dict = {'Tele2': 'tele2Wf', 'Beeline': 'beelineWf', 'Activ': 'activWf', 'Kcell': 'kcellWf'}
 to_find_dict = {'nearest.postamats': 'ближайший постамат',
                 'nearest.offices': 'ближайшее отделение',
                 'nearest.atms': 'ближайший банкомат'}
@@ -317,7 +317,7 @@ def reply_onai_enter_number(sender, last_sender_message):
             ]
           }
         }
-        resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_quick_replies)
+        requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
     except:
         reply(sender, "Введите 19ти-значный номер карты Онай\n" + hint_main_menu)
 
@@ -969,8 +969,6 @@ def reply_misc(sender):
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_misc_buttons)
 
 def reply_main_menu_buttons(sender):
-    url = "https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN
-    title = "Прокрутите влево/вправо, либо нажмите < или > для других команд"
     data_main_menu_buttons = {
       "recipient": {
         "id": sender
@@ -982,7 +980,7 @@ def reply_main_menu_buttons(sender):
             "template_type": "generic",
             "elements": [
               {
-                "title": title,
+                "title": "Платежи",
                 "buttons": [
                   {
                     "type": "postback",
@@ -1002,7 +1000,7 @@ def reply_main_menu_buttons(sender):
                 ]
               },
               {
-                "title": title,
+                "title": "Услуги",
                 "buttons": [
                   {
                     "type": "postback",
@@ -1059,8 +1057,8 @@ def reply_main_menu_buttons(sender):
                   },
                   {
                     "type": "postback",
-                    "title": "Отправить сообщение",
-                    "payload": "send.message"
+                    "title": "✖ Отключить бота",
+                    "payload": "disable.bot"
                   }
                 ]
               },
@@ -1089,7 +1087,7 @@ def reply_main_menu_buttons(sender):
         }
       }
     }
-    resp = requests.post(url, json=data_main_menu_buttons)
+    resp = requests.post(fb_url + ACCESS_TOKEN, json=data_main_menu_buttons)
 
 def reply_mobile_enter_number(sender, last_sender_message):
     try:
@@ -1194,7 +1192,7 @@ def reply_mobile_amount(sender, message, last_sender_message):
     last_sender_message['payload'] = 'mobile.chooseCard'
     last_sender_message['amount'] = amount
     collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
-    reply_display_cards(sender, message, last_sender_message)
+    reply_display_cards(sender, last_sender_message)
 
 def reply_mobile_csc(sender, payload, last_sender_message):
     amount = last_sender_message['amount']
