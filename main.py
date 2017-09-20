@@ -973,7 +973,7 @@ def reply_misc(sender):
     resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_misc_buttons)
 
 def reply_main_menu_buttons(sender):
-    logging.info('8 | ' + str(datetime.datetime.now()))
+    logging.info('reply_main_menu_buttons start | ' + str(datetime.datetime.now()))
     data_main_menu_buttons = {
       "recipient": {
         "id": sender
@@ -1092,8 +1092,10 @@ def reply_main_menu_buttons(sender):
         }
       }
     }
-    #logging.info('9 | ' + str(datetime.datetime.now()))
-    resp = requests.post(fb_url + ACCESS_TOKEN, json=data_main_menu_buttons)
+    logging.info('before request.post | ' + str(datetime.datetime.now()))
+    requests.post(fb_url + ACCESS_TOKEN, json=data_main_menu_buttons)
+    logging.info('after  request.post | ' + str(datetime.datetime.now()))
+    logging.info('reply_main_menu_buttons end | ' + str(datetime.datetime.now()))
 
 def reply_mobile_enter_number(sender, last_sender_message):
     try:
