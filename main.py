@@ -481,6 +481,7 @@ def reply_onai_startPayment(sender, message, last_sender_message):
         return "fail"
 
 def reply_card2card_enter_cardDst(sender, last_sender_message):
+    logging.info('reply_card2card_enter_cardDst start | ' + str(datetime.datetime.now()))
     try:
         lastCardDst = helper.insert_4_spaces(last_sender_message['lastCardDst'])
         data_quick_replies = {
@@ -499,7 +500,7 @@ def reply_card2card_enter_cardDst(sender, last_sender_message):
           }
         }
         requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
-        logging.info('2 | ' + str(datetime.datetime.now()))
+        logging.info('reply_card2card_enter_cardDst end | ' + str(datetime.datetime.now()))
     except:
         reply(sender, card2card_info + "\n\nВведите 16ти-значный номер карты, на который Вы хотите перевести деньги\n" + hint_main_menu)
 
