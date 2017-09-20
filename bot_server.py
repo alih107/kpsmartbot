@@ -117,7 +117,7 @@ def get_firstname_lastname(user_id):
 
 @app.route('/kpsmartbot', methods=['POST'])
 def handle_incoming_messages():
-    logging.info('1 | ' + str(datetime.datetime.now()))
+    logging.info('received data | ' + str(datetime.datetime.now()))
     data = request.json
     sender = data['entry'][0]['messaging'][0]['sender']['id']
     last_sender_message = collection_messages.find_one({"sender": sender})
@@ -467,6 +467,7 @@ def handle_sticker(sender, data, last_sender_message):
         last_sender_message['payload'] = 'mainMenu'
         collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
         main.reply_main_menu_buttons(sender)
+        logging.info('handle sticker finish | ' + str(datetime.datetime.now()))
         return "ok"
     except:
         return "try next"
