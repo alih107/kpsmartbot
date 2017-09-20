@@ -499,10 +499,12 @@ def reply_card2card_enter_cardDst(sender, last_sender_message):
             ]
           }
         }
+        logging.info('before request.post | ' + str(datetime.datetime.now()))
         requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
-        logging.info('reply_card2card_enter_cardDst end | ' + str(datetime.datetime.now()))
+        logging.info('after  request.post | ' + str(datetime.datetime.now()))
     except:
         reply(sender, card2card_info + "\n\nВведите 16ти-значный номер карты, на который Вы хотите перевести деньги\n" + hint_main_menu)
+    logging.info('reply_card2card_enter_cardDst end | ' + str(datetime.datetime.now()))
 
 def reply_card2card_check_cardDst(sender, message, last_sender_message):
     message = message.replace(' ', '')
