@@ -16,7 +16,7 @@ x_channel_id = constants.x_channel_id
 portal_id = constants.portal_id
 portal_id_2 = constants.portal_id_2
 ACCESS_TOKEN = constants.ACCESS_TOKEN
-fb_url = "https://graph.facebook.com/v2.6/me/messages?access_token="
+fb_url = "https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN
 
 hint_main_menu = "(для перехода в главное меню нажмите кнопку (y) "
 hint_main_menu2 = "(Нажмите (y) для перехода в главное меню)"
@@ -35,35 +35,35 @@ def reply(sender, msg):
         "recipient": {"id": sender},
         "message": {"text": msg}
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
+    requests.post(fb_url, json=data)
 
 def reply_gif_desktop(sender):
     data = {
         "recipient": {"id": sender},
         "message": {"attachment": {"type": "image", "payload": {'attachment_id': '347327995722569'}}}
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
+    requests.post(fb_url, json=data)
 
 def reply_gif_mobile(sender):
     data = {
         "recipient": {"id": sender},
         "message": {"attachment": {"type": "image", "payload": {'attachment_id': '347364952385540'}}}
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
+    requests.post(fb_url, json=data)
 
 def reply_typing_on(sender):
     data = {
         "recipient": {"id": sender},
         "sender_action": "typing_on"
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
+    requests.post(fb_url, json=data)
 
 def reply_typing_off(sender):
     data = {
         "recipient": {"id": sender},
         "sender_action": "typing_off"
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
+    requests.post(fb_url, json=data)
 
 def reply_display_cards(sender, last_sender_message):
     session = requests.Session()
@@ -116,7 +116,7 @@ def reply_display_cards(sender, last_sender_message):
             }
         }
     }
-    requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_cards)
+    requests.post(fb_url, json=data_cards)
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
 def reply_send_redirect_url(sender, url):
@@ -147,8 +147,7 @@ def reply_send_redirect_url(sender, url):
             }
         }
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
-                         json=data_url_button)
+    requests.post(fb_url, json=data_url_button)
     reply_typing_off(sender)
 
 def reply_pdd_shtrafy(sender):
@@ -172,7 +171,7 @@ def reply_pdd_shtrafy(sender):
         ]
       }
     }
-    requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
+    requests.post(fb_url, json=data_quick_replies)
 
 def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
     try:
@@ -317,7 +316,7 @@ def reply_onai_enter_number(sender, last_sender_message):
             ]
           }
         }
-        requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
+        requests.post(fb_url, json=data_quick_replies)
     except:
         reply(sender, "Введите 19ти-значный номер карты Онай\n" + hint_main_menu)
 
@@ -500,7 +499,7 @@ def reply_card2card_enter_cardDst(sender, last_sender_message):
           }
         }
         logging.info('before request.post | ' + str(datetime.datetime.now()))
-        requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
+        requests.post(fb_url, json=data_quick_replies)
         logging.info('after  request.post | ' + str(datetime.datetime.now()))
     except:
         reply(sender, card2card_info + "\n\nВведите 16ти-значный номер карты, на который Вы хотите перевести деньги\n" + hint_main_menu)
@@ -692,7 +691,7 @@ def reply_balance(sender):
         ]
       }
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_balance_replies)
+    requests.post(fb_url, json=data_balance_replies)
 
 def reply_komuslugi_cities(sender):
     data_buttons_cities = {
@@ -782,7 +781,7 @@ def reply_komuslugi_cities(sender):
         }
       }
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_buttons_cities)
+    requests.post(fb_url, json=data_buttons_cities)
 
 def reply_currencies(sender):
     data_cur_buttons = {
@@ -814,7 +813,7 @@ def reply_currencies(sender):
             }
           }
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_cur_buttons)
+    requests.post(fb_url, json=data_cur_buttons)
 
 def reply_currencies_grafik(sender):
     data_cur_grafik_buttons = {
@@ -846,7 +845,7 @@ def reply_currencies_grafik(sender):
             }
           }
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_cur_grafik_buttons)
+    requests.post(fb_url, json=data_cur_grafik_buttons)
 
 def reply_tracking(sender, tracking_number, last_sender_message):
     data = requests.get("https://post.kz/external-api/tracking/api/v2/" + tracking_number + "/events").json()
@@ -935,7 +934,7 @@ def reply_closest(sender):
             }
           }
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_closest_buttons)
+    requests.post(fb_url, json=data_closest_buttons)
 
 def reply_misc(sender):
     data_misc_buttons = {
@@ -970,7 +969,7 @@ def reply_misc(sender):
             }
           }
     }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data_misc_buttons)
+    requests.post(fb_url, json=data_misc_buttons)
 
 def reply_main_menu_buttons(sender):
     logging.info('reply_main_menu_buttons start | ' + str(datetime.datetime.now()))
@@ -1093,7 +1092,7 @@ def reply_main_menu_buttons(sender):
       }
     }
     logging.info('before request.post | ' + str(datetime.datetime.now()))
-    requests.post(fb_url + ACCESS_TOKEN, json=data_main_menu_buttons)
+    requests.post(fb_url, json=data_main_menu_buttons)
     logging.info('after  request.post | ' + str(datetime.datetime.now()))
     logging.info('reply_main_menu_buttons end | ' + str(datetime.datetime.now()))
 
@@ -1116,7 +1115,7 @@ def reply_mobile_enter_number(sender, last_sender_message):
             "quick_replies": buttons
           }
         }
-        requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
+        requests.post(fb_url, json=data_quick_replies)
     except:
         reply(sender, "Введите номер телефона\n" + hint_main_menu)
 
@@ -1175,7 +1174,7 @@ def reply_mobile_delete(sender, last_sender_message):
             "quick_replies": buttons
         }
     }
-    requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
+    requests.post(fb_url, json=data_quick_replies)
 
 def reply_mobile_delete_phone(sender, text, last_sender_message):
     last_sender_message['phonesToRefill'].remove(text)
@@ -1417,8 +1416,7 @@ def reply_nearest(sender):
             }
         }
     }
-    resp = requests.post(fb_url + ACCESS_TOKEN,
-                         json=data_misc_buttons)
+    requests.post(fb_url, json=data_misc_buttons)
 
 def reply_nearest_request_location(sender, payload):
     data_quick_replies = {
@@ -1434,7 +1432,7 @@ def reply_nearest_request_location(sender, payload):
             ]
         }
     }
-    resp = requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
+    requests.post(fb_url, json=data_quick_replies)
 
 def reply_nearest_find(sender, locLong, locLat, payload):
     try:
@@ -1522,8 +1520,7 @@ def reply_nearest_map_location(sender, locLong, locLat, title):
       }
     }
 
-    resp = requests.post(fb_url + ACCESS_TOKEN,
-                         json=data_misc_buttons)
+    requests.post(fb_url, json=data_misc_buttons)
 
 def reply_addcard_entercard(sender, last_sender_message):
     cards = get_cards_json(sender, last_sender_message)
@@ -1740,4 +1737,4 @@ def reply_auth_delete(sender):
             ]
         }
     }
-    resp = requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
+    requests.post(fb_url, json=data_quick_replies)

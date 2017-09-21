@@ -1,13 +1,13 @@
 import main
 import voice_assistant
+import constants
 from flask import Flask, request
 import requests
 import pymongo
-import constants
 import logging
 import datetime
 import threading
-import sys
+import time
 
 app = Flask(__name__)
 client = pymongo.MongoClient()
@@ -24,7 +24,6 @@ gosnomer_text = """Введите номер авто и номер техпас
 Пример: 123AAA01 AA00000000"""
 
 hint_main_menu = "(для перехода в главное меню нажмите кнопку (y)"
-mobile_codes = ['tele2Wf', 'beelineWf', 'activWf', 'kcellWf']
 digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30']
 
 
@@ -39,18 +38,10 @@ def verify():
 
     return "Wake up, Neo... The Matrix has you", 200
 
-def print_facebook_data(data, last_sender_message):
-    sender = data['entry'][0]['messaging'][0]['sender']['id']
+def print_facebook_data(data, sender, last_sender_message):
+    start = time.time()
     res = 'Sender id = ' + sender + ' | '
-
-    try:
-        last_sender_message = collection_messages.find_one({"sender": sender})
-        assert last_sender_message != None
-        res += 'Name = ' + last_sender_message['first_name'] + ' ' + last_sender_message['last_name'] + ' | '
-    except:
-        firstname, lastname = get_firstname_lastname(sender)
-        res += '[new user] Name = ' + firstname + ' ' + lastname + ' | '
-
+    res += 'Name = ' + last_sender_message['first_name'] + ' ' + last_sender_message['last_name'] + ' | '
     ms = int(data['entry'][0]['time']) / 1000.0
     ms1 = int(data['entry'][0]['messaging'][0]['timestamp']) / 1000.0
     tdiff = round(ms - ms1, 2)
@@ -100,6 +91,7 @@ def print_facebook_data(data, last_sender_message):
     except:
         pass
 
+    logging.debug('print_facebook_data execution time = ' + str(time.time() - start))
     return res
 
 def reply(user_id, msg):
@@ -108,11 +100,12 @@ def reply(user_id, msg):
         "message": {"text": msg}
     }
     logging.info('before request.post for reply | ' + str(datetime.datetime.now()))
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
+    requests.post(fb_url, json=data)
     logging.info('after  request.post for reply | ' + str(datetime.datetime.now()))
 
 def get_firstname_lastname(user_id):
-    call_string = "https://graph.facebook.com/v2.6/" + user_id + "?fields=first_name,last_name&access_token=" + ACCESS_TOKEN
+    call_string = "https://graph.facebook.com/v2.6/" + user_id + \
+                  "?fields=first_name,last_name&access_token=" + ACCESS_TOKEN
     resp = requests.get(call_string).json()
     fn = resp["first_name"]
     ln = resp["last_name"]
@@ -134,7 +127,7 @@ def handle_incoming_messages():
         isIntroSent = True
 
     #logging.info('2 | ' + str(datetime.datetime.now()))
-    logging.info(print_facebook_data(data, last_sender_message))
+    logging.info(print_facebook_data(data, sender, last_sender_message))
     #logging.info(data)
     if not 'isBotActive' in last_sender_message:
         last_sender_message['isBotActive'] = True
@@ -498,8 +491,7 @@ def handle_messages_when_deactivated(sender, data, last_sender_message):
                 ]
             }
         }
-        resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
-                             json=data_quick_replies)
+        requests.post(fb_url, json=data_quick_replies)
         return
     except:
         pass
@@ -563,7 +555,7 @@ def call_disable_bot(sender, last_sender_message, payload):
             ]
         }
     }
-    requests.post(fb_url + ACCESS_TOKEN, json=data_quick_replies)
+    requests.post(fb_url, json=data_quick_replies)
     last_sender_message['payload'] = payload
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
@@ -585,8 +577,7 @@ def call_tracking(sender, last_sender_message, payload):
                 ]
             }
         }
-        resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN,
-                             json=data_quick_replies)
+        requests.post(fb_url, json=data_quick_replies)
     except:
         reply(sender, "Введите трек-номер посылки\n" + hint_main_menu)
     last_sender_message['payload'] = payload
