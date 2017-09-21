@@ -13,7 +13,7 @@ app = Flask(__name__)
 client = pymongo.MongoClient()
 db = client.kpsmartbot_db
 collection_messages = db.messages
-logging.basicConfig(filename='botserver.log', level=logging.INFO,
+logging.basicConfig(filename='botserver.log', level=logging.DEBUG,
                     format='[%(levelname)s] (%(threadName)-10s) %(message)s')
 
 ACCESS_TOKEN = constants.ACCESS_TOKEN
