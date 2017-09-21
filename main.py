@@ -20,8 +20,9 @@ fb_url = "https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TO
 
 hint_main_menu = "(для перехода в главное меню нажмите кнопку (y) "
 hint_main_menu2 = "(Нажмите (y) для перехода в главное меню)"
-card2card_info = "Информация:\nПереводы возможны только между картами одной МПС: Visa to Visa или MasterCard to MasterCard. \
-\nПереводы между Visa и MasterCard возможны, только если одна из карт эмитирована банком АО \"Казкоммерцбанк\"."
+card2card_info = """Информация:\nПереводы возможны только между картами одной МПС: Visa to Visa или 
+MasterCard to MasterCard.\nПереводы между Visa и MasterCard возможны, только если одна из карт 
+эмитирована банком АО \"Казкоммерцбанк\"."""
 timeout = 300
 operators_dict = {'Tele2': 'tele2Wf', 'Beeline': 'beelineWf', 'Activ': 'activWf', 'Kcell': 'kcellWf'}
 to_find_dict = {'nearest.postamats': 'ближайший постамат',
@@ -31,11 +32,10 @@ to_find_dict = {'nearest.postamats': 'ближайший постамат',
 url_mobile_payments = 'https://post.kz/finance/payment/mobile'
 
 def reply(sender, msg):
-    data = {
-        "recipient": {"id": sender},
-        "message": {"text": msg}
-    }
+    data = {"recipient": {"id": sender}, "message": {"text": msg}}
+    start = time.time()
     requests.post(fb_url, json=data)
+    logging.warning('elapsed time for main.reply = ' + str(time.time() - start))
 
 def reply_gif_desktop(sender):
     data = {

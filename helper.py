@@ -1,10 +1,6 @@
 import sys
 import linecache
 import math
-import requests
-import constants
-
-ACCESS_TOKEN = constants.ACCESS_TOKEN
 
 postamat = """Почтомат или постамат – это автоматизированный терминал по выдаче товаров,
 заказанных в интернет-магазинах и каталогах, созданный как услуга альтернативной доставки.
@@ -67,28 +63,6 @@ trackbynumber_query = """Трекинговый номер - уникальны�
 по которому Вы можете отследить свое отправление. Трек-номер присваивается во время отправки почты или, в случае 
 получения почты из-за рубежа, при пересечении границы в Казахстане.
 """
-
-
-def reply_typing_on(sender):
-    data = {
-        "recipient": {"id": sender},
-        "sender_action": "typing_on"
-    }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
-
-def reply_typing_off(sender):
-    data = {
-        "recipient": {"id": sender},
-        "sender_action": "typing_off"
-    }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
-
-def reply(user_id, msg):
-    data = {
-        "recipient": {"id": user_id},
-        "message": {"text": msg}
-    }
-    resp = requests.post("https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN, json=data)
 
 def get_distance_in_meters(lat1, lat2, lon1, lon2):
     """

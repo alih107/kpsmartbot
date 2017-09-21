@@ -13,7 +13,7 @@ client = Wit(wit_token)
 
 def handle_voice_message(sender, voice_url, last_sender_message):
     try:
-        helper.reply_typing_on(sender)
+        main.reply_typing_on(sender)
         g = requests.get(voice_url, stream=True)
         voice_filename = "voice_" + sender + ".mp4"
         voice_filename_mp3 = "voice_" + sender + ".mp3"
@@ -24,13 +24,11 @@ def handle_voice_message(sender, voice_url, last_sender_message):
             try:
                 resp = client.speech(f, None, {'Content-Type': 'audio/mpeg3'})
                 logging.info('Yay, got Wit.ai response: ' + str(resp))
-                if "_text" in resp:
-                    message = resp['_text']
                 handle_entities(sender, last_sender_message, resp)
             except:
                 logging.info(helper.PrintException())
-                helper.reply(sender, "Извините, я не поняла что Вы сказали")
-        helper.reply_typing_off(sender)
+                main.reply(sender, "Извините, я не поняла что Вы сказали")
+        main.reply_typing_off(sender)
         try:
             os.remove(voice_filename)
             os.remove(voice_filename_mp3)
@@ -46,42 +44,42 @@ def handle_entities(sender, last_sender_message, resp):
             if i['confidence'] > 0.5:
                 handle_intent(sender, last_sender_message, i['value'])
                 return
-        helper.reply(sender, "Я не уверена, что именно Вы хотите")
+        main.reply(sender, "Я не уверена, что именно Вы хотите")
     except:
-        helper.reply(sender, "Я не поняла Вашу команду")
+        main.reply(sender, "Я не поняла Вашу команду")
         logging.error(helper.PrintException())
 
 
 def handle_intent(sender, last_sender_message, value):
     try:
         if value == 'greeting':
-            helper.reply(sender, "Здравствуйте, " + last_sender_message['first_name'] + "!")
+            main.reply(sender, "Здравствуйте, " + last_sender_message['first_name'] + "!")
         elif value == 'postamat':
-            helper.reply(sender, helper.postamat)
+            main.reply(sender, helper.postamat)
         elif value == 'hybridpost_def':
-            helper.reply(sender, helper.hybridpost_def)
+            main.reply(sender, helper.hybridpost_def)
         elif value == 'supermarket':
-            helper.reply(sender, helper.what_is_supermarket)
+            main.reply(sender, helper.what_is_supermarket)
         elif value == 'trackbynumber_query':
-            helper.reply(sender, helper.trackbynumber_query)
+            main.reply(sender, helper.trackbynumber_query)
         elif value == 'fastmail_options':
-            helper.reply(sender, helper.fastmail_options)
+            main.reply(sender, helper.fastmail_options)
         elif value == 'postamat_how':
-            helper.reply(sender, helper.postamat_how)
+            main.reply(sender, helper.postamat_how)
         elif value == 'hybridpost_time':
-            helper.reply(sender, helper.hybridpost_time)
+            main.reply(sender, helper.hybridpost_time)
         elif value == 'postamat_info_access':
-            helper.reply(sender, helper.postamat_info_access)
+            main.reply(sender, helper.postamat_info_access)
         elif value == 'hybridpost_info':
-            helper.reply(sender, helper.hybridpost_info)
+            main.reply(sender, helper.hybridpost_info)
         elif value == 'trackbynumber':
-            helper.reply(sender, helper.trackbynumber)
+            main.reply(sender, helper.trackbynumber)
         elif value == 'redirect':
-            helper.reply(sender, helper.redirect)
+            main.reply(sender, helper.redirect)
         elif value == 'redirect_why':
-            helper.reply(sender, helper.redirect_why)
+            main.reply(sender, helper.redirect_why)
         elif value == 'package_how_long':
-            helper.reply(sender, helper.package_how_long)
+            main.reply(sender, helper.package_how_long)
         elif value == 'COMMAND_exchange_rates':
             main.reply_currencies_kursy(sender)
         elif value == 'COMMAND_go_home':
@@ -113,9 +111,9 @@ def handle_intent(sender, last_sender_message, value):
         elif value == 'info_post':
             bot_server.call_tracking(sender, last_sender_message, 'tracking')
         elif value == 'how_are_you':
-            helper.reply(sender, "У меня всё замечательно!")
+            main.reply(sender, "У меня всё замечательно!")
         else:
-            helper.reply(sender, "Я не поняла Вашу команду")
+            main.reply(sender, "Я не поняла Вашу команду")
     except:
         logging.error(helper.PrintException())
 
