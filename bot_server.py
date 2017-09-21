@@ -13,7 +13,7 @@ app = Flask(__name__)
 client = pymongo.MongoClient()
 db = client.kpsmartbot_db
 collection_messages = db.messages
-logging.basicConfig(filename='botserver.log', level=logging.DEBUG,
+logging.basicConfig(filename='botserver.log', level=logging.INFO,
                     format='[%(levelname)s] (%(threadName)-10s) %(message)s')
 
 ACCESS_TOKEN = constants.ACCESS_TOKEN
@@ -91,7 +91,7 @@ def print_facebook_data(data, sender, last_sender_message):
     except:
         pass
 
-    logging.debug('print_facebook_data execution time = ' + str(time.time() - start))
+    logging.info('print_facebook_data execution time = ' + str(time.time() - start))
     return res
 
 def reply(user_id, msg):
