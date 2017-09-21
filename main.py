@@ -480,7 +480,6 @@ def reply_onai_startPayment(sender, message, last_sender_message):
         return "fail"
 
 def reply_card2card_enter_cardDst(sender, last_sender_message):
-    logging.info('reply_card2card_enter_cardDst start | ' + str(datetime.datetime.now()))
     try:
         lastCardDst = helper.insert_4_spaces(last_sender_message['lastCardDst'])
         data_quick_replies = {
@@ -498,12 +497,9 @@ def reply_card2card_enter_cardDst(sender, last_sender_message):
             ]
           }
         }
-        logging.info('before request.post | ' + str(datetime.datetime.now()))
         requests.post(fb_url, json=data_quick_replies)
-        logging.info('after  request.post | ' + str(datetime.datetime.now()))
     except:
         reply(sender, card2card_info + "\n\nВведите 16ти-значный номер карты, на который Вы хотите перевести деньги\n" + hint_main_menu)
-    logging.info('reply_card2card_enter_cardDst end | ' + str(datetime.datetime.now()))
 
 def reply_card2card_check_cardDst(sender, message, last_sender_message):
     message = message.replace(' ', '')
@@ -972,11 +968,8 @@ def reply_misc(sender):
     requests.post(fb_url, json=data_misc_buttons)
 
 def reply_main_menu_buttons(sender):
-    logging.info('reply_main_menu_buttons start | ' + str(datetime.datetime.now()))
     data_main_menu_buttons = {
-      "recipient": {
-        "id": sender
-      },
+      "recipient": {"id": sender},
       "message": {
         "attachment": {
           "type": "template",
@@ -1091,10 +1084,9 @@ def reply_main_menu_buttons(sender):
         }
       }
     }
-    logging.info('before request.post | ' + str(datetime.datetime.now()))
+    start = time.time()
     requests.post(fb_url, json=data_main_menu_buttons)
-    logging.info('after  request.post | ' + str(datetime.datetime.now()))
-    logging.info('reply_main_menu_buttons end | ' + str(datetime.datetime.now()))
+    logging.warning('elapsed time for reply_main_menu_buttons = ' + str(time.time() - start))
 
 def reply_mobile_enter_number(sender, last_sender_message):
     try:
