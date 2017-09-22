@@ -43,7 +43,7 @@ def reply_gif_desktop(sender):
         "message": {"attachment": {"type": "image", "payload":
                     {'url': 'https://thumbs.gfycat.com/TastyOrderlyCod-size_restricted.gif'}}}
     }
-    logging.info(requests.post(fb_url, json=data).json())
+    requests.post(fb_url, json=data)
 
 def reply_gif_mobile(sender):
     data = {
@@ -51,7 +51,7 @@ def reply_gif_mobile(sender):
         "message": {"attachment": {"type": "image", "payload":
                     {'url': 'https://thumbs.gfycat.com/ThickHappyHalicore-size_restricted.gif'}}}
     }
-    logging.info(requests.post(fb_url, json=data).json())
+    requests.post(fb_url, json=data)
 
 def reply_typing_on(sender):
     data = {

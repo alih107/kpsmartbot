@@ -5,6 +5,9 @@ import requests
 import logging
 import constants
 import os
+import feedparser
+from random import randint
+
 from wit import Wit
 from pydub import AudioSegment
 
@@ -112,6 +115,13 @@ def handle_intent(sender, last_sender_message, value):
             bot_server.call_tracking(sender, last_sender_message, 'tracking')
         elif value == 'how_are_you':
             main.reply(sender, "У меня всё замечательно!")
+        elif value == 'FUN_anekdot':
+            r = feedparser.parse('http://anekdotme.ru/RSS')
+            random_int = randint(0, len(r['entries']) - 1)
+            anekdot = r['entries'][random_int]['summary_detail']['value']
+            anekdot = anekdot.replace('<br />', '\n').replace('&mdash;', '')
+            main.reply(sender, anekdot)
+            pass
         else:
             main.reply(sender, "Я не поняла Вашу команду")
     except:
