@@ -103,14 +103,12 @@ def handle_incoming_messages():
     data = request.json
     sender = data['entry'][0]['messaging'][0]['sender']['id']
     last_sender_message = collection_messages.find_one({"sender": sender})
-    isIntroSent = False
     if last_sender_message == None:
         fn, ln = get_firstname_lastname(sender)
         db_record = {"sender": sender, "first_name": fn, "last_name": ln,
                      "isBotActive": True, 'phonesToRefill': [], 'hasCards': False, 'encodedLoginPass': None}
         last_sender_message = collection_messages.insert_one(db_record)
         reply_intro(sender)
-        isIntroSent = True
         logging.info("We've got new user! Sender = " + sender + " | " + fn + " " + ln)
         return "ok"
 
@@ -135,7 +133,7 @@ def handle_incoming_messages():
 
     try:
         payload = data['entry'][0]['messaging'][0]['postback']['payload']
-        handle_postback_payload(sender, last_sender_message, isIntroSent, payload)
+        handle_postback_payload(sender, last_sender_message, payload)
         return "ok"
     except:
         pass
@@ -248,10 +246,9 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
 # кнопки главного меню
-def handle_postback_payload(sender, last_sender_message, isIntroSent, payload):
+def handle_postback_payload(sender, last_sender_message, payload):
     if payload == 'GET_STARTED_PAYLOAD':
-        if not isIntroSent:
-            reply_intro(sender)
+        reply_intro(sender)
         return "ok"
     elif payload == 'tracking':
         call_tracking(sender, last_sender_message, payload)
