@@ -40,14 +40,16 @@ def reply(sender, msg):
 def reply_gif_desktop(sender):
     data = {
         "recipient": {"id": sender},
-        "message": {"attachment": {"type": "image", "payload": {'attachment_id': '347327995722569'}}}
+        "message": {"attachment": {"type": "image", "payload":
+                    {'url': 'https://thumbs.gfycat.com/TastyOrderlyCod-size_restricted.gif'}}}
     }
     logging.info(requests.post(fb_url, json=data).json())
 
 def reply_gif_mobile(sender):
     data = {
         "recipient": {"id": sender},
-        "message": {"attachment": {"type": "image", "payload": {'attachment_id': '347364952385540'}}}
+        "message": {"attachment": {"type": "image", "payload":
+                    {'url': 'https://thumbs.gfycat.com/ThickHappyHalicore-size_restricted.gif'}}}
     }
     logging.info(requests.post(fb_url, json=data).json())
 
