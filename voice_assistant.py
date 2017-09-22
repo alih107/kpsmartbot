@@ -120,6 +120,7 @@ def handle_intent(sender, last_sender_message, value):
             random_int = randint(0, len(r['entries']) - 1)
             anekdot = r['entries'][random_int]['summary_detail']['value']
             anekdot = anekdot.replace('<br />', '\n').replace('&mdash;', '')
+            logging.info("Anekdot = " + anekdot)
             main.reply(sender, anekdot)
             pass
         else:
