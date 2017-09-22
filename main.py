@@ -42,14 +42,14 @@ def reply_gif_desktop(sender):
         "recipient": {"id": sender},
         "message": {"attachment": {"type": "image", "payload": {'attachment_id': '347327995722569'}}}
     }
-    logging.info(requests.post(fb_url, json=data))
+    logging.info(requests.post(fb_url, json=data).json())
 
 def reply_gif_mobile(sender):
     data = {
         "recipient": {"id": sender},
         "message": {"attachment": {"type": "image", "payload": {'attachment_id': '347364952385540'}}}
     }
-    logging.info(requests.post(fb_url, json=data))
+    logging.info(requests.post(fb_url, json=data).json())
 
 def reply_typing_on(sender):
     data = {
