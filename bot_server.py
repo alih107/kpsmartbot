@@ -16,7 +16,7 @@ collection_messages = db.messages
 logging.basicConfig(filename='botserver.log', level=logging.INFO,
                     format='[%(levelname)s] (%(threadName)-10s) %(message)s')
 
-ACCESS_TOKEN = constants.ACCESS_TOKEN
+ACCESS_TOKEN = constants.ACCESS_TOKEN2
 fb_url = main.fb_url
 
 gosnomer_text = """Введите номер авто и номер техпаспорта через пробел
@@ -551,6 +551,8 @@ def call_tracking(sender, last_sender_message, payload):
 def call_addcard(sender, last_sender_message, payload):
     if check_login(sender, last_sender_message):
         main.reply_addcard_entercard(sender, last_sender_message)
+        last_sender_message['payload'] = payload
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
         return True
     return False
 
