@@ -15,7 +15,7 @@ url = constants.url
 x_channel_id = constants.x_channel_id
 portal_id = constants.portal_id
 portal_id_2 = constants.portal_id_2
-ACCESS_TOKEN = constants.ACCESS_TOKEN2
+ACCESS_TOKEN = constants.ACCESS_TOKEN
 fb_url = "https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN
 
 hint_main_menu = "(для перехода в главное меню нажмите кнопку (y) "
