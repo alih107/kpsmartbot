@@ -16,7 +16,7 @@ collection_messages = db.messages
 logging.basicConfig(filename='botserver.log', level=logging.INFO,
                     format='[%(levelname)s] (%(threadName)-10s) %(message)s')
 
-ACCESS_TOKEN = constants.ACCESS_TOKEN
+ACCESS_TOKEN = main.ACCESS_TOKEN
 fb_url = main.fb_url
 
 gosnomer_text = """Введите номер авто и номер техпаспорта через пробел
