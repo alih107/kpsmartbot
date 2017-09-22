@@ -165,9 +165,120 @@ def reply_main_menu_buttons(sender):
                             "buttons": [
                                 {
                                     "type": "postback",
+                                    "title": "Авторизация",
+                                    "payload": "auth"
+                                },
+                                {
+                                    "type": "postback",
+                                    "title": "Мои карты",
+                                    "payload": "addcard"
+                                },
+                                {
+                                    "type": "postback",
                                     "title": "Удаление авторизации",
                                     "payload": "auth.delete"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    }
+
+    data_main_menu_buttons2 = {
+        "recipient": {"id": sender},
+        "message": {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": [
+                        {
+                            "title": "Главное меню",
+                            "buttons": [
+                                {
+                                    "type": "postback",
+                                    "title": "📲 Пополнение баланса",
+                                    "payload": "balance"
                                 },
+                                {
+                                    "type": "postback",
+                                    "title": "🚗 Штрафы ПДД",
+                                    "payload": "shtrafy"
+                                },
+                                {
+                                    "type": "postback",
+                                    "title": "📃 Оплата ком.услуг",
+                                    "payload": "komuslugi"
+                                }
+                            ]
+                        },
+                        {
+                            "title": "Почтовые услуги",
+                            "buttons": [
+                                {
+                                    "type": "postback",
+                                    "title": "💲 Курсы валют",
+                                    "payload": "10.kursy"
+                                },
+                                {
+                                    "type": "postback",
+                                    "title": "🔍 Отслеживание",
+                                    "payload": "tracking"
+                                },
+                                {
+                                    "type": "postback",
+                                    "title": "📍 Ближайшие",
+                                    "payload": "nearest"
+                                }
+                            ]
+                        },
+                        {
+                            "title": "Платежи",
+                            "buttons": [
+                                {
+                                    "type": "postback",
+                                    "title": "💳 Перевод на карту",
+                                    "payload": "card2card"
+                                },
+                                {
+                                    "type": "web_url",
+                                    "title": "Перевод на наличные",
+                                    "url": "https://transfer.post.kz/money-transfer/card-to-cash",
+                                    "webview_height_ratio": "full"
+                                },
+                                {
+                                    "type": "postback",
+                                    "title": "🚌 Пополнение Онай",
+                                    "payload": "onai"
+                                },
+                            ]
+                        },
+                        {
+                            "title": "Прочие услуги",
+                            "buttons": [
+                                {
+                                    "type": "web_url",
+                                    "title": "⚖️ Cудебные штрафы",
+                                    "url": "https://post.kz/finance/payment/fines",
+                                    "webview_height_ratio": "full"
+                                },
+                                {
+                                    "type": "postback",
+                                    "title": "📁 Прочее",
+                                    "payload": "misc"
+                                },
+                                {
+                                    "type": "postback",
+                                    "title": "✖ Отключить бота",
+                                    "payload": "disable.bot"
+                                }
+                            ]
+                        },
+                        {
+                            "title": "Профиль на post.kz",
+                            "buttons": [
                                 {
                                     "type": "postback",
                                     "title": "Авторизация",
@@ -177,6 +288,11 @@ def reply_main_menu_buttons(sender):
                                     "type": "postback",
                                     "title": "Мои карты",
                                     "payload": "addcard"
+                                },
+                                {
+                                    "type": "postback",
+                                    "title": "Удаление авторизации",
+                                    "payload": "auth.delete"
                                 }
                             ]
                         }
@@ -186,7 +302,7 @@ def reply_main_menu_buttons(sender):
         }
     }
     start = time.time()
-    requests.post(fb_url, json=data_main_menu_buttons)
+    requests.post(fb_url, json=data_main_menu_buttons2)
     logging.warning('elapsed time for reply_main_menu_buttons = ' + str(time.time() - start))
 
 def reply_display_cards(sender, last_sender_message):
