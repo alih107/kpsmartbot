@@ -111,6 +111,8 @@ def handle_incoming_messages():
         last_sender_message = collection_messages.insert_one(db_record)
         reply_intro(sender)
         isIntroSent = True
+        logging.info("We've got new user! Sender = " + sender + " | " + fn + " " + ln)
+        return "ok"
 
     logging.info(print_facebook_data(data, sender, last_sender_message))
     if not last_sender_message['isBotActive']:
