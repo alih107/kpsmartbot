@@ -114,6 +114,7 @@ def handle_incoming_messages():
         return "ok"
 
     logging.info(print_facebook_data(data, sender, last_sender_message))
+    logging.info(data)
     if not last_sender_message['isBotActive']:
         handle_messages_when_deactivated(sender, data, last_sender_message)
         return "ok"
