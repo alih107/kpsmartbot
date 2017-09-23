@@ -30,6 +30,7 @@ def handle_voice_message(sender, voice_url, last_sender_message):
                 handle_entities(sender, last_sender_message, resp)
             except:
                 logging.info(helper.PrintException())
+                logging.info('Got error with Wit.ai response: ' + str(resp))
                 main.reply(sender, "Извините, я не поняла что Вы сказали")
         main.reply_typing_off(sender)
         try:
@@ -119,7 +120,7 @@ def handle_intent(sender, last_sender_message, value):
             r = feedparser.parse('http://anekdotme.ru/RSS')
             random_int = randint(0, len(r['entries']) - 1)
             anekdot = r['entries'][random_int]['summary_detail']['value']
-            anekdot = anekdot.replace('<br />', '\n').replace('&mdash;', '').replace('<BR>', '').replace('<br>','')
+            anekdot = anekdot.replace('<br />', '\n').replace('&mdash;', '').replace('<BR>', '').replace('<br>', '')
             logging.info("Anekdot = " + anekdot)
             main.reply(sender, anekdot)
             pass
