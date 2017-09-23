@@ -1,4 +1,5 @@
 import main
+import helper
 import voice_assistant
 import constants
 from flask import Flask, request
@@ -341,10 +342,13 @@ def handle_attachments(sender, last_sender_message, attachment):
         else:
             main.reply(sender, "А для чего Вы мне отправили своё местоположение?")
     if type == 'audio':
-        t = threading.Thread(target=voice_assistant.handle_voice_message,
-                             args=(sender, attachment['payload']['url'], last_sender_message,))
-        t.setDaemon(True)
-        t.start()
+        try:
+            t = threading.Thread(target=voice_assistant.handle_voice_message,
+                                 args=(sender, attachment['payload']['url'], last_sender_message,))
+            t.setDaemon(True)
+            t.start()
+        except:
+            logging.info(helper.PrintException())
 
 def handle_text_messages(sender, last_sender_message, message):
     payload = last_sender_message['payload']
