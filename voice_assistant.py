@@ -15,6 +15,7 @@ wit_token = constants.wit_token
 client = Wit(wit_token)
 
 def handle_voice_message(sender, voice_url, last_sender_message):
+    logging.info("Handling audio")
     try:
         main.reply_typing_on(sender)
         g = requests.get(voice_url, stream=True)

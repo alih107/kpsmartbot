@@ -331,6 +331,7 @@ def handle_postback_payload(sender, last_sender_message, payload):
 
 def handle_attachments(sender, last_sender_message, attachment):
     logging.info("Handling attachment...")
+    logging.info(attachment)
     type = attachment['type']
     payload = last_sender_message['payload']
     if type == 'location':
