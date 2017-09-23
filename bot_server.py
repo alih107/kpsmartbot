@@ -330,6 +330,7 @@ def handle_postback_payload(sender, last_sender_message, payload):
     collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
 
 def handle_attachments(sender, last_sender_message, attachment):
+    logging.info("Handling attachment...")
     type = attachment['type']
     payload = last_sender_message['payload']
     if type == 'location':
