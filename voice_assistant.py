@@ -19,12 +19,18 @@ def handle_voice_message(sender, voice_url, last_sender_message):
     logging.info("Handling audio")
     try:
         main.reply_typing_on(sender)
+        start = time.time()
         g = requests.get(voice_url, stream=True)
+        logging.info('requests.get(voice_url) time = ' + str(time.time() - start))
         voice_filename = "voice_" + sender + ".mp4"
         voice_filename_mp3 = "voice_" + sender + ".mp3"
         with open(voice_filename, "wb") as o:
+            start = time.time()
             o.write(g.content)
+            logging.info('o.write(g.content) time = ' + str(time.time() - start))
+        start = time.time()
         AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_mp3, format="mp3")
+        logging.info('AudioSegment export time = ' + str(time.time() - start))
         with open(voice_filename_mp3, 'rb') as f:
             try:
                 start = time.time()
