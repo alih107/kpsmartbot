@@ -58,7 +58,9 @@ def handle_entities(sender, last_sender_message, resp):
 def handle_intent(sender, last_sender_message, value):
     try:
         if value == 'greeting':
-            main.reply(sender, "Здравствуйте, " + last_sender_message['first_name'] + "!")
+            message = "Здравствуйте, " + last_sender_message['first_name'] + "!\n"
+            message += "Меня зовут Е-Сауле, я голосовая помощница этого бота."
+            main.reply(sender, message)
         elif value == 'postamat':
             main.reply(sender, helper.postamat)
         elif value == 'hybridpost_def':
