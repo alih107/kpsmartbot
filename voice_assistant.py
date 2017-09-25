@@ -76,7 +76,9 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                 url += '/asr_xml?uuid=' + uuid
                 url += '&key=' + api_key
                 url += '&topic=queries'
+                start = time.time()
                 r = requests.post(url, data=f, headers=headers)
+                logging.info('requests.post to yandex time = ' + str(time.time() - start))
                 root = ET.fromstring(r.text)
                 logging.info("" + str(root.tag) + " | " + str(root.attrib) + " | " + str(root.text))
                 for child in root:
