@@ -102,8 +102,7 @@ def get_firstname_lastname(sender):
 @app.route('/kpsmartbot', methods=['POST'])
 def handle_incoming_messages():
     data = request.json
-    t = threading.Thread(target=handle_data,
-                         args=(data,))
+    t = threading.Thread(target=handle_data, args=(data,))
     t.setDaemon(True)
     t.start()
 
