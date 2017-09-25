@@ -77,7 +77,7 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                 url += '&topic=queries'
                 r = requests.post(url, data=f, headers=headers)
                 logging.info(r)
-                logging.info(r.json())
+                logging.info(r.text)
             except:
                 logging.info(helper.PrintException())
                 main.reply(sender, "Извините, я не поняла что Вы сказали")
