@@ -187,20 +187,13 @@ def check_login_and_cards(sender, last_sender_message):
     return True
 
 def check_login(sender, last_sender_message):
-    try:
-        encodedLoginPass = last_sender_message['encodedLoginPass']
-        assert encodedLoginPass != None
-        session = requests.Session()
-        headers = {"Authorization": "Basic " + encodedLoginPass, 'Content-Type': 'application/json'}
-        url_login = 'https://post.kz/mail-app/api/account/'
-        r = session.get(url_login, headers=headers)
-        assert r.status_code != 401
-        return True
-    except:
-        main.reply(sender, "Требуется авторизация, пожалуйста, отправьте логин и пароль профиля на post.kz через пробел. Если у вас нет аккаунта, то зарегистрируйтесь в https://post.kz/register")
+    if last_sender_message['encodedLoginPass'] != None:
+        main.reply(sender, "Требуется авторизация, пожалуйста, отправьте логин и пароль профиля на post.kz через "
+                           "пробел. Если у вас нет аккаунта, то зарегистрируйтесь в https://post.kz/register")
         last_sender_message['payload'] = 'auth'
         collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
         return False
+    return True
 
 def reply_intro(sender):
     fn, ln = get_firstname_lastname(sender)
@@ -483,7 +476,7 @@ def handle_messages_when_deactivated(sender, data, last_sender_message):
 
 def call_card2card(sender, last_sender_message, payload):
     start = time.time()
-    if check_login_and_cards(sender, last_sender_message):
+    if check_login(sender, last_sender_message):
         logging.info('check_login_and_cards time = ' + str(time.time() - start))
         last_sender_message['lastCommand'] = payload
         main.reply_card2card_enter_cardDst(sender, last_sender_message)
@@ -492,7 +485,7 @@ def call_card2card(sender, last_sender_message, payload):
 
 def call_balance(sender, last_sender_message, payload):
     start = time.time()
-    if check_login_and_cards(sender, last_sender_message):
+    if check_login(sender, last_sender_message):
         logging.info('check_login_and_cards time = ' + str(time.time() - start))
         last_sender_message['lastCommand'] = payload
         main.reply_mobile_enter_number(sender, last_sender_message)
@@ -501,7 +494,7 @@ def call_balance(sender, last_sender_message, payload):
 
 def call_onai(sender, last_sender_message, payload):
     start = time.time()
-    if check_login_and_cards(sender, last_sender_message):
+    if check_login(sender, last_sender_message):
         logging.info('check_login_and_cards time = ' + str(time.time() - start))
         last_sender_message['lastCommand'] = payload
         main.reply_onai_enter_number(sender, last_sender_message)
