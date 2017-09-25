@@ -114,7 +114,8 @@ def handle_data(data):
     if last_sender_message == None:
         fn, ln = get_firstname_lastname(sender)
         db_record = {"sender": sender, "first_name": fn, "last_name": ln,
-                     "isBotActive": True, 'phonesToRefill': [], 'hasCards': False, 'encodedLoginPass': None}
+                     "isBotActive": True, 'phonesToRefill': [], 'onaisToRefill': [],
+                     'hasCards': False, 'encodedLoginPass': None}
         last_sender_message = collection_messages.insert_one(db_record)
         reply_intro(sender)
         logging.info("We've got new user! Sender = " + sender + " | " + fn + " " + ln)
@@ -216,6 +217,12 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
     elif payload == 'onai.last':
         main.reply_onai(sender, text, last_sender_message)
         payload = 'onai.amount'
+    elif payload == 'onai.delete':
+        main.reply_onai_delete(sender, last_sender_message)
+        return "ok"
+    elif payload == 'onai.delete.phone':
+        main.reply_onai_delete_phone(sender, text, last_sender_message)
+        return "ok"
     elif payload == 'mobile.last':
         main.reply_check_mobile_number(sender, text, last_sender_message)
         return "ok"

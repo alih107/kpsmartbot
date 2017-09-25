@@ -532,31 +532,63 @@ def reply_onai(sender, message, last_sender_message):
         return "wrong onai number"
 
     last_sender_message['onaiToRefill'] = message
+    try:
+        if not "onaisToRefill" in last_sender_message:
+            last_sender_message['onaisToRefill'] = []
+        if not message in last_sender_message['onaisToRefill'] and len(last_sender_message['onaisToRefill']) < 10:
+            last_sender_message['onaisToRefill'].append(message)
+        logging.info(last_sender_message['onaisToRefill'])
+    except:
+        logging.error(helper.PrintException())
+
     last_sender_message['payload'] = 'onai.amount'
     collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
     reply(sender, "Введите сумму пополнения баланса (не менее 100 тг)")
 
 def reply_onai_enter_number(sender, last_sender_message):
     try:
-        lastOnaiNumber = helper.insert_space_onai(last_sender_message['onaiToRefill'])
+        onaisToRefill = last_sender_message['onaisToRefill']
+        assert len(onaisToRefill) > 0
+        buttons = []
+        for onai in onaisToRefill:
+            onai = helper.insert_space_onai(onai)
+            buttons.append({"content_type": "text", "payload": "onai.last", "title": onai})
+        buttons.append({"content_type": "text", "payload": "onai.delete", "title": "Удалить карту"})
         data_quick_replies = {
-          "recipient":{
-            "id": sender
-          },
-          "message":{
-            "text":"Выберите карту Онай или введите 19ти-значный номер карты Онай\n" + hint_main_menu,
-            "quick_replies":[
-              {
-                "content_type":"text",
-                "title":lastOnaiNumber,
-                "payload":"onai.last"
-              }
-            ]
-          }
+            "recipient": {"id": sender},
+            "message": {
+                "text": "Выберите карту Онай или введите его\n" + hint_main_menu,
+                "quick_replies": buttons
+            }
         }
         requests.post(fb_url, json=data_quick_replies)
     except:
         reply(sender, "Введите 19ти-значный номер карты Онай\n" + hint_main_menu)
+
+def reply_onai_delete(sender, last_sender_message):
+    onaisToRefill = last_sender_message['onaisToRefill']
+    buttons = []
+    for onai in onaisToRefill:
+        onai = helper.insert_space_onai(onai)
+        buttons.append({"content_type": "text", "payload": "onai.delete.phone", "title": onai})
+
+    data_quick_replies = {
+        "recipient": {
+            "id": sender
+        },
+        "message": {
+            "text": "Выберите карту Онай, чтобы её удалить",
+            "quick_replies": buttons
+        }
+    }
+    requests.post(fb_url, json=data_quick_replies)
+
+def reply_onai_delete_phone(sender, text, last_sender_message):
+    last_sender_message['onaisToRefill'].remove(text.replace(' ', ''))
+    reply(sender, "Карта Онай " + text + " успешно удалёна")
+    reply_onai_enter_number(sender, last_sender_message)
+    last_sender_message['payload'] = 'onai'
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
 def reply_onai_amount(sender, message, last_sender_message):
     amount = 0
@@ -1212,9 +1244,7 @@ def reply_mobile_enter_number(sender, last_sender_message):
         buttons.append({"content_type": "text", "payload": "mobile.delete", "title": "Удалить номер"})
 
         data_quick_replies = {
-          "recipient": {
-            "id": sender
-          },
+          "recipient": {"id": sender},
           "message": {
             "text": "Выберите номер телефона или введите его\n" + hint_main_menu,
             "quick_replies": buttons
@@ -1283,7 +1313,7 @@ def reply_mobile_delete(sender, last_sender_message):
 
 def reply_mobile_delete_phone(sender, text, last_sender_message):
     last_sender_message['phonesToRefill'].remove(text)
-    reply(sender, "Номер успешно удалён")
+    reply(sender, "Номер " + text + " успешно удалён")
     reply_mobile_enter_number(sender, last_sender_message)
     last_sender_message['payload'] = 'balance'
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
