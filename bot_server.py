@@ -491,14 +491,18 @@ def call_card2card(sender, last_sender_message, payload):
     return False
 
 def call_balance(sender, last_sender_message, payload):
+    start = time.time()
     if check_login_and_cards(sender, last_sender_message):
+        logging.info('check_login_and_cards time = ' + str(time.time() - start))
         last_sender_message['lastCommand'] = payload
         main.reply_mobile_enter_number(sender, last_sender_message)
         return True
     return False
 
 def call_onai(sender, last_sender_message, payload):
+    start = time.time()
     if check_login_and_cards(sender, last_sender_message):
+        logging.info('check_login_and_cards time = ' + str(time.time() - start))
         last_sender_message['lastCommand'] = payload
         main.reply_onai_enter_number(sender, last_sender_message)
         return True
@@ -555,7 +559,9 @@ def call_tracking(sender, last_sender_message, payload):
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
 def call_addcard(sender, last_sender_message, payload):
+    start = time.time()
     if check_login(sender, last_sender_message):
+        logging.info('check_login time = ' + str(time.time() - start))
         main.reply_addcard_entercard(sender, last_sender_message)
         last_sender_message['payload'] = payload
         collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
