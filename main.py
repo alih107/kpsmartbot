@@ -1823,9 +1823,7 @@ def card_registration_confirm(sender, message, last_sender_message):
 
 def reply_auth_delete(sender):
     data_quick_replies = {
-        "recipient": {
-            "id": sender
-        },
+        "recipient": {"id": sender},
         "message": {
             "text": "Вы хотите удалить авторизацию?",
             "quick_replies": [

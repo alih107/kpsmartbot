@@ -121,6 +121,7 @@ def handle_data(data):
         return "ok"
 
     logging.info(print_facebook_data(data, sender, last_sender_message))
+    logging.info('Active number of threads = ' + str(threading.active_count()))
     if not last_sender_message['isBotActive']:
         handle_messages_when_deactivated(sender, data, last_sender_message)
         return "ok"
@@ -130,35 +131,35 @@ def handle_data(data):
         handle_sticker(sender, last_sender_message)
         return "ok"
     except:
-        logging.info(helper.PrintException())
+        pass
 
     try:
         payload = data['entry'][0]['messaging'][0]['message']['quick_reply']['payload']
         handle_quickreply_payload(sender, data, last_sender_message, payload)
         return "ok"
     except:
-        logging.info(helper.PrintException())
+        pass
 
     try:
         payload = data['entry'][0]['messaging'][0]['postback']['payload']
         handle_postback_payload(sender, last_sender_message, payload)
         return "ok"
     except:
-        logging.info(helper.PrintException())
+        pass
 
     try:
         attachment = data['entry'][0]['messaging'][0]['message']['attachments'][0]
         handle_attachments(sender, last_sender_message, attachment)
         return "ok"
     except:
-        logging.info(helper.PrintException())
+        pass
 
     try:
         message = data['entry'][0]['messaging'][0]['message']['text']
         handle_text_messages(sender, last_sender_message, message)
         return "ok"
     except:
-        logging.info(helper.PrintException())
+        pass
 
 def check_login_and_cards(sender, last_sender_message):
     try:
