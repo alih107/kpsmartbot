@@ -6,6 +6,7 @@ import logging
 import constants
 import os
 import feedparser
+import time
 from random import randint
 
 from wit import Wit
@@ -26,7 +27,9 @@ def handle_voice_message(sender, voice_url, last_sender_message):
         AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_mp3, format="mp3")
         with open(voice_filename_mp3, 'rb') as f:
             try:
+                start = time.time()
                 resp = client.speech(f, None, {'Content-Type': 'audio/mpeg3'})
+                logging.info('Wit.ai client.speech response time = ' + str(time.time() - start))
                 logging.info('Yay, got Wit.ai response: ' + str(resp))
                 handle_entities(sender, last_sender_message, resp)
             except:
