@@ -8,6 +8,7 @@ import os
 import feedparser
 import time
 from random import randint
+import xml.etree.ElementTree as ET
 
 from wit import Wit
 from pydub import AudioSegment
@@ -78,6 +79,10 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                 r = requests.post(url, data=f, headers=headers)
                 logging.info(r)
                 logging.info(r.text)
+                root = ET.fromstring(r.text)
+                logging.info("" + str(root.tag) + " " + str(root.attrib))
+                for child in root:
+                    logging.info("" + str(child.tag) + " " + str(child.attrib))
             except:
                 logging.info(helper.PrintException())
                 main.reply(sender, "Извините, я не поняла что Вы сказали")
