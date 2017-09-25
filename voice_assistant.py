@@ -50,6 +50,45 @@ def handle_voice_message(sender, voice_url, last_sender_message):
     except:
         logging.error(helper.PrintException())
 
+def handle_voice_message_yandex(sender, voice_url, last_sender_message):
+    uuid = constants.uuid
+    api_key = constants.api_key
+    logging.info("Handling audio with yandex")
+    try:
+        main.reply_typing_on(sender)
+        start = time.time()
+        g = requests.get(voice_url, stream=True)
+        logging.info('requests.get(voice_url) time = ' + str(time.time() - start))
+        voice_filename = "voice_" + sender + ".mp4"
+        voice_filename_wav = "voice_" + sender + ".wav"
+        with open(voice_filename, "wb") as o:
+            start = time.time()
+            o.write(g.content)
+            logging.info('o.write(g.content) time = ' + str(time.time() - start))
+        start = time.time()
+        AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="wav")
+        logging.info('AudioSegment export time = ' + str(time.time() - start))
+        with open(voice_filename_wav, 'rb') as f:
+            try:
+                headers = {'Content-Type': 'audio/x-wav'}
+                url = 'http://asr.yandex.net'
+                url += '/asr_xml?uuid=' + uuid
+                url += '&key=' + api_key
+                url += '&topic=queries'
+                resp = requests.post(url, data=f, headers=headers)
+                logging.info(resp)
+            except:
+                logging.info(helper.PrintException())
+                main.reply(sender, "Извините, я не поняла что Вы сказали")
+        main.reply_typing_off(sender)
+        try:
+            os.remove(voice_filename)
+            os.remove(voice_filename_wav)
+        except:
+            pass
+    except:
+        logging.error(helper.PrintException())
+
 def handle_entities(sender, last_sender_message, resp):
     try:
         entities = resp['entities']
