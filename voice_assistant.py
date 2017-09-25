@@ -75,8 +75,9 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                 url += '/asr_xml?uuid=' + uuid
                 url += '&key=' + api_key
                 url += '&topic=queries'
-                resp = requests.post(url, data=f, headers=headers)
-                logging.info(resp)
+                r = requests.post(url, data=f, headers=headers)
+                logging.info(r)
+                logging.info(r.json())
             except:
                 logging.info(helper.PrintException())
                 main.reply(sender, "Извините, я не поняла что Вы сказали")
