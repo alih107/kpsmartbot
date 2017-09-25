@@ -122,6 +122,7 @@ def handle_data(data):
 
     logging.info(print_facebook_data(data, sender, last_sender_message))
     logging.info('Active number of threads = ' + str(threading.active_count()))
+    logging.info(threading.enumerate())
     if not last_sender_message['isBotActive']:
         handle_messages_when_deactivated(sender, data, last_sender_message)
         return "ok"
