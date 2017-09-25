@@ -40,7 +40,6 @@ def handle_voice_message(sender, voice_url, last_sender_message):
                 handle_entities(sender, last_sender_message, resp)
             except:
                 logging.info(helper.PrintException())
-                logging.info('Got error with Wit.ai response: ' + str(resp))
                 main.reply(sender, "Извините, я не поняла что Вы сказали")
         main.reply_typing_off(sender)
         try:

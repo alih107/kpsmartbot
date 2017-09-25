@@ -178,7 +178,7 @@ def check_login_and_cards(sender, last_sender_message):
 
     hasCards = main.reply_has_cards(sender, last_sender_message)
     if not hasCards:
-        main.reply(sender, "Добавьте карту в профиль "+ last_sender_message['login'] +" на post.kz в разделе \"Мои счета и карты\", пожалуйста")
+        main.reply(sender, "Добавьте карту в профиль " + last_sender_message['login'] +" на post.kz в разделе \"Мои счета и карты\", пожалуйста")
         main.reply_main_menu_buttons(sender)
         last_sender_message['payload'] = 'mainMenu'
         collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
@@ -299,7 +299,8 @@ def handle_postback_payload(sender, last_sender_message, payload):
             answer += hint_main_menu
             main.reply(sender, answer)
         except:
-            main.reply(sender, "Для авторизации отправьте логин и пароль профиля на post.kz через пробел. Если у вас нет аккаунта то зарегистрируйтесь в https://post.kz/register")
+            main.reply(sender, "Для авторизации отправьте логин и пароль профиля на post.kz через пробел. "
+                               "Если у вас нет аккаунта то зарегистрируйтесь в https://post.kz/register")
 
     elif payload in digits:
         last_sender_message['chosenCardIndex'] = int(payload)
@@ -315,8 +316,7 @@ def handle_postback_payload(sender, last_sender_message, payload):
             payload = 'card2card.startPayment'
     elif payload == 'auth.delete':
         try:
-            res = last_sender_message['encodedLoginPass']
-            assert res != None
+            assert last_sender_message['encodedLoginPass'] != None
             main.reply_auth_delete(sender)
         except:
             main.reply(sender, "Авторизации нет")
@@ -338,15 +338,15 @@ def handle_postback_payload(sender, last_sender_message, payload):
 def handle_attachments(sender, last_sender_message, attachment):
     logging.info("Handling attachment...")
     logging.info(attachment)
-    type = attachment['type']
+    attachment_type = attachment['type']
     payload = last_sender_message['payload']
-    if type == 'location':
+    if attachment_type == 'location':
         if payload == 'nearest.postamats' or payload == 'nearest.offices' or payload == 'nearest.atms':
             coordinates = attachment['payload']['coordinates']
             main.reply_nearest_find(sender, coordinates['long'], coordinates['lat'], payload)
         else:
             main.reply(sender, "А для чего Вы мне отправили своё местоположение?")
-    if type == 'audio':
+    if attachment_type == 'audio':
         try:
             t = threading.Thread(target=voice_assistant.handle_voice_message,
                                  args=(sender, attachment['payload']['url'], last_sender_message,))
@@ -447,9 +447,7 @@ def handle_messages_when_deactivated(sender, data, last_sender_message):
     try:
         sticker_id = data['entry'][0]['messaging'][0]['message']['sticker_id']
         data_quick_replies = {
-            "recipient": {
-                "id": sender
-            },
+            "recipient": {"id": sender},
             "message": {
                 "text": "Вы хотите включить бота?",
                 "quick_replies": [
@@ -484,7 +482,9 @@ def handle_messages_when_deactivated(sender, data, last_sender_message):
         return
 
 def call_card2card(sender, last_sender_message, payload):
+    start = time.time()
     if check_login_and_cards(sender, last_sender_message):
+        logging.info('check_login_and_cards time = ' + str(time.time() - start))
         last_sender_message['lastCommand'] = payload
         main.reply_card2card_enter_cardDst(sender, last_sender_message)
         return True
@@ -511,9 +511,7 @@ def call_sendmessage(sender, last_sender_message, payload):
 
 def call_disable_bot(sender, last_sender_message, payload):
     data_quick_replies = {
-        "recipient": {
-            "id": sender
-        },
+        "recipient": {"id": sender},
         "message": {
             "text": "Вы хотите отключить бота?",
             "quick_replies": [
@@ -538,9 +536,7 @@ def call_tracking(sender, last_sender_message, payload):
     try:
         lastTrackingNumber = last_sender_message['lastTrackingNumber']
         data_quick_replies = {
-            "recipient": {
-                "id": sender
-            },
+            "recipient": {"id": sender},
             "message": {
                 "text": "Выберите последний трекинг-номер или введите его\n" + hint_main_menu,
                 "quick_replies": [
