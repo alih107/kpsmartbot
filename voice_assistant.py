@@ -57,6 +57,7 @@ def handle_voice_message(sender, voice_url, last_sender_message):
         logging.error(helper.PrintException())
 
 def handle_voice_message_yandex(sender, voice_url, last_sender_message):
+    start_function = time.time()
     uuid = constants.uuid
     api_key = constants.api_key
     logging.info("Handling audio with yandex")
@@ -92,6 +93,7 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                     resp = client.message(child.text)
                     logging.info('client.message time = ' + str(time.time() - start))
                     handle_entities(sender, last_sender_message, resp)
+                    logging.info('handle_voice_message elapsed time = ' + str(time.time() - start_function))
                     break
             except:
                 logging.info(helper.PrintException())
