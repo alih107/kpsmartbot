@@ -1153,7 +1153,7 @@ def reply_tracking(sender, tracking_number, last_sender_message):
         t_status_mapping = new_mapping[t_status]['mapping']
         result = "Информация об отправлении " + tracking_number + '\n'
         result += "Статус: " + t_status_mapping + '\n' + t_address + '\n' + t_datetime + '\n'
-        result += "(Чтобы узнать статус другой посылки, отправьте её трек-номер " \
+        result += "(Чтобы узнать статус другой посылки, выберите или отправьте её трек-номер " \
                   "либо нажмите (y) для перехода в главное меню)" + '\n'
 
         if not tracking_number in last_sender_message['trackingNumbers'] and \
