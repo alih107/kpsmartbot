@@ -85,11 +85,9 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                 logging.info("" + str(root.tag) + " | " + str(root.attrib) + " | " + str(root.text))
                 for child in root:
                     logging.info("" + str(child.tag) + " " + str(child.attrib) + " | " + str(child.text))
-                    main.reply(sender, child.text)
-                    start = time.time()
-                    r = client.message(child.text)
-                    logging.info('client.message time = ' + str(time.time() - start))
-                    logging.info(r)
+                    #main.reply(sender, child.text)
+                    resp = client.message(child.text)
+                    handle_entities(sender, last_sender_message, resp)
                     break
             except:
                 logging.info(helper.PrintException())
