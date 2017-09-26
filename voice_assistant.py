@@ -78,7 +78,7 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
         with open(voice_filename_wav, 'rb') as f:
             try:
                 headers = {'Content-Type': 'audio/x-wav'}
-                url = 'http://asr.yandex.net/asr_xml?uuid=' + uuid + '&key=' + api_key + '&topic=numbers'
+                url = 'http://asr.yandex.net/asr_xml?uuid=' + uuid + '&key=' + api_key + '&topic=queries'
                 start = time.time()
                 r = requests.post(url, data=f, headers=headers)
                 logging.info('requests.post to yandex time = ' + str(time.time() - start))
