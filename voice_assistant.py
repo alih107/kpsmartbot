@@ -36,6 +36,8 @@ def handle_voice_message(sender, voice_url, last_sender_message):
             try:
                 start = time.time()
                 resp = client.speech(f, None, {'Content-Type': 'audio/mpeg3'})
+                if "_text" in resp:
+                    main.reply(sender, resp['_text'])
                 logging.info('Wit.ai client.speech response time = ' + str(time.time() - start))
                 logging.info('Yay, got Wit.ai response: ' + str(resp))
                 handle_entities(sender, last_sender_message, resp)
