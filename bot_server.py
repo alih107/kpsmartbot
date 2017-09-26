@@ -114,7 +114,7 @@ def handle_data(data):
     if last_sender_message == None:
         fn, ln = get_firstname_lastname(sender)
         db_record = {"sender": sender, "first_name": fn, "last_name": ln,
-                     "isBotActive": True, 'phonesToRefill': [], 'onaisToRefill': [],
+                     "isBotActive": True, 'phonesToRefill': [], 'onaisToRefill': [], 'trackingNumbers': [],
                      'hasCards': False, 'encodedLoginPass': None}
         last_sender_message = collection_messages.insert_one(db_record)
         reply_intro(sender)
@@ -214,6 +214,11 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
     elif payload == 'tracking.last':
         main.reply_tracking(sender, text, last_sender_message)
         payload = 'tracking'
+    elif payload == 'tracking.delete':
+        main.reply_tracking_delete(sender, last_sender_message)
+    elif payload == 'tracking.delete.number':
+        main.reply_tracking_delete_number(sender, text, last_sender_message)
+        payload = 'tracking'
     elif payload == 'onai.last':
         main.reply_onai(sender, text, last_sender_message)
         payload = 'onai.amount'
@@ -257,7 +262,8 @@ def handle_postback_payload(sender, last_sender_message, payload):
         reply_intro(sender)
         return "ok"
     elif payload == 'tracking':
-        call_tracking(sender, last_sender_message, payload)
+        main.reply_tracking_enter_number(sender, last_sender_message)
+        return "ok"
     elif payload == 'shtrafy':
         main.reply_pdd_shtrafy(sender)
     elif payload == 'komuslugi':
@@ -333,7 +339,7 @@ def handle_postback_payload(sender, last_sender_message, payload):
         logging.info("Ne raspoznana komanda")
 
     last_sender_message['payload'] = payload
-    collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
 def handle_attachments(sender, last_sender_message, attachment):
     logging.info("Handling attachment...")
@@ -533,28 +539,6 @@ def call_disable_bot(sender, last_sender_message, payload):
         }
     }
     requests.post(fb_url, json=data_quick_replies)
-    last_sender_message['payload'] = payload
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
-
-def call_tracking(sender, last_sender_message, payload):
-    try:
-        lastTrackingNumber = last_sender_message['lastTrackingNumber']
-        data_quick_replies = {
-            "recipient": {"id": sender},
-            "message": {
-                "text": "Выберите последний трекинг-номер или введите его\n" + hint_main_menu,
-                "quick_replies": [
-                    {
-                        "content_type": "text",
-                        "title": lastTrackingNumber,
-                        "payload": "tracking.last"
-                    }
-                ]
-            }
-        }
-        requests.post(fb_url, json=data_quick_replies)
-    except:
-        main.reply(sender, "Введите трек-номер посылки\n" + hint_main_menu)
     last_sender_message['payload'] = payload
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 

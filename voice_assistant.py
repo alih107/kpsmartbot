@@ -178,7 +178,7 @@ def handle_intent(sender, last_sender_message, value):
         elif value == 'penalties_pdd' or value == 'COMMAND_penalties':
             main.reply_pdd_shtrafy(sender)
         elif value == 'info_post':
-            bot_server.call_tracking(sender, last_sender_message, 'tracking')
+            main.reply_tracking_enter_number(sender, last_sender_message)
         elif value == 'how_are_you':
             main.reply(sender, "У меня всё замечательно!")
         elif value == 'FUN_anekdot':
