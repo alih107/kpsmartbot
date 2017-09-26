@@ -204,18 +204,18 @@ def reply_main_menu_buttons(sender):
                                 },
                                 {
                                     "type": "postback",
-                                    "title": "🚗 Штрафы ПДД",
-                                    "payload": "shtrafy"
+                                    "title": "🔍 Отслеживание",
+                                    "payload": "tracking"
                                 },
                                 {
                                     "type": "postback",
-                                    "title": "📃 Оплата ком.услуг",
-                                    "payload": "komuslugi"
+                                    "title": "📍Ближайшие отделения",
+                                    "payload": "nearest"
                                 }
                             ]
                         },
                         {
-                            "title": "Почтовые услуги",
+                            "title": "Доп. услуги",
                             "buttons": [
                                 {
                                     "type": "postback",
@@ -224,13 +224,13 @@ def reply_main_menu_buttons(sender):
                                 },
                                 {
                                     "type": "postback",
-                                    "title": "🔍 Отслеживание",
-                                    "payload": "tracking"
+                                    "title": "🚗 Штрафы ПДД",
+                                    "payload": "shtrafy"
                                 },
                                 {
                                     "type": "postback",
-                                    "title": "📍 Ближайшие",
-                                    "payload": "nearest"
+                                    "title": "📃 Оплата ком.услуг",
+                                    "payload": "komuslugi"
                                 }
                             ]
                         },
