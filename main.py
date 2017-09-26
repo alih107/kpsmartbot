@@ -325,6 +325,12 @@ def reply_display_cards(sender, last_sender_message):
     cards_group = []
     cards_array = []
     index = 0
+    if len(cards) == 0:
+        reply(sender, "У вас отсутствуют добавленные карты в профиле post.kz."
+                      "Чтобы добавить, введите 16ти-значный номер карты")
+        last_sender_message['payload'] = 'addcard'
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        return
     if len(cards) > 3:
         title = "Прокрутите влево/вправо, либо нажмите < или > для выбора других карт"
     for card in cards:
@@ -343,9 +349,7 @@ def reply_display_cards(sender, last_sender_message):
     cards_group.append({"title": title, "buttons": cards_array})
 
     data_cards = {
-        "recipient": {
-            "id": sender
-        },
+        "recipient": {"id": sender},
         "message": {
             "attachment": {
                 "type": "template",
@@ -1386,7 +1390,7 @@ def reply_mobile_amount(sender, message, last_sender_message):
 
     last_sender_message['payload'] = 'mobile.chooseCard'
     last_sender_message['amount'] = amount
-    collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
     reply_display_cards(sender, last_sender_message)
 
 def reply_mobile_csc(sender, payload, last_sender_message):
