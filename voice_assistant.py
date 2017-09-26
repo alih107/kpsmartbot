@@ -89,7 +89,7 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                     start = time.time()
                     r = client.message(child.text)
                     logging.info('client.message time = ' + str(time.time() - start))
-                    logging.info(r.json())
+                    logging.info(r)
                     break
             except:
                 logging.info(helper.PrintException())
