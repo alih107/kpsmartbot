@@ -1115,22 +1115,26 @@ def reply_tracking_enter_number(sender, last_sender_message):
     try:
         trackingNumbers = last_sender_message['trackingNumbers']
         assert len(trackingNumbers) > 0
-        buttons = []
-        for num in trackingNumbers:
-            buttons.append({"content_type": "text", "payload": "tracking.last", "title": num})
-        buttons.append({"content_type": "text", "payload": "tracking.delete", "title": "Удалить трек-номер"})
-        data_quick_replies = {
-            "recipient": {"id": sender},
-            "message": {
-                "text": "Выберите трек-номер или введите его\n" + hint_main_menu,
-                "quick_replies": buttons
-            }
-        }
-        requests.post(fb_url, json=data_quick_replies)
+        text = "Выберите трек-номер или введите его\n" + hint_main_menu
+        reply_tracking_quick_replies_with_delete(sender, trackingNumbers, text)
     except:
         reply(sender, "Введите трек-номер посылки\n" + hint_main_menu)
     last_sender_message['payload'] = 'tracking'
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+
+def reply_tracking_quick_replies_with_delete(sender, trackingNumbers, text):
+    buttons = []
+    for num in trackingNumbers:
+        buttons.append({"content_type": "text", "payload": "tracking.last", "title": num})
+    buttons.append({"content_type": "text", "payload": "tracking.delete", "title": "Удалить трек-номер"})
+    data_quick_replies = {
+        "recipient": {"id": sender},
+        "message": {
+            "text": text,
+            "quick_replies": buttons
+        }
+    }
+    requests.post(fb_url, json=data_quick_replies)
 
 def reply_tracking(sender, tracking_number, last_sender_message):
     data = requests.get("https://post.kz/external-api/tracking/api/v2/" + tracking_number + "/events").json()
@@ -1155,9 +1159,9 @@ def reply_tracking(sender, tracking_number, last_sender_message):
         if not tracking_number in last_sender_message['trackingNumbers'] and \
                         len(last_sender_message['trackingNumbers']) < 10:
             last_sender_message['trackingNumbers'].append(tracking_number)
-        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
-        reply(sender, result)
+        reply_tracking_quick_replies_with_delete(sender, last_sender_message['trackingNumbers'], result)
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
         return "ok"
 
 def reply_tracking_delete(sender, last_sender_message):
