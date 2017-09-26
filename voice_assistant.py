@@ -24,18 +24,20 @@ def handle_voice_message(sender, voice_url, last_sender_message):
         g = requests.get(voice_url, stream=True)
         logging.info('requests.get(voice_url) time = ' + str(time.time() - start))
         voice_filename = "voice_" + sender + ".mp4"
-        voice_filename_mp3 = "voice_" + sender + ".mp3"
+        #voice_filename_mp3 = "voice_" + sender + ".mp3"
+        voice_filename_wav = "voice_" + sender + ".wav"
         with open(voice_filename, "wb") as o:
             start = time.time()
             o.write(g.content)
             logging.info('o.write(g.content) time = ' + str(time.time() - start))
         start = time.time()
-        AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_mp3, format="mp3")
+        #AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_mp3, format="mp3")
+        AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="wav")
         logging.info('AudioSegment export time = ' + str(time.time() - start))
-        with open(voice_filename_mp3, 'rb') as f:
+        with open(voice_filename_wav, 'rb') as f:
             try:
                 start = time.time()
-                resp = client.speech(f, None, {'Content-Type': 'audio/mpeg3'})
+                resp = client.speech(f, None, {'Content-Type': 'audio/wav'})
                 if "_text" in resp:
                     main.reply(sender, resp['_text'])
                 logging.info('Wit.ai client.speech response time = ' + str(time.time() - start))
@@ -47,7 +49,8 @@ def handle_voice_message(sender, voice_url, last_sender_message):
         main.reply_typing_off(sender)
         try:
             os.remove(voice_filename)
-            os.remove(voice_filename_mp3)
+            #os.remove(voice_filename_mp3)
+            os.remove(voice_filename_wav)
         except:
             pass
     except:
@@ -85,7 +88,6 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                 logging.info("" + str(root.tag) + " | " + str(root.attrib) + " | " + str(root.text))
                 for child in root:
                     logging.info("" + str(child.tag) + " " + str(child.attrib) + " | " + str(child.text))
-                    #main.reply(sender, child.text)
                     resp = client.message(child.text)
                     handle_entities(sender, last_sender_message, resp)
                     break
