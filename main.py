@@ -857,7 +857,6 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
         # 3 - вызов getToken()
         url_login4 = url + portal_id + '/token'
         headers = {'Content-Type': 'application/x-www-form-urlencoded',
-                   'X-Channel-Id': x_channel_id,
                    'X-IV-Authorization': 'Identifier ' + mobileNumber}
         r = session.post(url_login4, headers=headers)
         logging.info(r)
