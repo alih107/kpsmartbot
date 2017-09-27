@@ -859,7 +859,7 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
         headers = {'Content-Type': 'application/x-www-form-urlencoded',
                    'X-Channel-Id': x_channel_id,
                    'X-IV-Authorization': 'Identifier ' + mobileNumber}
-        r = session.post(url_login4, headers=headers)
+        r = session.post(url_login4)
         logging.info(r)
         logging.info(r.text)
         token = r.json()['token']
