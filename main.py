@@ -772,14 +772,15 @@ def reply_card2cash_history(sender, last_sender_message):
     for h in history_items:
         if h['paymentId'] == 'MoneyTransfer_KazPost_Card2Cash':
             amount = h['amount'][:-2]
-            card_title  = h['src']['title'][-4:]
+            card_title = h['src']['title'][-4:]
             desc_length = 20 - 2 - len(amount) - 4  # 20 - button title limit, 2 - for > and :, 4 - last 4 digits
             description = h['description'][:desc_length]
             title = card_title + '>' + description + ':' + amount
             item = {'title': title, 'token': h['token']}
             card2cash_items.append(item)
             logging.info(item)
-
+    return
+    reply(sender, "Выберите перевод из истории")
     data_items_buttons = {
         "recipient": {"id": sender},
         "message": {
