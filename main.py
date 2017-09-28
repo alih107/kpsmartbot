@@ -753,18 +753,11 @@ def reply_onai_startPayment(sender, message, last_sender_message):
 def reply_card2cash_history(sender, last_sender_message):
     try:
         reply_typing_on(sender)
-        url_login = 'https://post.kz/mail-app/api/account/'
-        headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
-                   'Content-Type': 'application/json'}
-
-        session = requests.Session()
-        session.get(url_login, headers=headers)
-        mobileNumber = last_sender_message['mobileNumber']
 
         url_history = url + portal_id + '/payment/?pageSize=30&pageNumber=0&result=success&portalType=web'
         headers = {'Content-Type': 'application/x-www-form-urlencoded',
                    'X-Channel-Id': x_channel_id,
-                   'X-IV-Authorization': 'Identifier ' + mobileNumber}
+                   'X-IV-Authorization': 'Identifier ' + last_sender_message['mobileNumber']}
         r = requests.get(url_history, headers=headers)
         history_items = r.json()['items']
         card2cash_items = []
@@ -809,7 +802,14 @@ def reply_card2cash_history(sender, last_sender_message):
         logging.info(helper.PrintException())
 
 def reply_card2cash_history_show(sender, last_sender_message, token):
-    reply(sender, token)
+    reply_typing_on(sender)
+    headers = {'Content-Type': 'application/x-www-form-urlencoded',
+               'X-Channel-Id': x_channel_id,
+               'X-IV-Authorization': 'Identifier ' + last_sender_message['mobileNumber']}
+
+    url_token_show = url + portal_id + '/payment/' + token
+    r = requests.get(url_token_show, headers=headers)
+    logging.info(r.json())
     pass
 
 def reply_card2card_enter_cardDst(sender, last_sender_message):
