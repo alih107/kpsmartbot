@@ -331,7 +331,7 @@ def reply_display_cards(sender, last_sender_message):
         collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
         return
     if len(cards) > 3:
-        title = "Прокрутите влево/вправо, либо нажмите < или > для выбора других карт"
+        title = "Выберите карту"
     for card in cards:
         if card['state'] != 'REGISTERED':
             continue
@@ -546,7 +546,7 @@ def reply_onai(sender, message, last_sender_message):
 
     last_sender_message['payload'] = 'onai.amount'
     collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
-    reply(sender, "Введите сумму пополнения баланса (не менее 100 тг)")
+    reply(sender, "Введите сумму пополнения баланса (не менее 100 тг, комиссия 0 тг)")
 
 def reply_onai_enter_number(sender, last_sender_message):
     try:
@@ -753,6 +753,7 @@ def reply_onai_startPayment(sender, message, last_sender_message):
         return "fail"
 
 def reply_card2cash_history(sender, last_sender_message):
+    reply_typing_on(sender)
     url_login = 'https://post.kz/mail-app/api/account/'
     headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
                'Content-Type': 'application/json'}
@@ -770,12 +771,56 @@ def reply_card2cash_history(sender, last_sender_message):
     card2cash_items = []
     for h in history_items:
         if h['paymentId'] == 'MoneyTransfer_KazPost_Card2Cash':
-            item = {'amount': h['amount'], 'description':  h['description'],
-                    'title': h['src']['title'][-5:], 'token': h['token']}
+            amount = h['amount'][:-2]
+            card_title  = h['src']['title'][-4:]
+            desc_length = 20 - 2 - len(amount) - 4  # 20 - button title limit, 2 - for > and :, 4 - last 4 digits
+            description = h['description'][:desc_length]
+            title = card_title + '>' + description + ':' + amount
+            item = {'title': title, 'token': h['token']}
             card2cash_items.append(item)
+            logging.info(item)
 
+    data_items_buttons = {
+        "recipient": {"id": sender},
+        "message": {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": [
+                        {
+                            "title": "Главное меню",
+                            "buttons": [
+                                {
+                                    "type": "postback",
+                                    "title": "📲 Пополнение баланса",
+                                    "payload": "balance"
+                                },
+                                {
+                                    "type": "postback",
+                                    "title": "🔍 Отслеживание",
+                                    "payload": "tracking"
+                                },
+                                {
+                                    "type": "postback",
+                                    "title": "📍Ближайшие отделения",
+                                    "payload": "nearest"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    }
+    elements = []
+    button_group = {}
+    buttons = []
+    count = 0
     for i in card2cash_items:
-        logging.info(i)
+        title = i['title'] + '-' + i['description'] + '-' + i['amount']
+        buttons.append({"type": "postback", "title": "📲 Пополнение баланса", "payload": i['token']})
+        count += 1
     reply(sender, "Выберите перевод из истории")
 
 
@@ -812,7 +857,7 @@ def reply_card2card_check_cardDst(sender, message, last_sender_message):
     last_sender_message['lastCardDst'] = message
     last_sender_message['payload'] = 'card2card.amount'
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
-    reply(sender, "Введите сумму перевода (от 500 до 494070)\n" + hint_main_menu)
+    reply(sender, "Введите сумму перевода (от 500 до 494070; комиссия 1,2%, минимум 300 тенге)\n" + hint_main_menu)
 
 def reply_card2card_amount(sender, message, last_sender_message):
     amount = 0
