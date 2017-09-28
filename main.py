@@ -300,9 +300,7 @@ def reply_main_menu_buttons(sender):
             }
         }
     }
-    start = time.time()
     requests.post(fb_url, json=data_main_menu_buttons2)
-    logging.warning('elapsed time for reply_main_menu_buttons = ' + str(time.time() - start))
 
 def reply_display_cards(sender, last_sender_message):
     session = requests.Session()
@@ -779,7 +777,21 @@ def reply_card2cash_history(sender, last_sender_message):
                 title = card_title + '>' + description + ':' + amount
                 item = {'title': title, 'token': h['token']}
                 card2cash_items.append(item)
-                logging.info(item)
+
+        elements = []
+        buttons = []
+        count = 0
+        if len(card2cash_items) == 0:
+            reply(sender, 'Пожалуйста, инициируйте операцию по переводу на руки на портале transfer.post.kz\n'
+                          'Данная функция предназначена только для повторных операций')
+            return
+        for i in card2cash_items:
+            if count > 0 and count % 3 == 0:
+                elements.append({'title': 'Выберите перевод', 'buttons': buttons})
+                buttons = []
+            buttons.append({"type": "postback", "title": i['title'], "payload": i['token']})
+            count += 1
+        elements.append({'title': 'Выберите перевод', 'buttons': buttons})
         data_items_buttons = {
             "recipient": {"id": sender},
             "message": {
@@ -787,41 +799,12 @@ def reply_card2cash_history(sender, last_sender_message):
                     "type": "template",
                     "payload": {
                         "template_type": "generic",
-                        "elements": [
-                            {
-                                "title": "Главное меню",
-                                "buttons": [
-                                    {
-                                        "type": "postback",
-                                        "title": "📲 Пополнение баланса",
-                                        "payload": "balance"
-                                    },
-                                    {
-                                        "type": "postback",
-                                        "title": "🔍 Отслеживание",
-                                        "payload": "tracking"
-                                    },
-                                    {
-                                        "type": "postback",
-                                        "title": "📍Ближайшие отделения",
-                                        "payload": "nearest"
-                                    }
-                                ]
-                            }
-                        ]
+                        "elements": elements
                     }
                 }
             }
         }
-        elements = []
-        button_group = {}
-        buttons = []
-        count = 0
-        for i in card2cash_items:
-            title = i['title'] + '-' + i['description'] + '-' + i['amount']
-            buttons.append({"type": "postback", "title": "📲 Пополнение баланса", "payload": i['token']})
-            count += 1
-        reply(sender, "Выберите перевод из истории")
+        requests.post(fb_url, json=data_items_buttons)
     except:
         logging.info(helper.PrintException())
 
@@ -1801,7 +1784,7 @@ def reply_addcard_entercard(sender, last_sender_message):
         res += '\nЕсли Вы хотите добавить карту, введите 16ти-значный номер карты'
         reply(sender, res)
     else:
-        reply(sender, 'Введите 16ти-значный номер карты')
+        reply(sender, 'Чтобы добавить карту, введите 16ти-значный номер карты')
 
 def reply_addcard_checkcard(sender, message, last_sender_message):
     message = message.replace(' ', '')
