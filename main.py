@@ -766,8 +766,7 @@ def reply_card2cash_history(sender, last_sender_message):
                'X-Channel-Id': x_channel_id,
                'X-IV-Authorization': 'Identifier ' + mobileNumber}
     r = requests.get(url_login, headers=headers)
-    for h in r.json():
-        logging.info(h)
+    logging.info(r.json())
     reply(sender, "Выберите перевод из истории")
 
 
