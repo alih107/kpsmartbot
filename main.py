@@ -753,7 +753,23 @@ def reply_onai_startPayment(sender, message, last_sender_message):
         return "fail"
 
 def reply_card2cash_history(sender, last_sender_message):
+    url_login = 'https://post.kz/mail-app/api/account/'
+    headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
+               'Content-Type': 'application/json'}
+
+    session = requests.Session()
+    session.get(url_login, headers=headers)
+    mobileNumber = last_sender_message['mobileNumber']
+
+    url_history = url + portal_id + '/payment/?pageSize=30&pageNumber=0&result=success&portalType=web'
+    headers = {'Content-Type': 'application/x-www-form-urlencoded',
+               'X-Channel-Id': x_channel_id,
+               'X-IV-Authorization': 'Identifier ' + mobileNumber}
+    r = requests.get(url_login, headers=headers)
+    for h in r.json():
+        logging.info(h)
     reply(sender, "Выберите перевод из истории")
+
 
 def reply_card2card_enter_cardDst(sender, last_sender_message):
     try:
@@ -862,8 +878,6 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
                    'X-Channel-Id': x_channel_id,
                    'X-IV-Authorization': 'Identifier ' + mobileNumber}
         r = session.post(url_login4, headers=headers)
-        logging.info(r)
-        logging.info(r.text)
         token = r.json()['token']
 
         # 4 - вызов startPayment()
