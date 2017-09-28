@@ -766,8 +766,16 @@ def reply_card2cash_history(sender, last_sender_message):
                'X-Channel-Id': x_channel_id,
                'X-IV-Authorization': 'Identifier ' + mobileNumber}
     r = requests.get(url_history, headers=headers)
-    for h in r.json()['items']:
-        logging.info(h)
+    history_items = r.json()['items']
+    card2cash_items = []
+    for h in history_items:
+        if h['paymentId'] == 'MoneyTransfer_KazPost_Card2Cash':
+            item = {'amount': h['amount'], 'description':  h['description'],
+                    'title': h['src']['title'][-5:], 'token': h['token']}
+            card2cash_items.append(item)
+
+    for i in card2cash_items:
+        logging.info(i)
     reply(sender, "Выберите перевод из истории")
 
 
