@@ -753,76 +753,77 @@ def reply_onai_startPayment(sender, message, last_sender_message):
         return "fail"
 
 def reply_card2cash_history(sender, last_sender_message):
-    reply_typing_on(sender)
-    url_login = 'https://post.kz/mail-app/api/account/'
-    headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
-               'Content-Type': 'application/json'}
+    try:
+        reply_typing_on(sender)
+        url_login = 'https://post.kz/mail-app/api/account/'
+        headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
+                   'Content-Type': 'application/json'}
 
-    session = requests.Session()
-    session.get(url_login, headers=headers)
-    mobileNumber = last_sender_message['mobileNumber']
+        session = requests.Session()
+        session.get(url_login, headers=headers)
+        mobileNumber = last_sender_message['mobileNumber']
 
-    url_history = url + portal_id + '/payment/?pageSize=30&pageNumber=0&result=success&portalType=web'
-    headers = {'Content-Type': 'application/x-www-form-urlencoded',
-               'X-Channel-Id': x_channel_id,
-               'X-IV-Authorization': 'Identifier ' + mobileNumber}
-    r = requests.get(url_history, headers=headers)
-    history_items = r.json()['items']
-    card2cash_items = []
-    for h in history_items:
-        if h['paymentId'] == 'MoneyTransfer_KazPost_Card2Cash':
-            amount = h['amount'][:-2]
-            card_title = h['src']['title'][-4:]
-            desc_length = 20 - 2 - len(amount) - 4  # 20 - button title limit, 2 - for > and :, 4 - last 4 digits
-            description = h['description'][:desc_length]
-            title = card_title + '>' + description + ':' + amount
-            item = {'title': title, 'token': h['token']}
-            card2cash_items.append(item)
-            logging.info(item)
-    return
-    reply(sender, "Выберите перевод из истории")
-    data_items_buttons = {
-        "recipient": {"id": sender},
-        "message": {
-            "attachment": {
-                "type": "template",
-                "payload": {
-                    "template_type": "generic",
-                    "elements": [
-                        {
-                            "title": "Главное меню",
-                            "buttons": [
-                                {
-                                    "type": "postback",
-                                    "title": "📲 Пополнение баланса",
-                                    "payload": "balance"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "🔍 Отслеживание",
-                                    "payload": "tracking"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "📍Ближайшие отделения",
-                                    "payload": "nearest"
-                                }
-                            ]
-                        }
-                    ]
+        url_history = url + portal_id + '/payment/?pageSize=30&pageNumber=0&result=success&portalType=web'
+        headers = {'Content-Type': 'application/x-www-form-urlencoded',
+                   'X-Channel-Id': x_channel_id,
+                   'X-IV-Authorization': 'Identifier ' + mobileNumber}
+        r = requests.get(url_history, headers=headers)
+        history_items = r.json()['items']
+        card2cash_items = []
+        for h in history_items:
+            if h['paymentId'] == 'MoneyTransfer_KazPost_Card2Cash':
+                amount = h['amount'][:-2]
+                card_title = h['src']['title'][-4:]
+                desc_length = 20 - 2 - len(amount) - 4  # 20 - button title limit, 2 - for > and :, 4 - last 4 digits
+                description = h['description'][:desc_length]
+                title = card_title + '>' + description + ':' + amount
+                item = {'title': title, 'token': h['token']}
+                card2cash_items.append(item)
+                logging.info(item)
+        data_items_buttons = {
+            "recipient": {"id": sender},
+            "message": {
+                "attachment": {
+                    "type": "template",
+                    "payload": {
+                        "template_type": "generic",
+                        "elements": [
+                            {
+                                "title": "Главное меню",
+                                "buttons": [
+                                    {
+                                        "type": "postback",
+                                        "title": "📲 Пополнение баланса",
+                                        "payload": "balance"
+                                    },
+                                    {
+                                        "type": "postback",
+                                        "title": "🔍 Отслеживание",
+                                        "payload": "tracking"
+                                    },
+                                    {
+                                        "type": "postback",
+                                        "title": "📍Ближайшие отделения",
+                                        "payload": "nearest"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
                 }
             }
         }
-    }
-    elements = []
-    button_group = {}
-    buttons = []
-    count = 0
-    for i in card2cash_items:
-        title = i['title'] + '-' + i['description'] + '-' + i['amount']
-        buttons.append({"type": "postback", "title": "📲 Пополнение баланса", "payload": i['token']})
-        count += 1
-    reply(sender, "Выберите перевод из истории")
+        elements = []
+        button_group = {}
+        buttons = []
+        count = 0
+        for i in card2cash_items:
+            title = i['title'] + '-' + i['description'] + '-' + i['amount']
+            buttons.append({"type": "postback", "title": "📲 Пополнение баланса", "payload": i['token']})
+            count += 1
+        reply(sender, "Выберите перевод из истории")
+    except:
+        logging.info(helper.PrintException())
 
 
 def reply_card2card_enter_cardDst(sender, last_sender_message):
