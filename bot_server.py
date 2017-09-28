@@ -280,7 +280,8 @@ def handle_postback_payload(sender, last_sender_message, payload):
         if not call_card2card(sender, last_sender_message, payload):
             return "ok"
     elif payload == 'card2cash':
-        main.reply(sender, "[не работает] Введите номер карты отправителя в формате\n0000 0000 0000 0000\n" + hint_main_menu)
+        if not call_card2cash(sender, last_sender_message, payload):
+            return "ok"
     elif payload == 'courier':
         main.reply(sender, "[не работает] Отправьте геолокацию\n" + hint_main_menu)
     elif payload == 'currencies':
@@ -488,11 +489,16 @@ def handle_messages_when_deactivated(sender, data, last_sender_message):
         return
 
 def call_card2card(sender, last_sender_message, payload):
-    start = time.time()
     if check_login(sender, last_sender_message):
-        logging.info('check_login time = ' + str(time.time() - start))
         last_sender_message['lastCommand'] = payload
         main.reply_card2card_enter_cardDst(sender, last_sender_message)
+        return True
+    return False
+
+def call_card2cash(sender, last_sender_message, payload):
+    if check_login(sender, last_sender_message):
+        last_sender_message['lastCommand'] = payload
+        main.reply_card2cash_history(sender, last_sender_message)
         return True
     return False
 

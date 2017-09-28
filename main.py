@@ -243,10 +243,9 @@ def reply_main_menu_buttons(sender):
                                     "payload": "card2card"
                                 },
                                 {
-                                    "type": "web_url",
+                                    "type": "postback",
                                     "title": "Перевод на наличные",
-                                    "url": "https://transfer.post.kz/money-transfer/card-to-cash",
-                                    "webview_height_ratio": "full"
+                                    "payload": "card2cash"
                                 },
                                 {
                                     "type": "postback",
@@ -752,6 +751,9 @@ def reply_onai_startPayment(sender, message, last_sender_message):
         reply_typing_off(sender)
         reply_main_menu_buttons(sender)
         return "fail"
+
+def reply_card2cash_history(sender, last_sender_message):
+    reply(sender, "Выберите перевод из истории")
 
 def reply_card2card_enter_cardDst(sender, last_sender_message):
     try:
@@ -1826,8 +1828,8 @@ def reply_addcard_startAdding(sender, message, last_sender_message):
             reply_send_redirect_url(sender, d['url'])
             time.sleep(9)
         if d['state'] == 'confirmation':
-            message = 'Для подтверждения карты, введите сумму, блокированную на вашей карте.\n'
-            message +='Блокированную сумму можно узнать через интернет-банкинг или call-центр вашего банка.\n'
+            message =  'Для подтверждения карты, введите сумму, блокированную на вашей карте.\n'
+            message += 'Блокированную сумму можно узнать через интернет-банкинг или call-центр вашего банка.\n'
             message += 'Осталось попыток: 3'
             reply(sender, message)
             last_sender_message['token'] = token
@@ -1886,12 +1888,12 @@ def card_registration_confirm(sender, message, last_sender_message):
     phone = r.json()['mobileNumber']
     token = last_sender_message['token']
     # phone = last_sender_message['mobileNumber']
-    url = 'https://post.kz/mail-app/api/intervale/card/registration/confirm/' + token
+    url_confirmation = 'https://post.kz/mail-app/api/intervale/card/registration/confirm/' + token
     data = {
         'blockedAmount': message,
         'phone': phone
     }
-    r = session.post(url, json=data)
+    r = session.post(url_confirmation, json=data)
     d = r.json()
     if d['state'] == 'confirmation':
         reply(sender, "Вы ввели неправильную сумму, осталось " + str(d['attempts']) + " попытки. Введите сумму ещё раз")
