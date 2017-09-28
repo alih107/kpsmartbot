@@ -761,7 +761,7 @@ def reply_card2cash_history(sender, last_sender_message):
         session.get(url_login, headers=headers)
         mobileNumber = last_sender_message['mobileNumber']
 
-        url_history = url + portal_id + '/payment/?pageSize=30&pageNumber=0&portalType=web'
+        url_history = url + portal_id + '/payment/?pageSize=30&pageNumber=0&result=success&portalType=web'
         headers = {'Content-Type': 'application/x-www-form-urlencoded',
                    'X-Channel-Id': x_channel_id,
                    'X-IV-Authorization': 'Identifier ' + mobileNumber}
@@ -808,6 +808,9 @@ def reply_card2cash_history(sender, last_sender_message):
     except:
         logging.info(helper.PrintException())
 
+def reply_card2cash_history_show(sender, last_sender_message, token):
+    reply(sender, token)
+    pass
 
 def reply_card2card_enter_cardDst(sender, last_sender_message):
     try:

@@ -258,6 +258,12 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
 
 # кнопки главного меню
 def handle_postback_payload(sender, last_sender_message, payload):
+    if last_sender_message['payload'] == 'card2cash':
+        main.reply_card2cash_history_show(sender, last_sender_message, payload)
+        last_sender_message['payload'] = 'card2cash.show'
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        return "ok"
+
     if payload == 'GET_STARTED_PAYLOAD':
         reply_intro(sender)
         return "ok"
