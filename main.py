@@ -877,8 +877,10 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
         url_token = url + portal_id + '/token'
         r = session.post(url_token, headers=headers)
         new_token = r.json()['token']
+        logging.info(new_token)
         url_start = url + portal_id + '/payment/' + new_token + '/start'
-        requests.post(url_start, data=data, headers=headers)
+        r = requests.post(url_start, data=data, headers=headers)
+        logging.info(r.json())
 
         url_status = url + portal_id + '/payment/' + new_token
         r = session.post(url_status, headers=headers).json()
