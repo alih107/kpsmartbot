@@ -819,7 +819,8 @@ def reply_card2cash_history_show(sender, last_sender_message, token):
                 "\nФИО получателя: " + data['params']['rcpnLastname'] + " " + data['params']['rcpnName'] + \
                 "\nАдрес получателя: " + data['params']['rcpnAddr'] + \
                 "\nНомер телефона получателя: " + data['params']['rcpnPhone'] + \
-                "\nКодовое слово: " + data['params']['codeWord']
+                "\nКодовое слово: " + data['params']['codeWord'] + \
+                "\n\nЧтобы подтвердить перевод, введите трехзначный код CSC/CVV2 на обратной стороне карты"
         reply(sender, result)
     except:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
