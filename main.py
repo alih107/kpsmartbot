@@ -885,8 +885,15 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
         logging.info(r.json())
 
         url_status = url + portal_id + '/payment/' + new_token
-        r = session.post(url_status, headers=headers).json()
-        logging.info(r)
+        while True:
+            r = session.post(url_status, headers=headers).json()
+            if r['state'] == 'redirect':
+                reply_send_redirect_url(sender, r['url'])
+                break
+            if r['state'] == 'result':
+                reply(sender, r['result']['status'])
+                break
+            logging.info(r)
         return
     except:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
