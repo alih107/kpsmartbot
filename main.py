@@ -843,10 +843,16 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
 
         url_token_show = url + portal_id + '/payment/' + token
         r = session.get(url_token_show, headers=headers)
+
+        url_token = url + portal_id + '/token'
+        r = session.post(url_token, headers=headers)
+        new_token = r.json()['token']
+        logging.info(new_token)
+
         data = r.json()
         data1 = {
             'paymentId': "MoneyTransfer_KazPost_Card2Cash",
-            'returnUrl': 'https://transfer.post.kz/money-transfer/card-to-cash?token=' + token,
+            'returnUrl': 'https://transfer.post.kz/money-transfer/card-to-cash?token=' + new_token,
             'src.type': 'card_id',
             'src.cardholder': 'NAME',
             'src.cardId': data['src']['cardId'],
@@ -874,12 +880,8 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
             'params.rcpnPhone': data['params']['rcpnPhone'],
             'params.codeWord': data['params']['codeWord'],
         }
-        url_token = url + portal_id + '/token'
-        r = session.post(url_token, headers=headers)
-        new_token = r.json()['token']
-        logging.info(new_token)
         url_start = url + portal_id + '/payment/' + new_token + '/start'
-        r = requests.post(url_start, data=data, headers=headers)
+        r = requests.post(url_start, data=data1, headers=headers)
         logging.info(r.json())
 
         url_status = url + portal_id + '/payment/' + new_token
