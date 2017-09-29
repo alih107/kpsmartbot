@@ -822,6 +822,64 @@ def reply_card2cash_history_show(sender, last_sender_message, token):
                 "\nКодовое слово: " + data['params']['codeWord'] + \
                 "\n\nЧтобы подтвердить перевод, введите трехзначный код CSC/CVV2 на обратной стороне карты"
         reply(sender, result)
+        last_sender_message['card2cash_token'] = token
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    except:
+        reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
+        logging.info(helper.PrintException())
+
+def reply_card2cash_history_startPayment(sender, message, last_sender_message):
+    if not helper.check_csc(message):
+        reply(sender, "Вы неправильно ввели трёхзначный код CSC/CVV2 на обратной стороне карты, введите заново")
+        return "ok"
+    reply(sender, "Идёт обработка перевода, подождите 1-2 минуты...")
+    reply_typing_on(sender)
+    try:
+        token = last_sender_message['card2cash_token']
+        headers = {'Content-Type': 'application/x-www-form-urlencoded',
+                   'X-Channel-Id': x_channel_id,
+                   'X-IV-Authorization': 'Identifier ' + last_sender_message['mobileNumber']}
+
+        url_token_show = url + portal_id + '/payment/' + token
+        r = requests.get(url_token_show, headers=headers)
+        data = r.json()
+        data1 = {
+            'paymentId': "MoneyTransfer_KazPost_Card2Cash",
+            'returnUrl': 'https://transfer.post.kz/money-transfer/card-to-cash?token=' + token,
+            'src.type': 'card_id',
+            'src.cardholder': 'NAME',
+            'src.cardId': data['src']['cardId'],
+            'src.csc': message,
+            'src.addToProfile': 'true',
+            'amount': str(data['amount']),
+            'commission': str(data['commission']),
+            'total': str(data['amount'] + data['commission']),
+            'currency': data['currency'],
+            'params.transfType': data['params']['transfType'],
+            'params.transfPurpose': data['params']['transfPurpose'],
+            'params.cliResident': data['params']['cliResident'],
+            'params.cliTaxcode': data['params']['cliTaxcode'],
+            'params.cliLastname': data['params']['cliLastname'],
+            'params.cliName': data['params']['cliName'],
+            'params.cliAddr': data['params']['cliAddr'],
+            'params.cliPhone': data['params']['cliPhone'],
+            'params.passportType': data['params']['passportType'],
+            'params.passportNum': data['params']['passportNum'],
+            'params.passportDate': data['params']['passportDate'],
+            'params.passportOrg': data['params']['passportOrg'],
+            'params.rcpnLastname': data['params']['rcpnLastname'],
+            'params.rcpnName': data['params']['rcpnName'],
+            'params.rcpnAddr': data['params']['rcpnAddr'],
+            'params.rcpnPhone': data['params']['rcpnPhone'],
+            'params.codeWord': data['params']['codeWord'],
+        }
+        url_start = url + portal_id + '/payment/' + token + '/start'
+        requests.post(url_start, data=data, headers=headers)
+
+        url_status = url + portal_id + '/payment/' + token
+        r = requests.post(url_status, headers=headers).json()
+        logging.info(r)
+        return
     except:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
         logging.info(helper.PrintException())
@@ -909,7 +967,7 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
     if not helper.check_csc(message):
         reply(sender, "Вы неправильно ввели трёхзначный код CSC/CVV2 на обратной стороне карты, введите заново")
         return "ok"
-    reply(sender, "Идет обработка платежа...")
+    reply(sender, "Идет обработка перевода...")
     reply_typing_on(sender)
     # 1 - авторизация на post.kz
     try:

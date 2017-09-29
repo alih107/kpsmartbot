@@ -385,6 +385,9 @@ def handle_text_messages(sender, last_sender_message, message):
     elif payload == 'balance':
         main.reply_check_mobile_number(sender, message, last_sender_message)
         return "ok"
+    elif payload == 'card2cash.show':
+
+        return "ok"
     elif payload == 'card2card':
         main.reply_card2card_check_cardDst(sender, message, last_sender_message)
         return "ok"
