@@ -802,45 +802,57 @@ def reply_card2cash_history(sender, last_sender_message):
         logging.info(helper.PrintException())
 
 def reply_card2cash_history_show(sender, last_sender_message, token):
-    reply_typing_on(sender)
-    headers = {'Content-Type': 'application/x-www-form-urlencoded',
-               'X-Channel-Id': x_channel_id,
-               'X-IV-Authorization': 'Identifier ' + last_sender_message['mobileNumber']}
+    try:
+        reply_typing_on(sender)
+        headers = {'Content-Type': 'application/x-www-form-urlencoded',
+                   'X-Channel-Id': x_channel_id,
+                   'X-IV-Authorization': 'Identifier ' + last_sender_message['mobileNumber']}
 
-    url_token_show = url + portal_id + '/payment/' + token
-    r = requests.get(url_token_show, headers=headers)
-    data = r.json()
-    data1 = {
-        'paymentId': "MoneyTransfer_KazPost_Card2Cash",
-        'returnUrl': 'https://transfer.post.kz/money-transfer/card-to-cash?token=' + token,
-        'src.type': 'card_id',
-        'src.cardholder': 'NAME',
-        'src.cardId': data['src']['cardId'],
-        'src.csc': data['sender_cvv'],
-        'src.addToProfile': 'true',
-        'amount': data['amount'],
-        'commission': data['commission'],
-        'total': str(int(data['amount']) + int(data['commission'])),
-        'currency': data['currency'],
-        'params.transfType': data['params']['transfType'],
-        'params.transfPurpose': data['params']['transfPurpose'],
-        'params.cliResident': data['params']['cliResident'],
-        'params.cliTaxcode': data['params']['cliTaxcode'],
-        'params.cliLastname': data['params']['cliLastname'],
-        'params.cliName': data['params']['cliName'],
-        'params.cliAddr': data['params']['cliAddr'],
-        'params.cliPhone': data['params']['cliPhone'],
-        'params.passportType': data['params']['passportType'],
-        'params.passportNum': data['params']['passportNum'],
-        'params.passportDate': data['params']['passportDate'],
-        'params.passportOrg': data['params']['passportOrg'],
-        'params.rcpnLastname': data['params']['rcpnLastname'],
-        'params.rcpnName': data['params']['rcpnName'],
-        'params.rcpnAddr': data['params']['rcpnAddr'],
-        'params.rcpnPhone': data['params']['rcpnPhone'],
-        'params.codeWord': data['params']['codeWord'],
-    }
-    pass
+        url_token_show = url + portal_id + '/payment/' + token
+        r = requests.get(url_token_show, headers=headers)
+        data = r.json()
+        data1 = {
+            'paymentId': "MoneyTransfer_KazPost_Card2Cash",
+            'returnUrl': 'https://transfer.post.kz/money-transfer/card-to-cash?token=' + token,
+            'src.type': 'card_id',
+            'src.cardholder': 'NAME',
+            'src.cardId': data['src']['cardId'],
+            'src.addToProfile': 'true',
+            'amount': data['amount'],
+            'commission': data['commission'],
+            'total': int(data['amount']) + int(data['commission']),
+            'currency': data['currency'],
+            'params.transfType': data['params']['transfType'],
+            'params.transfPurpose': data['params']['transfPurpose'],
+            'params.cliResident': data['params']['cliResident'],
+            'params.cliTaxcode': data['params']['cliTaxcode'],
+            'params.cliLastname': data['params']['cliLastname'],
+            'params.cliName': data['params']['cliName'],
+            'params.cliAddr': data['params']['cliAddr'],
+            'params.cliPhone': data['params']['cliPhone'],
+            'params.passportType': data['params']['passportType'],
+            'params.passportNum': data['params']['passportNum'],
+            'params.passportDate': data['params']['passportDate'],
+            'params.passportOrg': data['params']['passportOrg'],
+            'params.rcpnLastname': data['params']['rcpnLastname'],
+            'params.rcpnName': data['params']['rcpnName'],
+            'params.rcpnAddr': data['params']['rcpnAddr'],
+            'params.rcpnPhone': data['params']['rcpnPhone'],
+            'params.codeWord': data['params']['codeWord'],
+        }
+        last_sender_message['last_history_item'] = data1
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        result = "Проверьте введённые данные:" \
+                "\nКарта: " + data['src']['title'] + \
+                "\nСумма: " + str(data['amount'] // 100) + \
+                "\nКомиссия: " + str(data['amount'] // 100) + \
+                "\nИтого: " + str(data['total'] // 100) + \
+                "\nФИО получателя: " + data['params']['rcpnLastname'] + " " + data['params']['rcpnName'] + \
+                "\nКодовое слово: " + data['params']['codeWord']
+        reply(sender, result)
+    except:
+        reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
+        logging.info(helper.PrintException())
 
 def reply_card2card_enter_cardDst(sender, last_sender_message):
     try:
