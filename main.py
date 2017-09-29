@@ -1588,6 +1588,7 @@ def reply_mobile_csc(sender, payload, last_sender_message):
     message += "Если всё верно, введите трехзначный код CSC/CVV2 на обратной стороне карты"
     
     reply(sender, message)
+    last_sender_message['commission'] = commission
 
 def reply_mobile_startPayment(sender, message, last_sender_message):
     reply(sender, "Идет обработка платежа...")
