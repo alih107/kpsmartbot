@@ -873,10 +873,13 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
             'params.rcpnPhone': data['params']['rcpnPhone'],
             'params.codeWord': data['params']['codeWord'],
         }
-        url_start = url + portal_id + '/payment/' + token + '/start'
+        url_token = url + portal_id + '/token'
+        r = requests.post(url_token, headers=headers)
+        new_token = r.json()['token']
+        url_start = url + portal_id + '/payment/' + new_token + '/start'
         requests.post(url_start, data=data, headers=headers)
 
-        url_status = url + portal_id + '/payment/' + token
+        url_status = url + portal_id + '/payment/' + new_token
         r = requests.post(url_status, headers=headers).json()
         logging.info(r)
         return
