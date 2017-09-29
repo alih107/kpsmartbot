@@ -822,23 +822,7 @@ def reply_card2cash_history_show(sender, last_sender_message, token):
             'commission': data['commission'],
             'total': int(data['amount']) + int(data['commission']),
             'currency': data['currency'],
-            'params.transfType': data['params']['transfType'],
-            'params.transfPurpose': data['params']['transfPurpose'],
-            'params.cliResident': data['params']['cliResident'],
-            'params.cliTaxcode': data['params']['cliTaxcode'],
-            'params.cliLastname': data['params']['cliLastname'],
-            'params.cliName': data['params']['cliName'],
-            'params.cliAddr': data['params']['cliAddr'],
-            'params.cliPhone': data['params']['cliPhone'],
-            'params.passportType': data['params']['passportType'],
-            'params.passportNum': data['params']['passportNum'],
-            'params.passportDate': data['params']['passportDate'],
-            'params.passportOrg': data['params']['passportOrg'],
-            'params.rcpnLastname': data['params']['rcpnLastname'],
-            'params.rcpnName': data['params']['rcpnName'],
-            'params.rcpnAddr': data['params']['rcpnAddr'],
-            'params.rcpnPhone': data['params']['rcpnPhone'],
-            'params.codeWord': data['params']['codeWord'],
+            'params': data['params']
         }
         last_sender_message['last_history_item'] = data1
         collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
