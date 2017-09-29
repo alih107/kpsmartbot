@@ -74,9 +74,9 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
             logging.info('o.write(g.content) time = ' + str(time.time() - start))
         start = time.time()
         try:
-            AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="wav")
+            AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="wav") # android
         except:
-            AudioSegment.from_file(voice_filename, "aac").export(voice_filename_wav, format="wav")
+            AudioSegment.from_file(voice_filename, "aac").export(voice_filename_wav, format="wav") # iphone
         logging.info('AudioSegment export time = ' + str(time.time() - start))
         with open(voice_filename_wav, 'rb') as f:
             try:
