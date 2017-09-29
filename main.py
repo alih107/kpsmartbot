@@ -843,13 +843,13 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
 
         url_token_show = url + portal_id + '/payment/' + token
         r = session.get(url_token_show, headers=headers)
+        data = r.json()
 
         url_token = url + portal_id + '/token'
         r = session.post(url_token, headers=headers)
         new_token = r.json()['token']
         logging.info(new_token)
 
-        data = r.json()
         data1 = {
             'paymentId': "MoneyTransfer_KazPost_Card2Cash",
             'returnUrl': 'https://transfer.post.kz/money-transfer/card-to-cash?token=' + new_token,
