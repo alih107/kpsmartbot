@@ -784,7 +784,7 @@ def reply_card2cash_history(sender, last_sender_message):
                 buttons = []
             buttons.append({"type": "postback", "title": i['title'], "payload": i['token']})
             count += 1
-        elements.append({'title': 'Выберите перевод', 'buttons': buttons})
+        elements.append({'title': 'Выберите перевод (Карта>Кому:Сумма)', 'buttons': buttons})
         data_items_buttons = {
             "recipient": {"id": sender},
             "message": {
