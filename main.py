@@ -244,7 +244,7 @@ def reply_main_menu_buttons(sender):
                                 },
                                 {
                                     "type": "postback",
-                                    "title": "Перевод на наличные",
+                                    "title": "💸 Перевод на руки",
                                     "payload": "card2cash"
                                 },
                                 {
@@ -780,7 +780,7 @@ def reply_card2cash_history(sender, last_sender_message):
             return
         for i in card2cash_items:
             if count > 0 and count % 3 == 0:
-                elements.append({'title': 'Выберите перевод', 'buttons': buttons})
+                elements.append({'title': 'Выберите перевод (Карта>Кому:Сумма)', 'buttons': buttons})
                 buttons = []
             buttons.append({"type": "postback", "title": i['title'], "payload": i['token']})
             count += 1
@@ -881,8 +881,7 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
             'params.codeWord': data['params']['codeWord'],
         }
         url_start = url + portal_id + '/payment/' + new_token + '/start'
-        r = requests.post(url_start, data=data1, headers=headers)
-        logging.info(r.json())
+        requests.post(url_start, data=data1, headers=headers)
 
         url_status = url + portal_id + '/payment/' + new_token
         timer = 0
