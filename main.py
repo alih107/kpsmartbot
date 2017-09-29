@@ -885,16 +885,42 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
         logging.info(r.json())
 
         url_status = url + portal_id + '/payment/' + new_token
-        while True:
+        reply_typing_on(sender)
+        timer = 0
+        urlSent = False
+        while timer < timeout:
+            if urlSent:
+                time.sleep(1)
             r = session.post(url_status, headers=headers).json()
             if r['state'] == 'redirect':
                 reply_send_redirect_url(sender, r['url'])
-                break
+                urlSent = True
             if r['state'] == 'result':
-                reply(sender, r['result']['status'])
-                break
-            logging.info(r)
-        return
+                if r['result']['status'] == 'fail':
+                    reply(sender, "Перевод не был завершен успешно. Попробуйте снова")
+                if r['result']['status'] == 'suspended':
+                    reply(sender, "Возникла проблема на стороне банка, перевод не был осуществлён. Попробуйте позже")
+                if r['result']['status'] == 'success':
+                    res = "Поздравляю! Перевод был проведен успешно!"
+                    res += "\nВнимание! Сообщите контрольный номер перевода и кодовое слово получателю перевода"
+                    res += "\nКонтрольный номер перевода: " + r['result']['transferCode']
+                    res += "\nКонтрольное слово: " + data['params']['codeWord']
+                    reply(sender, res)
+                reply_typing_off(sender)
+                last_sender_message['payload'] = 'card2cash.finished'
+                collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+                return
+            timer += 1
+
+        last_sender_message = collection_messages.find_one({"sender": sender})
+        if last_sender_message['payload'] == 'card2cash.show':
+            strminutes = str(timeout // 60)
+            reply(sender, "Прошло больше " + strminutes + " минут: перевод отменяется")
+            reply_typing_off(sender)
+            reply_main_menu_buttons(sender)
+            last_sender_message['payload'] = 'mainMenu'
+            collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        return "time exceed"
     except:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
         logging.info(helper.PrintException())
