@@ -885,9 +885,9 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
         logging.info(r.json())
 
         url_status = url + portal_id + '/payment/' + new_token
-        reply_typing_on(sender)
         timer = 0
         urlSent = False
+        reply_typing_on(sender)
         while timer < timeout:
             if urlSent:
                 time.sleep(1)
@@ -907,6 +907,7 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
                     res += "\nКонтрольное слово: " + data['params']['codeWord']
                     reply(sender, res)
                 reply_typing_off(sender)
+                reply_main_menu_buttons(sender)
                 last_sender_message['payload'] = 'card2cash.finished'
                 collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
                 return
