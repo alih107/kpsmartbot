@@ -852,7 +852,7 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
 
         data1 = {
             'paymentId': "MoneyTransfer_KazPost_Card2Cash",
-            'returnUrl': 'https://transfer.post.kz/money-transfer/card-to-cash?token=' + new_token,
+            'returnUrl': 'https://post.kz/static/return.html',
             'src.type': 'card_id',
             'src.cardholder': 'NAME',
             'src.cardId': data['src']['cardId'],
