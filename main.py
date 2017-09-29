@@ -814,8 +814,8 @@ def reply_card2cash_history_show(sender, last_sender_message, token):
         result = "Проверьте введённые данные:" \
                 "\nКарта: " + data['src']['title'] + \
                 "\nСумма: " + str(data['amount'] // 100) + \
-                "\nКомиссия: " + str(data['amount'] // 100) + \
-                "\nИтого: " + str(data['total'] // 100) + \
+                "\nКомиссия: " + str(data['commission'] // 100) + \
+                "\nИтого: " + str((int(data['amount'])+int(data['commission'])) // 100) + \
                 "\nФИО получателя: " + data['params']['rcpnLastname'] + " " + data['params']['rcpnName'] + \
                 "\nКодовое слово: " + data['params']['codeWord']
         reply(sender, result)
