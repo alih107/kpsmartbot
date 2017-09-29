@@ -73,7 +73,10 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
             o.write(g.content)
             logging.info('o.write(g.content) time = ' + str(time.time() - start))
         start = time.time()
-        AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="wav")
+        try:
+            AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="wav")
+        except:
+            AudioSegment.from_file(voice_filename, "aac").export(voice_filename_wav, format="wav")
         logging.info('AudioSegment export time = ' + str(time.time() - start))
         with open(voice_filename_wav, 'rb') as f:
             try:
