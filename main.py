@@ -836,12 +836,13 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
     reply_typing_on(sender)
     try:
         token = last_sender_message['card2cash_token']
+        session = requests.Session()
         headers = {'Content-Type': 'application/x-www-form-urlencoded',
                    'X-Channel-Id': x_channel_id,
                    'X-IV-Authorization': 'Identifier ' + last_sender_message['mobileNumber']}
 
         url_token_show = url + portal_id + '/payment/' + token
-        r = requests.get(url_token_show, headers=headers)
+        r = session.get(url_token_show, headers=headers)
         data = r.json()
         data1 = {
             'paymentId': "MoneyTransfer_KazPost_Card2Cash",
@@ -874,13 +875,13 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
             'params.codeWord': data['params']['codeWord'],
         }
         url_token = url + portal_id + '/token'
-        r = requests.post(url_token, headers=headers)
+        r = session.post(url_token, headers=headers)
         new_token = r.json()['token']
         url_start = url + portal_id + '/payment/' + new_token + '/start'
         requests.post(url_start, data=data, headers=headers)
 
         url_status = url + portal_id + '/payment/' + new_token
-        r = requests.post(url_status, headers=headers).json()
+        r = session.post(url_status, headers=headers).json()
         logging.info(r)
         return
     except:
