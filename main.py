@@ -892,7 +892,7 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
             if urlSent:
                 time.sleep(1)
             r = session.post(url_status, headers=headers).json()
-            if r['state'] == 'redirect':
+            if r['state'] == 'redirect' and not urlSent:
                 reply_send_redirect_url(sender, r['url'])
                 urlSent = True
             if r['state'] == 'result':
