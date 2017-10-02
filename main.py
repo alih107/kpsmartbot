@@ -438,6 +438,7 @@ def reply_pdd_shtrafy_iin_enter(sender, last_sender_message):
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
 def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
+    reply_typing_on(sender)
     try:
         year = int(message[:2])
         month = int(message[2:4])
@@ -456,7 +457,6 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
     except:
         reply(sender, "Вы ввели неправильный ИИН, введите еще раз")
         return "again"
-    reply_typing_on(sender)
     session = requests.Session()
     url_login = 'https://post.kz/mail-app/api/public/transfer/loadName/' + message
     r = session.get(url_login).json()
