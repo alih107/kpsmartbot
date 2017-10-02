@@ -437,9 +437,6 @@ def reply_pdd_shtrafy_iin_enter(sender, last_sender_message):
     last_sender_message['payload'] = '4.IIN'
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
-def reply_pdd_shtrafy_gosnomer_enter(sender):
-    pass
-
 def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
     try:
         year = int(message[:2])
@@ -469,6 +466,7 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
         reply(sender, "Такой ИИН не найден, введите еще раз")
         return "again"
 
+    result = ''
     try:
         headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
                    'Content-Type': 'application/json'}
@@ -482,18 +480,14 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
         status = data['responseInfo']['status']
         if status == 'FAILED':
             result = 'Штрафов по данным ' + message + ' не найдено'
-            reply(sender, result)
-            reply_typing_off(sender)
-            return "again"
-
-        subscriptionId = str(r.json()['subscriptionData']['id'])
-        url_login = 'https://post.kz/mail-app/api/v2/subscriptions/' + subscriptionId + '/invoices'
-        invoiceData = session.get(url_login).json()['invoiceData']
-        result = ''
-        for fine in invoiceData:
-            desc = fine['details'][0]['description']
-            amount = str(fine['details'][0]['amount'])
-            result += desc + ' - сумма ' + amount + ' тг\n\n'
+        else:
+            subscriptionId = str(r.json()['subscriptionData']['id'])
+            url_login = 'https://post.kz/mail-app/api/v2/subscriptions/' + subscriptionId + '/invoices'
+            invoiceData = session.get(url_login).json()['invoiceData']
+            for fine in invoiceData:
+                desc = fine['details'][0]['description']
+                amount = str(fine['details'][0]['amount'])
+                result += desc + ' - сумма ' + amount + ' тг\n\n'
     except:
         url_login = 'https://post.kz/mail-app/api/public/v2/invoices/create'
         data = {'operatorId': 'pddIin', 'data': message}
@@ -503,15 +497,12 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
         if status == 'FAILED':
             result = 'Штрафов по данным ' + message + ' не найдено\n'
             result += '(Информация может быть неполной! Для полной информации авторизуйтесь в главном меню)'
-            reply(sender, result)
-            reply_typing_off(sender)
-            return "again"
-        invoiceData = data['invoiceData']
-        result = ''
-        desc = invoiceData['details'][0]['description']
-        amount = str(invoiceData['details'][0]['amount'])
-        result += desc + ' - сумма ' + amount + ' тг\n'
-        result += '(Информация может быть неполной! Для полной информации авторизуйтесь в главном меню)'
+        else:
+            invoiceData = data['invoiceData']
+            desc = invoiceData['details'][0]['description']
+            amount = str(invoiceData['details'][0]['amount'])
+            result += desc + ' - сумма ' + amount + ' тг\n'
+            result += '(Информация может быть неполной! Для полной информации авторизуйтесь в главном меню)'
 
     reply(sender, result)
 
@@ -524,6 +515,8 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
     except:
         logging.error(helper.PrintException())
 
+    result += "\n(Выберите или введите другой ИИН, чтобы посмотреть штрафы ПДД, " \
+              "либо нажмите (y) для перехода в главное меню)"
     reply_pdd_shtrafy_iin_quick_replies_with_delete(sender, last_sender_message['pddIINs'], result)
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
@@ -540,6 +533,9 @@ def reply_pdd_shtrafy_iin_quick_replies_with_delete(sender, pddIINs, text):
         }
     }
     requests.post(fb_url, json=data_quick_replies)
+
+def reply_pdd_shtrafy_gosnomer_enter(sender):
+    pass
 
 def reply_pdd_shtrafy_gosnomer(sender, message, last_sender_message):
     reply(sender, "Идет проверка на наличие штрафов...")
