@@ -208,7 +208,7 @@ def reply_intro(sender):
 def handle_quickreply_payload(sender, data, last_sender_message, payload):
     text = data['entry'][0]['messaging'][0]['message']['text']
     if payload == '4.IIN':
-        main.reply_pdd_shtrafy_gosnomer_enter(sender, last_sender_message)
+        main.reply_pdd_shtrafy_iin_enter(sender, last_sender_message)
         return "ok"
     elif payload == '4.GosNomer':
         main.reply(sender, gosnomer_text + "\n" + hint_main_menu)
