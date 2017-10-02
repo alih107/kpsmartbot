@@ -509,7 +509,6 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
             last_sender_message['pddIINs'] = []
         if not message in last_sender_message['pddIINs'] and len(last_sender_message['pddIINs']) < 10:
             last_sender_message['pddIINs'].append(message)
-        logging.info(last_sender_message['pddIINs'])
     except:
         logging.error(helper.PrintException())
 
