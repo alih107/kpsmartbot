@@ -504,8 +504,6 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
             result += desc + ' - сумма ' + amount + ' тг\n'
             result += '(Информация может быть неполной! Для полной информации авторизуйтесь в главном меню)'
 
-    reply(sender, result)
-
     try:
         if not "pddIINs" in last_sender_message:
             last_sender_message['pddIINs'] = []
