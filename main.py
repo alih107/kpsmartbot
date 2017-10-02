@@ -531,6 +531,28 @@ def reply_pdd_shtrafy_iin_quick_replies_with_delete(sender, pddIINs, text):
     }
     requests.post(fb_url, json=data_quick_replies)
 
+def reply_pdd_shtrafy_iin_delete(sender, last_sender_message):
+    pddIINs = last_sender_message['pddIINs']
+    buttons = []
+    for iin in pddIINs:
+        buttons.append({"content_type": "text", "payload": "pddIIN.delete.number", "title": iin})
+
+    data_quick_replies = {
+        "recipient": {"id": sender},
+        "message": {
+            "text": "Выберите ИИН, чтобы его удалить",
+            "quick_replies": buttons
+        }
+    }
+    requests.post(fb_url, json=data_quick_replies)
+
+def reply_pdd_shtrafy_iin_delete_iin(sender, text, last_sender_message):
+    last_sender_message['pddIINs'].remove(text)
+    reply(sender, "ИИН " + text + " успешно удалён")
+    reply_pdd_shtrafy_iin_enter(sender, last_sender_message)
+    last_sender_message['payload'] = '4.IIN'
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+
 def reply_pdd_shtrafy_gosnomer_enter(sender):
     pass
 
@@ -1600,24 +1622,26 @@ def reply_mobile_amount(sender, message, last_sender_message):
         return "again"
 
     if amount < minAmount:
-        reply(sender, "Сумма пополнения баланса должна быть не менее " + str(minAmount) +" тг. Введите сумму заново")
+        reply(sender, "Сумма пополнения баланса должна быть не менее " + str(minAmount) + " тг. Введите сумму заново")
         return "again"
 
-    last_sender_message['payload'] = 'mobile.chooseCard'
-    last_sender_message['amount'] = amount
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
     reply_display_cards(sender, last_sender_message)
-
-def reply_mobile_csc(sender, payload, last_sender_message):
-    amount = last_sender_message['amount']
-    commission = 0
     operator = last_sender_message['mobileOperator']
+    commission = 0
     if operator == 'Activ' or operator == 'Kcell':
         commission = amount / 10
         if commission > 70:
             commission = 70
     elif operator == 'Tele2' or operator == 'Beeline':
         commission = 50
+    last_sender_message['commission'] = commission
+    last_sender_message['payload'] = 'mobile.chooseCard'
+    last_sender_message['amount'] = amount
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+
+def reply_mobile_csc(sender, payload, last_sender_message):
+    amount = last_sender_message['amount']
+    commission = last_sender_message['commission']
     phoneToRefill = last_sender_message['phoneToRefill']
     total = amount + commission
     chosenCard = last_sender_message[payload]
@@ -1631,7 +1655,6 @@ def reply_mobile_csc(sender, payload, last_sender_message):
     message += "Если всё верно, введите трехзначный код CSC/CVV2 на обратной стороне карты"
     
     reply(sender, message)
-    last_sender_message['commission'] = commission
 
 def reply_mobile_startPayment(sender, message, last_sender_message):
     reply(sender, "Идет обработка платежа...")
