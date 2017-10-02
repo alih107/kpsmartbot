@@ -113,8 +113,8 @@ def handle_data(data):
     last_sender_message = collection_messages.find_one({"sender": sender})
     if last_sender_message == None:
         fn, ln = get_firstname_lastname(sender)
-        db_record = {"sender": sender, "first_name": fn, "last_name": ln,
-                     "isBotActive": True, 'phonesToRefill': [], 'onaisToRefill': [], 'trackingNumbers': [],
+        db_record = {"sender": sender, "first_name": fn, "last_name": ln, "isBotActive": True, 'phonesToRefill': [],
+                     'onaisToRefill': [], 'trackingNumbers': [], 'pddIINs': [], 'pddGosnomers': [],
                      'hasCards': False, 'encodedLoginPass': None, 'payload': 'mainMenu'}
         last_sender_message = collection_messages.insert_one(db_record)
         reply_intro(sender)
@@ -208,7 +208,8 @@ def reply_intro(sender):
 def handle_quickreply_payload(sender, data, last_sender_message, payload):
     text = data['entry'][0]['messaging'][0]['message']['text']
     if payload == '4.IIN':
-        main.reply(sender, "Введите 12-ти значный ИИН\n" + hint_main_menu)
+        main.reply_pdd_shtrafy_gosnomer_enter(sender, last_sender_message)
+        return "ok"
     elif payload == '4.GosNomer':
         main.reply(sender, gosnomer_text + "\n" + hint_main_menu)
     elif payload == 'tracking.last':

@@ -67,7 +67,6 @@ def reply_typing_off(sender):
     }
     requests.post(fb_url, json=data)
 
-
 def reply_main_menu_buttons(sender):
     data_main_menu_buttons = {
         "recipient": {"id": sender},
@@ -412,6 +411,35 @@ def reply_pdd_shtrafy(sender):
     }
     requests.post(fb_url, json=data_quick_replies)
 
+def reply_pdd_shtrafy_iin_enter(sender, last_sender_message):
+    pddIINs = []
+    try:
+        pddIINs = last_sender_message['pddIINs']
+    except:
+        last_sender_message['pddIINs'] = []
+
+    try:
+        assert len(pddIINs) > 0
+        buttons = []
+        for iin in pddIINs:
+            buttons.append({"content_type": "text", "payload": "pddIIN.last", "title": iin})
+        buttons.append({"content_type": "text", "payload": "pddIIN.delete", "title": "Удалить ИИН"})
+        data_quick_replies = {
+            "recipient": {"id": sender},
+            "message": {
+                "text": "Выберите ИИН или введите его\n" + hint_main_menu,
+                "quick_replies": buttons
+            }
+        }
+        requests.post(fb_url, json=data_quick_replies)
+    except:
+        reply(sender, "Введите 12-ти значный ИИН\n" + hint_main_menu)
+    last_sender_message['payload'] = '4.IIN'
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+
+def reply_pdd_shtrafy_gosnomer_enter(sender):
+    pass
+
 def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
     try:
         year = int(message[:2])
@@ -442,7 +470,8 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
         return "again"
 
     try:
-        headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type':'application/json'}
+        headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
+                   'Content-Type': 'application/json'}
         url_login = 'https://post.kz/mail-app/api/account/'
         r = session.get(url_login, headers=headers)
 
@@ -465,13 +494,9 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
             desc = fine['details'][0]['description']
             amount = str(fine['details'][0]['amount'])
             result += desc + ' - сумма ' + amount + ' тг\n\n'
-
-        reply(sender, result)
-        reply_typing_off(sender)
-
     except:
         url_login = 'https://post.kz/mail-app/api/public/v2/invoices/create'
-        data = {'operatorId':'pddIin', 'data':message}
+        data = {'operatorId': 'pddIin', 'data': message}
         r = session.post(url_login, json=data)
         data = r.json()
         status = data['responseInfo']['status']
@@ -488,8 +513,33 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
         result += desc + ' - сумма ' + amount + ' тг\n'
         result += '(Информация может быть неполной! Для полной информации авторизуйтесь в главном меню)'
 
-        reply_typing_off(sender)
-        reply(sender, result)
+    reply(sender, result)
+
+    try:
+        if not "pddIINs" in last_sender_message:
+            last_sender_message['pddIINs'] = []
+        if not message in last_sender_message['pddIINs'] and len(last_sender_message['pddIINs']) < 10:
+            last_sender_message['pddIINs'].append(message)
+        logging.info(last_sender_message['pddIINs'])
+    except:
+        logging.error(helper.PrintException())
+
+    reply_pdd_shtrafy_iin_quick_replies_with_delete(sender, last_sender_message['pddIINs'], result)
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+
+def reply_pdd_shtrafy_iin_quick_replies_with_delete(sender, pddIINs, text):
+    buttons = []
+    for iin in pddIINs:
+        buttons.append({"content_type": "text", "payload": "pddiin.last", "title": iin})
+    buttons.append({"content_type": "text", "payload": "pddiin.delete", "title": "Удалить ИИН"})
+    data_quick_replies = {
+        "recipient": {"id": sender},
+        "message": {
+            "text": text,
+            "quick_replies": buttons
+        }
+    }
+    requests.post(fb_url, json=data_quick_replies)
 
 def reply_pdd_shtrafy_gosnomer(sender, message, last_sender_message):
     reply(sender, "Идет проверка на наличие штрафов...")
