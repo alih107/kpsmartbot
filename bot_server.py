@@ -210,6 +210,9 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
     if payload == '4.IIN':
         main.reply_pdd_shtrafy_iin_enter(sender, last_sender_message)
         return "ok"
+    if payload == 'pddiin.last':
+        main.reply_pdd_shtrafy_iin(sender, text, last_sender_message)
+        return "ok"
     elif payload == '4.GosNomer':
         main.reply(sender, gosnomer_text + "\n" + hint_main_menu)
     elif payload == 'tracking.last':
