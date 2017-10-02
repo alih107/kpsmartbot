@@ -369,6 +369,11 @@ def handle_attachments(sender, last_sender_message, attachment):
             logging.info(helper.PrintException())
 
 def handle_text_messages(sender, last_sender_message, message):
+    if message == '👍':
+        main.reply_main_menu_buttons(sender)
+        last_sender_message['payload'] = 'mainMenu'
+        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        return "ok"
     payload = last_sender_message['payload']
     if payload == 'tracking':
         main.reply_tracking(sender, message, last_sender_message)
