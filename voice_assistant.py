@@ -87,14 +87,17 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                 logging.info('requests.post to yandex time = ' + str(time.time() - start))
                 root = ET.fromstring(r.text)
                 logging.info("" + str(root.tag) + " | " + str(root.attrib) + " | " + str(root.text))
-                for child in root:
-                    logging.info("" + str(child.tag) + " " + str(child.attrib) + " | " + str(child.text))
-                    start = time.time()
-                    resp = client.message(child.text)
-                    logging.info('client.message time = ' + str(time.time() - start))
-                    handle_entities(sender, last_sender_message, resp)
-                    logging.info('handle_voice_message elapsed time = ' + str(time.time() - start_function))
-                    break
+                if root.attrib['success'] == '0':
+                    main.reply(sender, "Мне кажется, что Вы отправили пустую аудио-запись")
+                else:
+                    for child in root:
+                        logging.info("" + str(child.tag) + " " + str(child.attrib) + " | " + str(child.text))
+                        start = time.time()
+                        resp = client.message(child.text)
+                        logging.info('client.message time = ' + str(time.time() - start))
+                        handle_entities(sender, last_sender_message, resp)
+                        logging.info('handle_voice_message elapsed time = ' + str(time.time() - start_function))
+                        break
             except:
                 logging.info(helper.PrintException())
                 main.reply(sender, "Извините, я не поняла что Вы сказали")
