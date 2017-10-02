@@ -115,7 +115,7 @@ def handle_data(data):
         fn, ln = get_firstname_lastname(sender)
         db_record = {"sender": sender, "first_name": fn, "last_name": ln,
                      "isBotActive": True, 'phonesToRefill': [], 'onaisToRefill': [], 'trackingNumbers': [],
-                     'hasCards': False, 'encodedLoginPass': None}
+                     'hasCards': False, 'encodedLoginPass': None, 'payload': 'mainMenu'}
         last_sender_message = collection_messages.insert_one(db_record)
         reply_intro(sender)
         logging.info("We've got new user! Sender = " + sender + " | " + fn + " " + ln)
@@ -374,7 +374,6 @@ def handle_text_messages(sender, last_sender_message, message):
         last_sender_message['payload'] = 'mainMenu'
         collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
         return "ok"
-
     payload = last_sender_message['payload']
     if payload == 'tracking':
         main.reply_tracking(sender, message, last_sender_message)
