@@ -479,7 +479,7 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
         data = r.json()
         status = data['responseInfo']['status']
         if status == 'FAILED':
-            result = 'Штрафов по данным ' + message + ' не найдено'
+            result = 'Штрафов по данным ' + message + ' не найдено\n'
         else:
             subscriptionId = str(r.json()['subscriptionData']['id'])
             url_login = 'https://post.kz/mail-app/api/v2/subscriptions/' + subscriptionId + '/invoices'
@@ -512,7 +512,7 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
     except:
         logging.error(helper.PrintException())
 
-    result += "\n(Выберите или введите другой ИИН, чтобы посмотреть штрафы ПДД, " \
+    result += "(Выберите или введите другой ИИН, чтобы посмотреть штрафы ПДД, " \
               "либо нажмите (y) для перехода в главное меню)"
     reply_pdd_shtrafy_iin_quick_replies_with_delete(sender, last_sender_message['pddIINs'], result)
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
