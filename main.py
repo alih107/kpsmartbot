@@ -520,8 +520,8 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
 def reply_pdd_shtrafy_iin_quick_replies_with_delete(sender, pddIINs, text):
     buttons = []
     for iin in pddIINs:
-        buttons.append({"content_type": "text", "payload": "pddiin.last", "title": iin})
-    buttons.append({"content_type": "text", "payload": "pddiin.delete", "title": "Удалить ИИН"})
+        buttons.append({"content_type": "text", "payload": "pddIIN.last", "title": iin})
+    buttons.append({"content_type": "text", "payload": "pddIIN.delete", "title": "Удалить ИИН"})
     data_quick_replies = {
         "recipient": {"id": sender},
         "message": {
