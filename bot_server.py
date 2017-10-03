@@ -20,10 +20,6 @@ logging.basicConfig(filename='botserver.log', level=logging.INFO,
 ACCESS_TOKEN = main.ACCESS_TOKEN
 fb_url = main.fb_url
 
-gosnomer_text = """Введите номер авто и номер техпаспорта через пробел
-Правильный формат запроса: [номер авто] [номер техпаспорта]
-Пример: 123AAA01 AA00000000"""
-
 hint_main_menu = "(для перехода в главное меню нажмите кнопку (y)"
 digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30']
 
@@ -220,7 +216,17 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
         main.reply_pdd_shtrafy_iin_delete_iin(sender, text, last_sender_message)
         return "ok"
     elif payload == '4.GosNomer':
-        main.reply(sender, gosnomer_text + "\n" + hint_main_menu)
+        main.reply_pdd_shtrafy_gosnomer_enter(sender, last_sender_message)
+        return "ok"
+    elif payload == 'pddGosnomer.last':
+        main.reply_pdd_shtrafy_gosnomer(sender, text, last_sender_message)
+        return "ok"
+    elif payload == 'pddGosnomer.delete':
+        main.reply_pdd_shtrafy_gosnomer_delete(sender, last_sender_message)
+        return "ok"
+    elif payload == 'pddGosnomer.delete.number':
+        main.reply_pdd_shtrafy_gosnomer_delete_gosnomer(sender, text, last_sender_message)
+        return "ok"
     elif payload == 'tracking.last':
         main.reply_tracking(sender, text, last_sender_message)
         payload = 'tracking'

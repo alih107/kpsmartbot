@@ -23,6 +23,9 @@ hint_main_menu2 = "(Нажмите (y) для перехода в главное
 card2card_info = """Информация:\nПереводы возможны только между картами одной МПС: Visa to Visa или 
 MasterCard to MasterCard.\nПереводы между Visa и MasterCard возможны, только если одна из карт 
 эмитирована банком АО \"Казкоммерцбанк\"."""
+gosnomer_text = """Введите номер авто и номер техпаспорта через пробел
+Правильный формат запроса: [номер авто] [номер техпаспорта]
+Пример: 123AAA01 AA00000000"""
 timeout = 300
 operators_dict = {'Tele2': 'tele2Wf', 'Beeline': 'beelineWf', 'Activ': 'activWf', 'Kcell': 'kcellWf'}
 to_find_dict = {'nearest.postamats': 'ближайший постамат',
@@ -30,6 +33,45 @@ to_find_dict = {'nearest.postamats': 'ближайший постамат',
                 'nearest.atms': 'ближайший банкомат'}
 
 url_mobile_payments = 'https://post.kz/finance/payment/mobile'
+
+def check_penalties_pdd(last_sender_message, data):
+    message = data['data']
+    result = ''
+    session = requests.Session()
+    try:
+        headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
+                   'Content-Type': 'application/json'}
+        url_login = 'https://post.kz/mail-app/api/account/'
+        r = session.get(url_login, headers=headers)
+
+        url_login = 'https://post.kz/mail-app/api/v2/subscriptions'
+        r = session.post(url_login, json=data)
+        data = r.json()
+        status = data['responseInfo']['status']
+        if status == 'FAILED':
+            result = 'Штрафов по данным ' + message + ' не найдено\n'
+        else:
+            subscriptionId = str(r.json()['subscriptionData']['id'])
+            url_login = 'https://post.kz/mail-app/api/v2/subscriptions/' + subscriptionId + '/invoices'
+            invoiceData = session.get(url_login).json()['invoiceData']
+            for fine in invoiceData:
+                desc = fine['details'][0]['description']
+                amount = str(fine['details'][0]['amount'])
+                result += desc + ' - сумма ' + amount + ' тг\n\n'
+    except:
+        url_login = 'https://post.kz/mail-app/api/public/v2/invoices/create'
+        r = session.post(url_login, json=data)
+        data = r.json()
+        status = data['responseInfo']['status']
+        if status == 'FAILED':
+            result = 'Штрафов по данным ' + message + ' не найдено\n'
+        else:
+            invoiceData = data['invoiceData']
+            desc = invoiceData['details'][0]['description']
+            amount = str(invoiceData['details'][0]['amount'])
+            result += desc + ' - сумма ' + amount + ' тг\n'
+        result += '(Информация может быть неполной! Для полной информации авторизуйтесь в главном меню)'
+    return result
 
 def reply(sender, msg):
     data = {"recipient": {"id": sender}, "message": {"text": msg}}
@@ -457,53 +499,16 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
     except:
         reply(sender, "Вы ввели неправильный ИИН, введите еще раз")
         return "again"
-    session = requests.Session()
     url_login = 'https://post.kz/mail-app/api/public/transfer/loadName/' + message
-    r = session.get(url_login).json()
+    r = requests.get(url_login).json()
     try:
         name = r['name']
     except:
         reply(sender, "Такой ИИН не найден, введите еще раз")
         return "again"
 
-    result = ''
-    try:
-        headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
-                   'Content-Type': 'application/json'}
-        url_login = 'https://post.kz/mail-app/api/account/'
-        r = session.get(url_login, headers=headers)
-
-        url_login = 'https://post.kz/mail-app/api/v2/subscriptions'
-        data = {'operatorId':'pddIin', 'data':message}
-        r = session.post(url_login, json=data)
-        data = r.json()
-        status = data['responseInfo']['status']
-        if status == 'FAILED':
-            result = 'Штрафов по данным ' + message + ' не найдено\n'
-        else:
-            subscriptionId = str(r.json()['subscriptionData']['id'])
-            url_login = 'https://post.kz/mail-app/api/v2/subscriptions/' + subscriptionId + '/invoices'
-            invoiceData = session.get(url_login).json()['invoiceData']
-            for fine in invoiceData:
-                desc = fine['details'][0]['description']
-                amount = str(fine['details'][0]['amount'])
-                result += desc + ' - сумма ' + amount + ' тг\n\n'
-    except:
-        url_login = 'https://post.kz/mail-app/api/public/v2/invoices/create'
-        data = {'operatorId': 'pddIin', 'data': message}
-        r = session.post(url_login, json=data)
-        data = r.json()
-        status = data['responseInfo']['status']
-        if status == 'FAILED':
-            result = 'Штрафов по данным ' + message + ' не найдено\n'
-            result += '(Информация может быть неполной! Для полной информации авторизуйтесь в главном меню)'
-        else:
-            invoiceData = data['invoiceData']
-            desc = invoiceData['details'][0]['description']
-            amount = str(invoiceData['details'][0]['amount'])
-            result += desc + ' - сумма ' + amount + ' тг\n'
-            result += '(Информация может быть неполной! Для полной информации авторизуйтесь в главном меню)'
-
+    data = {'operatorId': 'pddIin', 'data': message}
+    result = check_penalties_pdd(last_sender_message, data)
     try:
         if not "pddIINs" in last_sender_message:
             last_sender_message['pddIINs'] = []
@@ -553,41 +558,84 @@ def reply_pdd_shtrafy_iin_delete_iin(sender, text, last_sender_message):
     last_sender_message['payload'] = '4.IIN'
     collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
-def reply_pdd_shtrafy_gosnomer_enter(sender):
-    pass
+def reply_pdd_shtrafy_gosnomer_enter(sender, last_sender_message):
+    pddGosnomers = []
+    try:
+        pddGosnomers = last_sender_message['pddGosnomers']
+    except:
+        last_sender_message['pddGosnomers'] = []
+
+    try:
+        assert len(pddGosnomers) > 0
+        buttons = []
+        for gn in pddGosnomers:
+            buttons.append({"content_type": "text", "payload": "pddGosnomer.last", "title": gn})
+        buttons.append({"content_type": "text", "payload": "pddGosnomer.delete", "title": "Удалить авто"})
+        data_quick_replies = {
+            "recipient": {"id": sender},
+            "message": {
+                "text": "Выберите номер авто/техпаспорт или введите из через пробел (пример: 123AAA01 AA00000000)\n" + hint_main_menu,
+                "quick_replies": buttons
+            }
+        }
+        requests.post(fb_url, json=data_quick_replies)
+    except:
+        reply(sender, gosnomer_text + "\n" + hint_main_menu)
+    last_sender_message['payload'] = '4.GosNomer'
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
 def reply_pdd_shtrafy_gosnomer(sender, message, last_sender_message):
-    reply(sender, "Идет проверка на наличие штрафов...")
+    reply_typing_on(sender)
+    data = {'operatorId': 'pddVehicle', 'data': message.replace(' ', '/')}
+    result = check_penalties_pdd(last_sender_message, data)
     try:
-        session = requests.Session()
-        headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type':'application/json'}
-        url_login = 'https://post.kz/mail-app/api/account/'
-        r = session.get(url_login, headers=headers)
-
-        url_login = 'https://post.kz/mail-app/api/v2/subscriptions'
-        data = {'operatorId':'pddIin', 'data':message.replace(' ', '/')}
-        r = session.post(url_login, json=data)
-        data = r.json()
-        status = data['responseInfo']['status']
-        if status == 'FAILED':
-            result = 'Штрафов по данным ' + message + ' не найдено'
-            reply(sender, result)
-            return "again"
-
-        subscriptionId = str(r.json()['subscriptionData']['id'])
-        url_login = 'https://post.kz/mail-app/api/v2/subscriptions/' + subscriptionId + '/invoices'
-        invoiceData = session.get(url_login).json()['invoiceData']
-        result = ''
-        for fine in invoiceData:
-            desc = fine['details'][0]['description']
-            amount = str(fine['details'][0]['amount'])
-            result += desc + ' - сумма ' + amount + ' тг\n\n'
-
-        reply(sender, result)
+        if not "pddGosnomers" in last_sender_message:
+            last_sender_message['pddGosnomers'] = []
+        if not message in last_sender_message['pddGosnomers'] and len(last_sender_message['pddIINs']) < 10:
+            last_sender_message['pddGosnomers'].append(message)
     except:
-        url_login = 'https://post.kz/mail-app/api/public/v2/invoices/create'
-        data = {'operatorId':'pddIin', 'data':message}
-        r = session.post(url_login, json=data)
+        logging.error(helper.PrintException())
+
+    result += "(Выберите или введите другой номер авто/техпаспорт через пробел (пример: 123AAA01 AA00000000), " \
+              "чтобы посмотреть штрафы ПДД, либо нажмите (y) для перехода в главное меню)"
+    reply_pdd_shtrafy_gosnomer_quick_replies_with_delete(sender, last_sender_message['pddGosnomers'], result)
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+
+def reply_pdd_shtrafy_gosnomer_quick_replies_with_delete(sender, pddGosnomers, text):
+    buttons = []
+    for gn in pddGosnomers:
+        buttons.append({"content_type": "text", "payload": "pddGosnomer.last", "title": gn})
+    buttons.append({"content_type": "text", "payload": "pddGosnomer.delete", "title": "Удалить авто"})
+    data_quick_replies = {
+        "recipient": {"id": sender},
+        "message": {
+            "text": text,
+            "quick_replies": buttons
+        }
+    }
+    requests.post(fb_url, json=data_quick_replies)
+
+def reply_pdd_shtrafy_gosnomer_delete(sender, last_sender_message):
+    pddGosnomers = last_sender_message['pddGosnomers']
+    buttons = []
+    for gn in pddGosnomers:
+        buttons.append({"content_type": "text", "payload": "pddGosnomer.delete.number", "title": gn})
+
+    data_quick_replies = {
+        "recipient": {"id": sender},
+        "message": {
+            "text": "Выберите авто, чтобы его удалить",
+            "quick_replies": buttons
+        }
+    }
+    requests.post(fb_url, json=data_quick_replies)
+
+def reply_pdd_shtrafy_gosnomer_delete_gosnomer(sender, text, last_sender_message):
+    last_sender_message['pddGosnomers'].remove(text)
+    reply(sender, "Авто " + text + " успешно удалён")
+    reply_pdd_shtrafy_gosnomer_enter(sender, last_sender_message)
+    last_sender_message['payload'] = '4.GosNomer'
+    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
 
 def reply_onai(sender, message, last_sender_message):
     url_login = 'https://post.kz/mail-app/api/public/v2/invoices/create'

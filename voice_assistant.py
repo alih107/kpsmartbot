@@ -94,6 +94,7 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                         logging.info("" + str(child.tag) + " " + str(child.attrib) + " | " + str(child.text))
                         start = time.time()
                         resp = client.message(child.text)
+                        logging.info('Yay, got Wit.ai response: ' + str(resp))
                         logging.info('client.message time = ' + str(time.time() - start))
                         handle_entities(sender, last_sender_message, resp)
                         logging.info('handle_voice_message elapsed time = ' + str(time.time() - start_function))
