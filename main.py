@@ -55,6 +55,7 @@ def check_penalties_pdd(last_sender_message, data):
             url_login = 'https://post.kz/mail-app/api/v2/subscriptions/' + subscriptionId + '/invoices'
             invoiceData = session.get(url_login).json()['invoiceData']
             for fine in invoiceData:
+                logging.info(fine)
                 desc = fine['details'][0]['description']
                 amount = str(fine['details'][0]['amount'])
                 result += desc + ' - сумма ' + amount + ' тг\n\n'
