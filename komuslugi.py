@@ -109,7 +109,7 @@ def reply_astanaErc(sender, message, last_sender_message):
         logging.error(helper.PrintException())
 
 def reply_astanaErc_quick_replies_with_delete(sender, astanaErc_accounts, text):
-    main.reply(sender, text)
+    #main.reply(sender, text)
     data_text = "(Выберите или введите номер лицевого счёта Астана ЕРЦ, чтобы посмотреть квитанции, " \
                   "либо нажмите (y) для перехода в главное меню)"
     buttons = []
@@ -119,13 +119,13 @@ def reply_astanaErc_quick_replies_with_delete(sender, astanaErc_accounts, text):
     data_quick_replies = {
         "recipient": {"id": sender},
         "message": {
-            "text": data_text,
+            "text": text,
             "quick_replies": buttons
         }
     }
-    logging.info(fb_url)
-    logging.info(data_quick_replies)
-    requests.post(fb_url, json=data_quick_replies)
+    r = requests.post(fb_url, json=data_quick_replies)
+    logging.info(r)
+    logging.info(r.text)
 
 def reply_astanaErc_delete(sender, last_sender_message):
     astanaErc_accounts = last_sender_message['astanaErc_accounts']
