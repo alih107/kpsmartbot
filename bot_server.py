@@ -228,6 +228,9 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
     elif payload == 'astanaErc.delete.acc':
         komuslugi.reply_astanaErc_delete_acc(sender, text, last_sender_message)
         return "ok"
+    elif payload == 'astanaErc.pay':
+        komuslugi.reply_astanaErc_chooseCard(sender, last_sender_message)
+        return "ok"
     elif payload == 'tracking.last':
         main.reply_tracking(sender, text, last_sender_message)
         payload = 'tracking'
@@ -347,6 +350,9 @@ def handle_postback_payload(sender, last_sender_message, payload):
         elif lastCommand == 'card2card':
             main.reply_card2card_csc(sender, payload, last_sender_message)
             payload = 'card2card.startPayment'
+        elif lastCommand == 'astanaErc':
+            komuslugi.reply_astanaErc_csc(sender, payload, last_sender_message)
+            payload = 'astanaErc.startPayment'
     elif payload == 'auth.delete':
         try:
             assert last_sender_message['encodedLoginPass'] != None

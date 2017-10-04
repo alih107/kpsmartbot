@@ -382,8 +382,6 @@ def reply_display_cards(sender, last_sender_message):
         last_sender_message['payload'] = 'addcard'
         mongo_update_record(last_sender_message)
         return
-    if len(cards) > 3:
-        title = "Выберите карту"
     for card in cards:
         if card['state'] != 'REGISTERED':
             continue
