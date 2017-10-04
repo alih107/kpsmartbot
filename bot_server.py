@@ -413,6 +413,11 @@ def handle_text_messages(sender, last_sender_message, message):
     elif payload == 'astanaErc.enter':
         komuslugi.reply_astanaErc(sender, message, last_sender_message)
         return "ok"
+    elif payload == 'astanaErc.startPayment':
+        t = threading.Thread(target=komuslugi.reply_astanaErc_startPayment, args=(sender, message, last_sender_message,))
+        t.setDaemon(True)
+        t.start()
+        return "ok"
     elif payload == 'auth':
         main.reply_auth(sender, message, last_sender_message)
         return "ok"

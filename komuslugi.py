@@ -47,7 +47,6 @@ def get_komuslugi(last_sender_message, data):
         main.reply(last_sender_message['sender'], "Произошла непредвиденная ошибка, попробуйте позднее")
         logging.error(helper.PrintException())
         return 'error', status
-    logging.info('before returning result and status, status = ' + status)
     return result, status
 
 def get_komuslugi_invoice(last_sender_message):
@@ -208,6 +207,15 @@ def reply_astanaErc_csc(sender, payload, last_sender_message):
         result += desc + sum_str + '\n'
         c += 1
     result += '\nИтого: ' + str(sum) + ' тг'
-    result += "Карта: " + chosenCard + '\n\n'
+    result += "\nКарта: " + chosenCard + '\n\n'
     result += "Если всё верно, введите трехзначный код CSC/CVV2 на обратной стороне карты"
     main.reply(sender, result)
+    last_sender_message['payload'] = 'astanaErc.startPayment'
+    main.mongo_update_record(last_sender_message)
+
+def reply_astanaErc_startPayment(sender, message, last_sender_message):
+    if not helper.check_csc(message):
+        main.reply(sender, "Вы неправильно ввели трёхзначный код CSC/CVV2 на обратной стороне карты, введите заново")
+        return "ok"
+    main.reply(sender, "Идет обработка платежа...")
+    main.reply_typing_on(sender)
