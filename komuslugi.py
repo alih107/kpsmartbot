@@ -24,13 +24,20 @@ def get_komuslugi(last_sender_message, data):
         else:
             subscriptionId = str(r.json()['subscriptionData']['id'])
             url_login = 'https://post.kz/mail-app/api/v2/subscriptions/' + subscriptionId + '/invoices'
-            invoiceData = session.get(url_login).json()['invoiceData'][0]
+            data = session.get(url_login).json()
+            logging.info(data)
+            invoiceData = data['invoiceData'][0]
             result = 'Информация по лицевому счёту ' + message + '\n'
             result += invoiceData['description'] + '\n\n'
             for i in invoiceData['details']:
                 desc = i['description']
-                amount = str(i['amount'])
-                result += desc + ', сумма ' + amount + ' тг\n'
+                amount = i['amount']
+                amount_str = ', сумма ' + str(amount) + ' тг'
+                debt = i['debt']
+                debt_str = ''
+                if debt > 0:
+                    debt_str = ', долг ' + str(debt) + ' тг'
+                result += desc + debt_str + amount_str + '\n'
     except:
         main.reply(last_sender_message['sender'], "Произошла непредвиденная ошибка, попробуйте позднее")
         logging.error(helper.PrintException())
@@ -104,28 +111,28 @@ def reply_astanaErc(sender, message, last_sender_message):
             last_sender_message['astanaErc_accounts'].append(message)
 
         reply_astanaErc_quick_replies_with_delete(sender, last_sender_message['astanaErc_accounts'], result)
+        last_sender_message['astanaErc_last_acc'] = message
         main.mongo_update_record(last_sender_message)
     except:
         logging.error(helper.PrintException())
 
 def reply_astanaErc_quick_replies_with_delete(sender, astanaErc_accounts, text):
-    #main.reply(sender, text)
-    text += "(Выберите или введите номер лицевого счёта Астана ЕРЦ, чтобы посмотреть квитанции, " \
-                  "либо нажмите (y) для перехода в главное меню)"
+    main.reply(sender, text)
+    data_text = "(Вы можете оплатить квитанцию, выбрать или ввести номер лицевого счёта Астана ЕРЦ, чтобы посмотреть " \
+                "квитанции, либо нажать (y) для перехода в главное меню)"
     buttons = []
+    buttons.append({"content_type": "text", "payload": "astanaErc.pay", "title": "Оплатить квитанцию"})
     for acc in astanaErc_accounts:
         buttons.append({"content_type": "text", "payload": "astanaErc.last", "title": acc})
     buttons.append({"content_type": "text", "payload": "astanaErc.delete", "title": "Удалить лицевой счёт"})
     data_quick_replies = {
         "recipient": {"id": sender},
         "message": {
-            "text": text,
+            "text": data_text,
             "quick_replies": buttons
         }
     }
     r = requests.post(fb_url, json=data_quick_replies)
-    logging.info(r)
-    logging.info(r.text)
 
 def reply_astanaErc_delete(sender, last_sender_message):
     astanaErc_accounts = last_sender_message['astanaErc_accounts']
