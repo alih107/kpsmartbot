@@ -1,4 +1,5 @@
 import main
+import komuslugi
 import helper
 import voice_assistant
 import constants
@@ -289,7 +290,9 @@ def handle_postback_payload(sender, last_sender_message, payload):
     elif payload == 'shtrafy':
         main.reply_pdd_shtrafy(sender)
     elif payload == 'komuslugi':
-        main.reply_komuslugi_cities(sender)
+        komuslugi.reply_komuslugi_cities(sender)
+    elif payload == 'komuslugi.astana.erc':
+        komuslugi.reply_komuslugi_astana_erc_enter(sender, last_sender_message)
     elif payload == 'nearest':
         main.reply_nearest(sender)
     elif payload == 'nearest.postamats' or payload == 'nearest.offices' or payload == 'nearest.atms':
