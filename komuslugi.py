@@ -31,7 +31,7 @@ def get_komuslugi(last_sender_message, data):
             for i in invoiceData['details']:
                 desc = i['description']
                 amount = str(i['amount'])
-                result += desc + ' - сумма ' + amount + ' тг\n\n'
+                result += desc + ', сумма ' + amount + ' тг\n'
     except:
         main.reply(last_sender_message['sender'], "Произошла непредвиденная ошибка, попробуйте позднее")
         logging.error(helper.PrintException())
@@ -101,16 +101,14 @@ def reply_astanaErc(sender, message, last_sender_message):
         logging.info('after result, result = ' + result)
         if result == 'error':
             return
-        try:
-            if not "astanaErc_accounts" in last_sender_message:
-                last_sender_message['astanaErc_accounts'] = []
-            if not message in last_sender_message['astanaErc_accounts'] and len(last_sender_message['astanaErc_accounts']) < 10:
-                last_sender_message['astanaErc_accounts'].append(message)
-        except:
-            logging.error(helper.PrintException())
+        if not "astanaErc_accounts" in last_sender_message:
+            last_sender_message['astanaErc_accounts'] = []
+        if not message in last_sender_message['astanaErc_accounts'] and len(last_sender_message['astanaErc_accounts']) < 10:
+            last_sender_message['astanaErc_accounts'].append(message)
         result += "(Выберите или введите номер лицевого счёта Астана ЕРЦ, чтобы посмотреть квитанции, " \
                   "либо нажмите (y) для перехода в главное меню)"
-        reply_astanaErc_quick_replies_with_delete(sender, last_sender_message['pddIINs'], result)
+
+        reply_astanaErc_quick_replies_with_delete(sender, last_sender_message['astanaErc_accounts'], result)
         main.mongo_update_record(last_sender_message)
     except:
         logging.error(helper.PrintException())
