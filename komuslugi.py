@@ -96,7 +96,9 @@ def reply_astanaErc(sender, message, last_sender_message):
         if not main.check_login(sender, last_sender_message):
             return
         data = {'operatorId': 'astanaErcWf', 'data': message}
+        logging.info('before result')
         result = get_komuslugi(last_sender_message, data)
+        logging.info('after result, result = ' + result)
         if result == 'error':
             return
         try:
