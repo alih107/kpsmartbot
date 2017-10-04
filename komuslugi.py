@@ -3,8 +3,7 @@ import helper
 import requests
 import constants
 import logging
-ACCESS_TOKEN = constants.ACCESS_TOKEN
-fb_url = "https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN
+fb_url = main.fb_url
 
 def get_komuslugi(last_sender_message, data):
     message = data['data']
@@ -96,9 +95,7 @@ def reply_astanaErc(sender, message, last_sender_message):
         if not main.check_login(sender, last_sender_message):
             return
         data = {'operatorId': 'astanaErcWf', 'data': message}
-        logging.info('before result')
         result = get_komuslugi(last_sender_message, data)
-        logging.info('after result, result = ' + result)
         if result == 'error':
             return
         if not "astanaErc_accounts" in last_sender_message:
@@ -125,6 +122,8 @@ def reply_astanaErc_quick_replies_with_delete(sender, astanaErc_accounts, text):
             "quick_replies": buttons
         }
     }
+    logging.info(fb_url)
+    logging.info(data_quick_replies)
     requests.post(fb_url, json=data_quick_replies)
 
 def reply_astanaErc_delete(sender, last_sender_message):
