@@ -102,8 +102,6 @@ def reply_astanaErc(sender, message, last_sender_message):
             last_sender_message['astanaErc_accounts'] = []
         if not message in last_sender_message['astanaErc_accounts'] and len(last_sender_message['astanaErc_accounts']) < 10:
             last_sender_message['astanaErc_accounts'].append(message)
-        result += "(Выберите или введите номер лицевого счёта Астана ЕРЦ, чтобы посмотреть квитанции, " \
-                  "либо нажмите (y) для перехода в главное меню)"
 
         reply_astanaErc_quick_replies_with_delete(sender, last_sender_message['astanaErc_accounts'], result)
         main.mongo_update_record(last_sender_message)
@@ -111,6 +109,9 @@ def reply_astanaErc(sender, message, last_sender_message):
         logging.error(helper.PrintException())
 
 def reply_astanaErc_quick_replies_with_delete(sender, astanaErc_accounts, text):
+    main.reply(sender, text)
+    data_text = "(Выберите или введите номер лицевого счёта Астана ЕРЦ, чтобы посмотреть квитанции, " \
+                  "либо нажмите (y) для перехода в главное меню)"
     buttons = []
     for acc in astanaErc_accounts:
         buttons.append({"content_type": "text", "payload": "astanaErc.last", "title": acc})
@@ -118,7 +119,7 @@ def reply_astanaErc_quick_replies_with_delete(sender, astanaErc_accounts, text):
     data_quick_replies = {
         "recipient": {"id": sender},
         "message": {
-            "text": text,
+            "text": data_text,
             "quick_replies": buttons
         }
     }
