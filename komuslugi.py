@@ -42,7 +42,7 @@ def get_komuslugi(last_sender_message, data):
                 if debt > 0:
                     debt_str = ', долг ' + str(debt) + ' тг'
                 result += desc + debt_str + amount_str + '\n'
-            result += '\nИтого: ' + str(sum) + ' тг'
+            result += '\nИтого: ' + format(sum, '.2f') + ' тг'
     except:
         main.reply(last_sender_message['sender'], "Произошла непредвиденная ошибка, попробуйте позднее")
         logging.error(helper.PrintException())
@@ -125,7 +125,6 @@ def reply_astanaErc_enter(sender, last_sender_message):
     main.mongo_update_record(last_sender_message)
 
 def reply_astanaErc(sender, message, last_sender_message):
-    main.reply_typing_on(sender)
     try:
         if not main.check_login(sender, last_sender_message):
             return
