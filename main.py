@@ -34,6 +34,19 @@ to_find_dict = {'nearest.postamats': 'ближайший постамат',
 
 url_mobile_payments = 'https://post.kz/finance/payment/mobile'
 
+def mongo_update_record(last_sender_message):
+    collection_messages.update_one({'sender': last_sender_message['sender']},
+                                   {"$set": last_sender_message}, upsert=False)
+
+def check_login(sender, last_sender_message):
+    if last_sender_message['encodedLoginPass'] == None:
+        reply(sender, "Требуется авторизация, пожалуйста, отправьте логин и пароль профиля на post.kz через "
+                      "пробел. Если у вас нет аккаунта, то зарегистрируйтесь в https://post.kz/register")
+        last_sender_message['payload'] = 'auth'
+        mongo_update_record(last_sender_message)
+        return False
+    return True
+
 def check_penalties_pdd(last_sender_message, data):
     message = data['data']
     result = ''
@@ -55,7 +68,6 @@ def check_penalties_pdd(last_sender_message, data):
             url_login = 'https://post.kz/mail-app/api/v2/subscriptions/' + subscriptionId + '/invoices'
             invoiceData = session.get(url_login).json()['invoiceData']
             for fine in invoiceData:
-                logging.info(fine)
                 desc = fine['details'][0]['description']
                 amount = str(fine['details'][0]['amount'])
                 result += desc + ' - сумма ' + amount + ' тг\n\n'
@@ -368,7 +380,7 @@ def reply_display_cards(sender, last_sender_message):
         reply(sender, "У вас отсутствуют добавленные карты в профиле post.kz. "
                       "Чтобы добавить, введите 16ти-значный номер карты")
         last_sender_message['payload'] = 'addcard'
-        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        mongo_update_record(last_sender_message)
         return
     if len(cards) > 3:
         title = "Выберите карту"
@@ -400,7 +412,7 @@ def reply_display_cards(sender, last_sender_message):
         }
     }
     requests.post(fb_url, json=data_cards)
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
 
 def reply_send_redirect_url(sender, url):
     data_url_button = {
@@ -478,7 +490,7 @@ def reply_pdd_shtrafy_iin_enter(sender, last_sender_message):
     except:
         reply(sender, "Введите 12-ти значный ИИН\n" + hint_main_menu)
     last_sender_message['payload'] = '4.IIN'
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
 
 def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
     reply_typing_on(sender)
@@ -521,7 +533,7 @@ def reply_pdd_shtrafy_iin(sender, message, last_sender_message):
     result += "(Выберите или введите другой ИИН, чтобы посмотреть штрафы ПДД, " \
               "либо нажмите (y) для перехода в главное меню)"
     reply_pdd_shtrafy_iin_quick_replies_with_delete(sender, last_sender_message['pddIINs'], result)
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
 
 def reply_pdd_shtrafy_iin_quick_replies_with_delete(sender, pddIINs, text):
     buttons = []
@@ -557,7 +569,7 @@ def reply_pdd_shtrafy_iin_delete_iin(sender, text, last_sender_message):
     reply(sender, "ИИН " + text + " успешно удалён")
     reply_pdd_shtrafy_iin_enter(sender, last_sender_message)
     last_sender_message['payload'] = '4.IIN'
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
 
 def reply_pdd_shtrafy_gosnomer_enter(sender, last_sender_message):
     pddGosnomers = []
@@ -583,7 +595,7 @@ def reply_pdd_shtrafy_gosnomer_enter(sender, last_sender_message):
     except:
         reply(sender, gosnomer_text + "\n" + hint_main_menu)
     last_sender_message['payload'] = '4.GosNomer'
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
 
 def reply_pdd_shtrafy_gosnomer(sender, message, last_sender_message):
     reply_typing_on(sender)
@@ -600,7 +612,7 @@ def reply_pdd_shtrafy_gosnomer(sender, message, last_sender_message):
     result += "(Выберите или введите другой номер авто/техпаспорт через пробел (пример: 123AAA01 AA00000000), " \
               "чтобы посмотреть штрафы ПДД, либо нажмите (y) для перехода в главное меню)"
     reply_pdd_shtrafy_gosnomer_quick_replies_with_delete(sender, last_sender_message['pddGosnomers'], result)
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
 
 def reply_pdd_shtrafy_gosnomer_quick_replies_with_delete(sender, pddGosnomers, text):
     buttons = []
@@ -636,7 +648,7 @@ def reply_pdd_shtrafy_gosnomer_delete_gosnomer(sender, text, last_sender_message
     reply(sender, "Авто " + text + " успешно удалён")
     reply_pdd_shtrafy_gosnomer_enter(sender, last_sender_message)
     last_sender_message['payload'] = '4.GosNomer'
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
 
 def reply_onai(sender, message, last_sender_message):
     url_login = 'https://post.kz/mail-app/api/public/v2/invoices/create'
@@ -703,7 +715,7 @@ def reply_onai_delete_phone(sender, text, last_sender_message):
     reply(sender, "Карта Онай " + text + " успешно удалёна")
     reply_onai_enter_number(sender, last_sender_message)
     last_sender_message['payload'] = 'onai'
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
 
 def reply_onai_amount(sender, message, last_sender_message):
     amount = 0
@@ -937,7 +949,7 @@ def reply_card2cash_history_show(sender, last_sender_message, token):
                 "\n\nЧтобы подтвердить перевод, введите трехзначный код CSC/CVV2 на обратной стороне карты"
         reply(sender, result)
         last_sender_message['card2cash_token'] = token
-        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        mongo_update_record(last_sender_message)
     except:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
         logging.info(helper.PrintException())
@@ -1022,7 +1034,7 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
                 reply_typing_off(sender)
                 reply_main_menu_buttons(sender)
                 last_sender_message['payload'] = 'card2cash.finished'
-                collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+                mongo_update_record(last_sender_message)
                 return
             timer += 1
 
@@ -1033,7 +1045,7 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
             reply_typing_off(sender)
             reply_main_menu_buttons(sender)
             last_sender_message['payload'] = 'mainMenu'
-            collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+            mongo_update_record(last_sender_message)
         return "time exceed"
     except:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
@@ -1071,7 +1083,7 @@ def reply_card2card_check_cardDst(sender, message, last_sender_message):
         return "cardDst.again"
     last_sender_message['lastCardDst'] = message
     last_sender_message['payload'] = 'card2card.amount'
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
     reply(sender, "Введите сумму перевода (от 500 до 494070; комиссия 1,2%, минимум 300 тенге)\n" + hint_main_menu)
 
 def reply_card2card_amount(sender, message, last_sender_message):
@@ -1094,7 +1106,7 @@ def reply_card2card_amount(sender, message, last_sender_message):
 
     last_sender_message['payload'] = 'card2card.chooseCard'
     last_sender_message['amount'] = amount
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
     reply_display_cards(sender, last_sender_message)
 
 def reply_card2card_csc(sender, payload, last_sender_message):
@@ -1191,7 +1203,7 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
                     res += ", она доступна в профиле post.kz в разделе История платежей"
                     reply(sender, res)
                 last_sender_message['payload'] = 'card2card.finished'
-                collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+                mongo_update_record(last_sender_message)
                 reply_typing_off(sender)
                 reply_main_menu_buttons(sender)
                 return "ok"
@@ -1206,7 +1218,7 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
             reply_typing_off(sender)
             reply_main_menu_buttons(sender)
             last_sender_message['payload'] = 'mainMenu'
-            collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+            mongo_update_record(last_sender_message)
         return "time exceed"
     except Exception as e:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
@@ -1322,7 +1334,7 @@ def reply_tracking_enter_number(sender, last_sender_message):
     except:
         reply(sender, "Введите трек-номер посылки\n" + hint_main_menu)
     last_sender_message['payload'] = 'tracking'
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
 
 def reply_tracking_quick_replies_with_delete(sender, trackingNumbers, text):
     buttons = []
@@ -1363,7 +1375,7 @@ def reply_tracking(sender, tracking_number, last_sender_message):
             last_sender_message['trackingNumbers'].append(tracking_number)
 
         reply_tracking_quick_replies_with_delete(sender, last_sender_message['trackingNumbers'], result)
-        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        mongo_update_record(last_sender_message)
         return "ok"
 
 def reply_tracking_delete(sender, last_sender_message):
@@ -1544,7 +1556,7 @@ def reply_check_mobile_number(sender, message, last_sender_message):
         logging.error(helper.PrintException())
 
     last_sender_message['minAmount'] = minAmount
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
 
     title = "Оператор номера: " + operator + "\nВведите сумму пополнения баланса (не менее " + str(minAmount) + " тг)"
     reply(sender, title)
@@ -1571,7 +1583,7 @@ def reply_mobile_delete_phone(sender, text, last_sender_message):
     reply(sender, "Номер " + text + " успешно удалён")
     reply_mobile_enter_number(sender, last_sender_message)
     last_sender_message['payload'] = 'balance'
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
 
 def reply_mobile_amount(sender, message, last_sender_message):
     amount = 0
@@ -1598,7 +1610,7 @@ def reply_mobile_amount(sender, message, last_sender_message):
     last_sender_message['commission'] = commission
     last_sender_message['payload'] = 'mobile.chooseCard'
     last_sender_message['amount'] = amount
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
 
 def reply_mobile_csc(sender, payload, last_sender_message):
     amount = last_sender_message['amount']
@@ -1940,7 +1952,7 @@ def reply_addcard_checkcard(sender, message, last_sender_message):
         return "addcard.again"
     last_sender_message['addcard_cardnumber'] = message
     last_sender_message['payload'] = 'addcard.expiredate'
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
     reply(sender, "Введите месяц и год срока действия карты (например, 0418)\n" + hint_main_menu)
 
 def reply_addcard_checkexpiredate(sender, message, last_sender_message):
@@ -1955,7 +1967,7 @@ def reply_addcard_checkexpiredate(sender, message, last_sender_message):
         return "addcard.expiredateagain"
     last_sender_message['addcard_expiredate'] = message
     last_sender_message['payload'] = 'addcard.cardowner'
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
     reply(sender, "Введите имя и фамилию на карте латинскими буквами\n" + hint_main_menu)
 
 def reply_addcard_checkcardowner(sender, message, last_sender_message):
@@ -1967,7 +1979,7 @@ def reply_addcard_checkcardowner(sender, message, last_sender_message):
     res += 'Имя на карте: ' + last_sender_message['addcard_cardowner'] + '\n'
     res += '\nЕсли всё верно, введите трехзначный код CSC/CVV2 на обратной стороне карты, чтобы добавить эту карту'
     last_sender_message['payload'] = 'addcard.csc'
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    mongo_update_record(last_sender_message)
     reply(sender, res)
 
 def reply_addcard_startAdding(sender, message, last_sender_message):
@@ -2032,7 +2044,7 @@ def reply_addcard_startAdding(sender, message, last_sender_message):
             last_sender_message['token'] = token
             last_sender_message['mobileNumber'] = mobileNumber
             last_sender_message['payload'] = 'addcard.confirmation'
-            collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+            mongo_update_record(last_sender_message)
             return "confirmation"
 
         timer = 0
@@ -2048,7 +2060,7 @@ def reply_addcard_startAdding(sender, message, last_sender_message):
                 if status == 'fail':
                     reply(sender, "Карта не была добавлена. Попробуйте снова")
                 last_sender_message['payload'] = 'addcard.finished'
-                collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+                mongo_update_record(last_sender_message)
                 reply_typing_off(sender)
                 reply_main_menu_buttons(sender)
                 return "ok"
@@ -2060,7 +2072,7 @@ def reply_addcard_startAdding(sender, message, last_sender_message):
             reply_typing_off(sender)
             reply_main_menu_buttons(sender)
             last_sender_message['payload'] = 'mainMenu'
-            collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+            mongo_update_record(last_sender_message)
         return "time exceed"
 
     except Exception as e:
@@ -2103,7 +2115,7 @@ def card_registration_confirm(sender, message, last_sender_message):
         if status == 'fail':
             reply(sender, "Карта не была добавлена. Попробуйте снова")
         last_sender_message['payload'] = 'addcard.finished'
-        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        mongo_update_record(last_sender_message)
         reply_typing_off(sender)
         reply_main_menu_buttons(sender)
         return "ok"

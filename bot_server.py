@@ -2,7 +2,6 @@ import main
 import komuslugi
 import helper
 import voice_assistant
-import constants
 from flask import Flask, request
 import requests
 import pymongo
@@ -22,7 +21,8 @@ ACCESS_TOKEN = main.ACCESS_TOKEN
 fb_url = main.fb_url
 
 hint_main_menu = "(для перехода в главное меню нажмите кнопку (y)"
-digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30']
+digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15',
+          '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30']
 
 
 @app.route('/kpsmartbot', methods=['GET'])
@@ -171,7 +171,7 @@ def check_login_and_cards(sender, last_sender_message):
         main.reply(sender, "Требуется авторизация, пожалуйста, отправьте логин и пароль профиля на post.kz через "
                            "пробел. Если у вас нет аккаунта, то зарегистрируйтесь в https://post.kz/register")
         last_sender_message['payload'] = 'auth'
-        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        main.mongo_update_record(last_sender_message)
         return False
 
     hasCards = main.reply_has_cards(sender, last_sender_message)
@@ -179,18 +179,9 @@ def check_login_and_cards(sender, last_sender_message):
         main.reply(sender, "Добавьте карту в профиль " + last_sender_message['login'] +" на post.kz в разделе \"Мои счета и карты\", пожалуйста")
         main.reply_main_menu_buttons(sender)
         last_sender_message['payload'] = 'mainMenu'
-        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        main.mongo_update_record(last_sender_message)
         return False
 
-    return True
-
-def check_login(sender, last_sender_message):
-    if last_sender_message['encodedLoginPass'] == None:
-        main.reply(sender, "Требуется авторизация, пожалуйста, отправьте логин и пароль профиля на post.kz через "
-                           "пробел. Если у вас нет аккаунта, то зарегистрируйтесь в https://post.kz/register")
-        last_sender_message['payload'] = 'auth'
-        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
-        return False
     return True
 
 def reply_intro(sender):
@@ -227,6 +218,15 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
         return "ok"
     elif payload == 'pddGosnomer.delete.number':
         main.reply_pdd_shtrafy_gosnomer_delete_gosnomer(sender, text, last_sender_message)
+        return "ok"
+    elif payload == 'astanaErc.last':
+        komuslugi.reply_astanaErc(sender, text, last_sender_message)
+        return "ok"
+    elif payload == 'astanaErc.delete':
+        komuslugi.reply_astanaErc_delete(sender, last_sender_message)
+        return "ok"
+    elif payload == 'astanaErc.delete.acc':
+        komuslugi.reply_astanaErc_delete_acc(sender, text, last_sender_message)
         return "ok"
     elif payload == 'tracking.last':
         main.reply_tracking(sender, text, last_sender_message)
@@ -271,14 +271,14 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
         main.reply(sender, "Бот остался включенным")
         main.reply_main_menu_buttons(sender)
     last_sender_message['payload'] = payload
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    main.mongo_update_record(last_sender_message)
 
 # кнопки главного меню
 def handle_postback_payload(sender, last_sender_message, payload):
     if last_sender_message['payload'] == 'card2cash':
         main.reply_card2cash_history_show(sender, last_sender_message, payload)
         last_sender_message['payload'] = 'card2cash.show'
-        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        main.mongo_update_record(last_sender_message)
         return "ok"
 
     if payload == 'GET_STARTED_PAYLOAD':
@@ -291,8 +291,8 @@ def handle_postback_payload(sender, last_sender_message, payload):
         main.reply_pdd_shtrafy(sender)
     elif payload == 'komuslugi':
         komuslugi.reply_komuslugi_cities(sender)
-    elif payload == 'komuslugi.astana.erc':
-        komuslugi.reply_komuslugi_astana_erc_enter(sender, last_sender_message)
+    elif payload == 'astanaErc':
+        komuslugi.reply_astanaErc_enter(sender, last_sender_message)
     elif payload == 'nearest':
         main.reply_nearest(sender)
     elif payload == 'nearest.postamats' or payload == 'nearest.offices' or payload == 'nearest.atms':
@@ -365,7 +365,7 @@ def handle_postback_payload(sender, last_sender_message, payload):
         logging.info("Ne raspoznana komanda")
 
     last_sender_message['payload'] = payload
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    main.mongo_update_record(last_sender_message)
 
 def handle_attachments(sender, last_sender_message, attachment):
     logging.info("Handling attachment...")
@@ -391,7 +391,7 @@ def handle_text_messages(sender, last_sender_message, message):
     if message == '👍':
         main.reply_main_menu_buttons(sender)
         last_sender_message['payload'] = 'mainMenu'
-        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        main.mongo_update_record(last_sender_message)
         return "ok"
     payload = last_sender_message['payload']
     if payload == 'tracking':
@@ -402,6 +402,9 @@ def handle_text_messages(sender, last_sender_message, message):
         return "ok"
     elif payload == '4.GosNomer':
         main.reply_pdd_shtrafy_gosnomer(sender, message, last_sender_message)
+        return "ok"
+    elif payload == 'astanaErc.enter':
+        komuslugi.reply_astanaErc(sender, message, last_sender_message)
         return "ok"
     elif payload == 'auth':
         main.reply_auth(sender, message, last_sender_message)
@@ -476,11 +479,11 @@ def handle_text_messages(sender, last_sender_message, message):
         return "ok"
     main.reply_main_menu_buttons(sender)
     last_sender_message['payload'] = 'mainMenu'
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    main.mongo_update_record(last_sender_message)
 
 def handle_sticker(sender, last_sender_message):
     last_sender_message['payload'] = 'mainMenu'
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    main.mongo_update_record(last_sender_message)
     main.reply_main_menu_buttons(sender)
 
 def handle_messages_when_deactivated(sender, data, last_sender_message):
@@ -513,7 +516,7 @@ def handle_messages_when_deactivated(sender, data, last_sender_message):
         payload = data['entry'][0]['messaging'][0]['message']['quick_reply']['payload']
         if payload == 'activate.bot':
             last_sender_message['isBotActive'] = True
-            collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+            main.mongo_update_record(last_sender_message)
             main.reply(sender, "Бот включен")
             main.reply_main_menu_buttons(sender)
         if payload == 'deactivate.bot':
@@ -522,32 +525,28 @@ def handle_messages_when_deactivated(sender, data, last_sender_message):
         return
 
 def call_card2card(sender, last_sender_message, payload):
-    if check_login(sender, last_sender_message):
+    if main.check_login(sender, last_sender_message):
         last_sender_message['lastCommand'] = payload
         main.reply_card2card_enter_cardDst(sender, last_sender_message)
         return True
     return False
 
 def call_card2cash(sender, last_sender_message, payload):
-    if check_login(sender, last_sender_message):
+    if main.check_login(sender, last_sender_message):
         last_sender_message['lastCommand'] = payload
         main.reply_card2cash_history(sender, last_sender_message)
         return True
     return False
 
 def call_balance(sender, last_sender_message, payload):
-    start = time.time()
-    if check_login(sender, last_sender_message):
-        logging.info('check_login time = ' + str(time.time() - start))
+    if main.check_login(sender, last_sender_message):
         last_sender_message['lastCommand'] = payload
         main.reply_mobile_enter_number(sender, last_sender_message)
         return True
     return False
 
 def call_onai(sender, last_sender_message, payload):
-    start = time.time()
-    if check_login(sender, last_sender_message):
-        logging.info('check_login time = ' + str(time.time() - start))
+    if main.check_login(sender, last_sender_message):
         last_sender_message['lastCommand'] = payload
         main.reply_onai_enter_number(sender, last_sender_message)
         return True
@@ -556,7 +555,7 @@ def call_onai(sender, last_sender_message, payload):
 def call_sendmessage(sender, last_sender_message, payload):
     main.reply(sender, "Пожалуйста, отправьте сообщение, которое Вас интересует")
     last_sender_message['payload'] = payload
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    main.mongo_update_record(last_sender_message)
 
 def call_disable_bot(sender, last_sender_message, payload):
     data_quick_replies = {
@@ -579,22 +578,20 @@ def call_disable_bot(sender, last_sender_message, payload):
     }
     requests.post(fb_url, json=data_quick_replies)
     last_sender_message['payload'] = payload
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    main.mongo_update_record(last_sender_message)
 
 def call_addcard(sender, last_sender_message, payload):
-    start = time.time()
-    if check_login(sender, last_sender_message):
-        logging.info('check_login time = ' + str(time.time() - start))
+    if main.check_login(sender, last_sender_message):
         main.reply_addcard_entercard(sender, last_sender_message)
         last_sender_message['payload'] = payload
-        collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+        main.mongo_update_record(last_sender_message)
         return True
     return False
 
 def call_request_nearest_location(sender, last_sender_message, payload):
     main.reply_nearest_request_location(sender, payload)
     last_sender_message['payload'] = payload
-    collection_messages.update_one({'sender': sender}, {"$set": last_sender_message}, upsert=False)
+    main.mongo_update_record(last_sender_message)
 
 if __name__ == '__main__':
     app.run(debug=True)
