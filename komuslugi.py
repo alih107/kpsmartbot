@@ -45,7 +45,8 @@ def get_komuslugi(last_sender_message, data):
     except:
         main.reply(last_sender_message['sender'], "Произошла непредвиденная ошибка, попробуйте позднее")
         logging.error(helper.PrintException())
-        return 'error'
+        return 'error', status
+    logging.info('before returning result and status, status = ' + status)
     return result, status
 
 def get_komuslugi_invoice(last_sender_message):
