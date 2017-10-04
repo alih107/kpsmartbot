@@ -293,6 +293,7 @@ def handle_postback_payload(sender, last_sender_message, payload):
         komuslugi.reply_komuslugi_cities(sender)
     elif payload == 'astanaErc':
         komuslugi.reply_astanaErc_enter(sender, last_sender_message)
+        return "ok"
     elif payload == 'nearest':
         main.reply_nearest(sender)
     elif payload == 'nearest.postamats' or payload == 'nearest.offices' or payload == 'nearest.atms':
