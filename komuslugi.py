@@ -92,23 +92,26 @@ def reply_astanaErc_enter(sender, last_sender_message):
 
 def reply_astanaErc(sender, message, last_sender_message):
     main.reply_typing_on(sender)
-    if not main.check_login(sender, last_sender_message):
-        return
-    data = {'operatorId': 'astanaErcWf', 'data': message}
-    result = get_komuslugi(last_sender_message, data)
-    if result == 'error':
-        return
     try:
-        if not "astanaErc_accounts" in last_sender_message:
-            last_sender_message['astanaErc_accounts'] = []
-        if not message in last_sender_message['astanaErc_accounts'] and len(last_sender_message['astanaErc_accounts']) < 10:
-            last_sender_message['astanaErc_accounts'].append(message)
+        if not main.check_login(sender, last_sender_message):
+            return
+        data = {'operatorId': 'astanaErcWf', 'data': message}
+        result = get_komuslugi(last_sender_message, data)
+        if result == 'error':
+            return
+        try:
+            if not "astanaErc_accounts" in last_sender_message:
+                last_sender_message['astanaErc_accounts'] = []
+            if not message in last_sender_message['astanaErc_accounts'] and len(last_sender_message['astanaErc_accounts']) < 10:
+                last_sender_message['astanaErc_accounts'].append(message)
+        except:
+            logging.error(helper.PrintException())
+        result += "(Выберите или введите номер лицевого счёта Астана ЕРЦ, чтобы посмотреть квитанции, " \
+                  "либо нажмите (y) для перехода в главное меню)"
+        reply_astanaErc_quick_replies_with_delete(sender, last_sender_message['pddIINs'], result)
+        main.mongo_update_record(last_sender_message)
     except:
         logging.error(helper.PrintException())
-    result += "(Выберите или введите номер лицевого счёта Астана ЕРЦ, чтобы посмотреть квитанции, " \
-              "либо нажмите (y) для перехода в главное меню)"
-    reply_astanaErc_quick_replies_with_delete(sender, last_sender_message['pddIINs'], result)
-    main.mongo_update_record(last_sender_message)
 
 def reply_astanaErc_quick_replies_with_delete(sender, astanaErc_accounts, text):
     buttons = []
