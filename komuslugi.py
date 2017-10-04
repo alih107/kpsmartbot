@@ -28,6 +28,7 @@ def get_komuslugi(last_sender_message, data):
             subscriptionId = str(r.json()['subscriptionData']['id'])
             url_login = 'https://post.kz/mail-app/api/v2/subscriptions/' + subscriptionId + '/invoices'
             data = session.get(url_login).json()
+            status = data['responseInfo']['status']
             invoiceData = data['invoiceData'][0]
             result = 'Информация по лицевому счёту ' + message + '\n'
             result += invoiceData['description'] + '\n\n'
