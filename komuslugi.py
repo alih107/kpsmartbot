@@ -125,6 +125,7 @@ def reply_astanaErc_enter(sender, last_sender_message):
     main.mongo_update_record(last_sender_message)
 
 def reply_astanaErc(sender, message, last_sender_message):
+    main.reply_typing_on(sender)
     try:
         if not main.check_login(sender, last_sender_message):
             return
@@ -185,8 +186,9 @@ def reply_astanaErc_delete_acc(sender, text, last_sender_message):
     main.mongo_update_record(last_sender_message)
 
 def reply_astanaErc_chooseCard(sender, last_sender_message):
+    main.reply_typing_on(sender)
     main.reply_display_cards(sender, last_sender_message)
-    last_sender_message['payload'] = 'astanaErc'
+    last_sender_message['lastCommand'] = 'astanaErc'
     main.mongo_update_record(last_sender_message)
 
 def reply_astanaErc_csc(sender, payload, last_sender_message):
