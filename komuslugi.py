@@ -110,7 +110,7 @@ def reply_astanaErc(sender, message, last_sender_message):
 
 def reply_astanaErc_quick_replies_with_delete(sender, astanaErc_accounts, text):
     #main.reply(sender, text)
-    data_text = "(Выберите или введите номер лицевого счёта Астана ЕРЦ, чтобы посмотреть квитанции, " \
+    text += "(Выберите или введите номер лицевого счёта Астана ЕРЦ, чтобы посмотреть квитанции, " \
                   "либо нажмите (y) для перехода в главное меню)"
     buttons = []
     for acc in astanaErc_accounts:
