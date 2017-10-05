@@ -182,6 +182,8 @@ def handle_intent(sender, last_sender_message, value):
             main.reply_nearest(sender)
         elif value == 'COMMAND_disable_bot':
             bot_server.call_disable_bot(sender, last_sender_message, 'disable.bot')
+        elif value == 'COMMAND_track':
+            main.reply_tracking_enter_number(sender, last_sender_message)
         elif value == 'penalties_pdd' or value == 'COMMAND_penalties':
             main.reply_pdd_shtrafy(sender)
         elif value == 'info_post':
