@@ -17,6 +17,7 @@ portal_id = constants.portal_id
 portal_id_2 = constants.portal_id_2
 ACCESS_TOKEN = constants.ACCESS_TOKEN
 fb_url = "https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN
+api_key = constants.api_key
 
 hint_main_menu = "(для перехода в главное меню нажмите кнопку (y) "
 hint_main_menu2 = "(Нажмите (y) для перехода в главное меню)"
@@ -86,11 +87,26 @@ def check_penalties_pdd(last_sender_message, data):
         result += '(Информация может быть неполной! Для полной информации авторизуйтесь в главном меню)'
     return result
 
+def send_voice(sender, msg):
+    ya_url = 'https://tts.voicetech.yandex.net/generate?key=' + api_key + '&text='
+    ya_url += msg
+    ya_url += '&format=mp3&quality=hi&lang=ru-RU&speaker=oksana&speed=1.0&emotion=good'
+    r = requests.get(url)
+    voice_file = 'ya_' + sender + '.mp3'
+    with open(voice_file, "wb") as o:
+        o.write(r.content)
+    data = {
+        'recipient': '{id' + sender,
+        'message': '{"attachment":{"type":"audio", "payload":{}}}'
+    }
+    files = {'filedata': (voice_file, open(voice_file, "rb"), 'audio/mp3')}
+    requests.post(fb_url, data=data, files=files)
+
 def reply(sender, msg):
     data = {"recipient": {"id": sender}, "message": {"text": msg}}
-    start = time.time()
     requests.post(fb_url, json=data)
-    logging.warning('elapsed time for main.reply = ' + str(time.time() - start))
+    if True:
+        send_voice(sender, msg)
 
 def reply_gif_desktop(sender):
     data = {
@@ -1005,7 +1021,7 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
             'params.codeWord': data['params']['codeWord'],
         }
         url_start = url + portal_id + '/payment/' + new_token + '/start'
-        requests.post(url_start, data=data1, headers=headers)
+        requests.post(url_start,                                                                                                                                                                                        data1, headers=headers)
 
         url_status = url + portal_id + '/payment/' + new_token
         timer = 0
@@ -1428,7 +1444,7 @@ def reply_auth(sender, loginPass, last_sender_message):
         last_sender_message['login'] = login
         last_sender_message['iin'] = iin
         last_sender_message['mobileNumber'] = mobile
-        collection_messages.update_one({'sender':sender}, {"$set": last_sender_message}, upsert=False)
+        mongo_update_record(last_sender_message)
         reply_main_menu_buttons(sender)
 
 def reply_closest(sender):

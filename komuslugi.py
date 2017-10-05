@@ -1,10 +1,13 @@
 import main
 import helper
 import requests
-import constants
 import logging
 import math
 fb_url = main.fb_url
+url = main.url
+portal_id = main.portal_id
+x_channel_id = main.x_channel_id
+
 
 def get_komuslugi(last_sender_message, data):
     message = data['data']
@@ -219,3 +222,93 @@ def reply_astanaErc_startPayment(sender, message, last_sender_message):
         return "ok"
     main.reply(sender, "Идет обработка платежа...")
     main.reply_typing_on(sender)
+    # 1 - авторизация на post.kz
+    try:
+        url_login = 'https://post.kz/mail-app/api/account/'
+        headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
+                   'Content-Type': 'application/json'}
+
+        session = requests.Session()
+        r = session.get(url_login, headers=headers)
+        mobileNumber = last_sender_message['mobileNumber']
+
+        # 2 - вызов getCards()
+        url_login6 = 'https://post.kz/mail-app/api/intervale/card?device=mobile'
+        sd2 = {"blockedAmount": "", "phone": mobileNumber, "paymentId": "", "returnUrl": "", "transferId": ""}
+        r = session.post(url_login6, json=sd2)
+        card = r.json()[last_sender_message['chosenCardIndex']]
+
+        # 3 - вызов getToken()
+        url_login4 = url + portal_id + '/token'
+        headers = {'Content-Type': 'application/x-www-form-urlencoded',
+                   'X-Channel-Id': x_channel_id,
+                   'X-IV-Authorization': 'Identifier ' + mobileNumber}
+        r = session.post(url_login4, headers=headers)
+        token = r.json()['token']
+
+        # 4 - вызов startPayment()
+        amount = last_sender_message['amount']
+        data = {'paymentId': 'MoneyTransfer_KazPost_Card2Card',
+                'currency': 'KZT',
+                'amount': str(amount) + '00',
+                'commission': str(last_sender_message['commission']) + '00',
+                'total': str(last_sender_message['total']) + '00',
+                'src.type': 'card_id',
+                'src.cardId': card['id'],
+                'src.csc': message,
+                'dst.type': 'card',
+                'dst.pan': last_sender_message['lastCardDst'],
+                'returnUrl': 'https://transfer.post.kz/?token=' + token}
+
+        url_login5 = url + portal_id + '/payment/' + token + '/start'
+        r = session.post(url_login5, data=data, headers=headers)
+
+        # 5 - вызов statusPayment()
+
+        url_login10 = url + portal_id + '/payment/' + token
+        r = session.post(url_login10, headers=headers)
+        data = r.json()
+        state = data['state']
+        if state == 'redirect':
+            reply_send_redirect_url(sender, data['url'])
+
+        card_w_spaces = helper.insert_4_spaces(last_sender_message['lastCardDst'])
+        timer = 0
+        while timer < timeout:
+            time.sleep(1)
+            r = session.post(url_login10, headers=headers)
+            data = r.json()
+            try:
+                result_status = data['result']['status']
+                if result_status == 'fail':
+                    reply(sender, "Платеж не был завершен успешно. Попробуйте снова")
+                elif result_status == 'success':
+                    res = "Поздравляю! Платеж был проведен успешно, карта " + card_w_spaces + " пополнена на сумму " + str(
+                        amount) + " тг.\n"
+                    res += "Номер квитанции: " + str(data['result']['trxId'])
+                    res += ", она доступна в профиле post.kz в разделе История платежей"
+                    reply(sender, res)
+                last_sender_message['payload'] = 'card2card.finished'
+                mongo_update_record(last_sender_message)
+                reply_typing_off(sender)
+                reply_main_menu_buttons(sender)
+                return "ok"
+            except Exception as e:
+                pass
+            timer += 1
+
+        last_sender_message = collection_messages.find_one({"sender": sender})
+        if last_sender_message['payload'] == 'card2card.startPayment':
+            strminutes = str(timeout // 60)
+            reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
+            reply_typing_off(sender)
+            reply_main_menu_buttons(sender)
+            last_sender_message['payload'] = 'mainMenu'
+            mongo_update_record(last_sender_message)
+        return "time exceed"
+    except Exception as e:
+        reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
+        reply_typing_off(sender)
+        reply_main_menu_buttons(sender)
+        logging.error(helper.PrintException())
+        return "fail"
