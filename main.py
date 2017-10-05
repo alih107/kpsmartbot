@@ -98,7 +98,7 @@ def send_voice(sender, msg):
         with open(voice_file, "wb") as o:
             o.write(r.content)
         data = {
-            'recipient': '{id:' + sender,
+            'recipient': '{id:' + sender + '}',
             'message': '{"attachment":{"type":"audio", "payload":{}}}'
         }
         files = {'filedata': (voice_file, open(voice_file, "rb"), 'audio/mp3')}
