@@ -108,7 +108,8 @@ def send_voice(sender, msg):
 def reply(sender, msg):
     data = {"recipient": {"id": sender}, "message": {"text": msg}}
     requests.post(fb_url, json=data)
-    if True:
+    last_sender_message = collection_messages.find_one({"sender": sender})
+    if last_sender_message['sendVoice']:
         send_voice(sender, msg)
 
 def reply_gif_desktop(sender):
