@@ -119,6 +119,7 @@ def handle_data(data):
         return "ok"
 
     logging.info(print_facebook_data(data, sender, last_sender_message))
+    last_sender_message['sendVoice'] = False
     if not last_sender_message['isBotActive']:
         handle_messages_when_deactivated(sender, data, last_sender_message)
         return "ok"
@@ -386,6 +387,8 @@ def handle_attachments(sender, last_sender_message, attachment):
         else:
             main.reply(sender, "А для чего Вы мне отправили своё местоположение?")
     if attachment_type == 'audio':
+        last_sender_message['sendVoice'] = True
+        main.mongo_update_record(last_sender_message)
         try:
             t = threading.Thread(target=voice_assistant.handle_voice_message_yandex,
                                  args=(sender, attachment['payload']['url'], last_sender_message,))
