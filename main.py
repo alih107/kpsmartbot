@@ -93,7 +93,6 @@ def send_voice(sender, msg):
         ya_url += msg
         ya_url += '&format=mp3&quality=hi&lang=ru-RU&speaker=oksana&speed=1.0&emotion=good'
         r = requests.get(ya_url)
-        logging.info(r)
         voice_file = 'ya_' + sender + '.mp3'
         with open(voice_file, "wb") as o:
             o.write(r.content)
@@ -102,8 +101,7 @@ def send_voice(sender, msg):
             'message': '{"attachment":{"type":"audio", "payload":{}}}'
         }
         files = {'filedata': (voice_file, open(voice_file, "rb"), 'audio/mp3')}
-        r = requests.post(fb_url, data=data, files=files)
-        logging.info(r.text)
+        requests.post(fb_url, data=data, files=files)
     except:
         logging.error(helper.PrintException())
 
@@ -1687,7 +1685,6 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
 
         body['token'] = token
         body['invoiceId'] = invoiceId
-        body['iin'] = iin
         body['systemId'] = 'mobile'
         body['details'][0]['amount'] = amount
         body['details'][0]['commission'] = last_sender_message['commission']
