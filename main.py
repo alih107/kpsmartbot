@@ -778,7 +778,6 @@ def reply_onai_startPayment(sender, message, last_sender_message):
 
         session = requests.Session()
         r = session.get(url_login, headers=headers)
-        iin = r.json()['iin']
 
         # 2 - вызов createSubscription() из PaymentAPI
         url_login2 = 'https://post.kz/mail-app/api/v2/subscriptions'
@@ -807,7 +806,6 @@ def reply_onai_startPayment(sender, message, last_sender_message):
 
         body['token'] = token
         body['invoiceId'] = invoiceId
-        body['iin'] = iin
         body['systemId'] = 'POSTKZ'
         body['details'][0]['amount'] = amount
         body['details'][0]['commission'] = 0
@@ -1656,7 +1654,6 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
 
         session = requests.Session()
         r = session.get(url_login, headers=headers)
-        iin = r.json()['iin']
 
         # 2 - вызов createSubscription() из PaymentAPI
         url_login2 = 'https://post.kz/mail-app/api/v2/subscriptions'
