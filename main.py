@@ -88,19 +88,22 @@ def check_penalties_pdd(last_sender_message, data):
     return result
 
 def send_voice(sender, msg):
-    ya_url = 'https://tts.voicetech.yandex.net/generate?key=' + api_key + '&text='
-    ya_url += msg
-    ya_url += '&format=mp3&quality=hi&lang=ru-RU&speaker=oksana&speed=1.0&emotion=good'
-    r = requests.get(url)
-    voice_file = 'ya_' + sender + '.mp3'
-    with open(voice_file, "wb") as o:
-        o.write(r.content)
-    data = {
-        'recipient': '{id' + sender,
-        'message': '{"attachment":{"type":"audio", "payload":{}}}'
-    }
-    files = {'filedata': (voice_file, open(voice_file, "rb"), 'audio/mp3')}
-    requests.post(fb_url, data=data, files=files)
+    try:
+        ya_url = 'https://tts.voicetech.yandex.net/generate?key=' + api_key + '&text='
+        ya_url += msg
+        ya_url += '&format=mp3&quality=hi&lang=ru-RU&speaker=oksana&speed=1.0&emotion=good'
+        r = requests.get(ya_url)
+        voice_file = 'ya_' + sender + '.mp3'
+        with open(voice_file, "wb") as o:
+            o.write(r.content)
+        data = {
+            'recipient': '{id' + sender,
+            'message': '{"attachment":{"type":"audio", "payload":{}}}'
+        }
+        files = {'filedata': (voice_file, open(voice_file, "rb"), 'audio/mp3')}
+        requests.post(fb_url, data=data, files=files)
+    except:
+        logging.error(helper.PrintException())
 
 def reply(sender, msg):
     data = {"recipient": {"id": sender}, "message": {"text": msg}}
