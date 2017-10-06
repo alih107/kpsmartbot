@@ -190,27 +190,30 @@ def reply_astanaErc_chooseCard(sender, last_sender_message):
     main.mongo_update_record(last_sender_message)
 
 def reply_astanaErc_csc(sender, payload, last_sender_message):
-    main.reply_typing_on(sender)
-    chosenCard = last_sender_message[payload]
-    result = 'Проверьте суммы:\n'
-    invoiceData = get_komuslugi_invoice(last_sender_message)
-    c = 0
-    sum = 0
-    for i in invoiceData['details']:
-        desc = i['description']
-        invoiceData['details'][c]['amount'] = math.ceil(invoiceData['details'][c]['amount'])
-        amount = i['amount']
-        debt = i['debt']
-        sum += amount + debt
-        sum_str = ', сумма ' + str(amount + debt) + ' тг'
-        result += desc + sum_str + '\n'
-        c += 1
-    result += "\nКарта: " + chosenCard
-    result += "\nСумма: " + str(sum) + " тг"
-    result += "\nКомиссия: 100 тг"
-    result += "\nИтого: " + str(sum + 100) + " тг"
-    result += "\n\nЕсли всё верно, введите трехзначный код CSC/CVV2 на обратной стороне карты"
-    main.reply(sender, result)
+    try:
+        main.reply_typing_on(sender)
+        chosenCard = last_sender_message[payload]
+        result = 'Проверьте суммы:\n'
+        invoiceData = get_komuslugi_invoice(last_sender_message)
+        c = 0
+        sum = 0
+        for i in invoiceData['details']:
+            desc = i['description']
+            invoiceData['details'][c]['amount'] = math.ceil(invoiceData['details'][c]['amount'])
+            amount = i['amount']
+            debt = i['debt']
+            sum += amount + debt
+            sum_str = ', сумма ' + str(amount + debt) + ' тг'
+            result += desc + sum_str + '\n'
+            c += 1
+        result += "\nКарта: " + chosenCard
+        result += "\nСумма: " + str(sum) + " тг"
+        result += "\nКомиссия: 100 тг"
+        result += "\nИтого: " + str(sum + 100) + " тг"
+        result += "\n\nЕсли всё верно, введите трехзначный код CSC/CVV2 на обратной стороне карты"
+        main.reply(sender, result)
+    except:
+        logging.error(helper.PrintException())
 
 def reply_astanaErc_startPayment(sender, message, last_sender_message):
     if not helper.check_csc(message):
