@@ -206,8 +206,8 @@ def reply_astanaErc_csc(sender, payload, last_sender_message):
         result += desc + sum_str + '\n'
         c += 1
     result += "\nКарта: " + chosenCard
-    result += '\nСумма: ' + str(sum) + ' тг'
-    result += "\nКомиссия: 100" + " тг"
+    result += "\nСумма: " + str(sum) + " тг"
+    result += "\nКомиссия: 100 тг"
     result += "\nИтого: " + str(sum + 100) + " тг"
     result += "\n\nЕсли всё верно, введите трехзначный код CSC/CVV2 на обратной стороне карты"
     main.reply(sender, result)
