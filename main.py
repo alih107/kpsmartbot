@@ -123,7 +123,9 @@ def send_voice(sender, msg):
 
 def reply(sender, msg):
     data = {"recipient": {"id": sender}, "message": {"text": msg}}
-    requests.post(fb_url, json=data)
+    r = requests.post(fb_url, json=data)
+    if r.status_code != 200:
+        logging.error("Got facebook error: " + r.text)
     last_sender_message = collection_messages.find_one({"sender": sender})
     if last_sender_message['sendVoice']:
         send_voice(sender, msg)
