@@ -190,7 +190,6 @@ def reply_astanaErc_chooseCard(sender, last_sender_message):
     main.mongo_update_record(last_sender_message)
 
 def reply_astanaErc_csc(sender, payload, last_sender_message):
-    logging.info('entered main.reply_astanaErc_csc')
     try:
         main.reply_typing_on(sender)
         chosenCard = last_sender_message[payload]
@@ -209,7 +208,7 @@ def reply_astanaErc_csc(sender, payload, last_sender_message):
             c += 1
         result += "\nКарта: " + chosenCard
         result += "\nСумма: " + str(sum) + " тг"
-        #result += "\nКомиссия: 100 тг"
+        result += "\nКомиссия: 100 тг"
         #result += "\nИтого: " + str(sum + 100.0) + " тг"
         result += "\n\nЕсли всё верно, введите трехзначный код CSC/CVV2 на обратной стороне карты"
         main.reply(sender, result)
