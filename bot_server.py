@@ -120,6 +120,7 @@ def handle_data(data):
 
     logging.info(print_facebook_data(data, sender, last_sender_message))
     last_sender_message['sendVoice'] = False
+    main.mongo_update_record(last_sender_message)
     if not last_sender_message['isBotActive']:
         handle_messages_when_deactivated(sender, data, last_sender_message)
         return "ok"
@@ -485,6 +486,12 @@ def handle_text_messages(sender, last_sender_message, message):
         t.setDaemon(True)
         t.start()
         logging.info('main.reply_addcard_startAdding called with a new thread')
+        return "ok"
+    elif payload == 'astanaErc.startPayment':
+        t = threading.Thread(target=komuslugi.reply_astanaErc_startPayment, args=(sender, message, last_sender_message,))
+        t.setDaemon(True)
+        t.start()
+        logging.info('komuslugi.reply_astanaErc_startPayment_startAdding called with a new thread')
         return "ok"
     elif payload == 'send.message':
         res = "Спасибо, Ваше сообщение принято! Ожидайте ответа от операторов\n"

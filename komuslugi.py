@@ -3,6 +3,7 @@ import helper
 import requests
 import logging
 import math
+import time
 fb_url = main.fb_url
 url = main.url
 portal_id = main.portal_id
@@ -55,14 +56,9 @@ def get_komuslugi(last_sender_message, data):
 def get_komuslugi_invoice(last_sender_message):
     message = last_sender_message['astanaErc_last_acc']
     data = {'operatorId': 'astanaErcWf', 'data': message}
-    session = requests.Session()
     invoiceData = {}
     try:
-        headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
-                   'Content-Type': 'application/json'}
-        url_login = 'https://post.kz/mail-app/api/account/'
-        r = session.get(url_login, headers=headers)
-
+        session = main.get_authorized_session(last_sender_message['encodedLoginPass'])
         url_login = 'https://post.kz/mail-app/api/v2/subscriptions'
         r = session.post(url_login, json=data)
         subscriptionId = str(r.json()['subscriptionData']['id'])
@@ -213,8 +209,6 @@ def reply_astanaErc_csc(sender, payload, last_sender_message):
     result += "\nКарта: " + chosenCard + '\n\n'
     result += "Если всё верно, введите трехзначный код CSC/CVV2 на обратной стороне карты"
     main.reply(sender, result)
-    last_sender_message['payload'] = 'astanaErc.startPayment'
-    main.mongo_update_record(last_sender_message)
 
 def reply_astanaErc_startPayment(sender, message, last_sender_message):
     if not helper.check_csc(message):
@@ -224,91 +218,95 @@ def reply_astanaErc_startPayment(sender, message, last_sender_message):
     main.reply_typing_on(sender)
     # 1 - авторизация на post.kz
     try:
-        url_login = 'https://post.kz/mail-app/api/account/'
-        headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
-                   'Content-Type': 'application/json'}
-
-        session = requests.Session()
-        r = session.get(url_login, headers=headers)
+        session = main.get_authorized_session(last_sender_message['encodedLoginPass'])
         mobileNumber = last_sender_message['mobileNumber']
+        token = main.get_token_postkz(session, mobileNumber)
+        invoiceData = get_komuslugi_invoice(last_sender_message)
+        invoiceData['systemId'] = 'POSTKZ'
+        invoiceData['token'] = token
+        invoiceData['invoiceId'] = invoiceData['id']
+        c = 0
+        for i in invoiceData['details']:
+            invoiceData['details'][c]['amount'] = math.ceil(invoiceData['details'][c]['amount'])
+            c += 1
 
-        # 2 - вызов getCards()
+        # 5 - createPayment
+        url_login5 = 'https://post.kz/mail-app/api/v2/payments/create'
+        r = session.post(url_login5, json=invoiceData)
+        payment_id = r.json()['paymentData']['id']
+
+        # 6 - вызов getCards()
         url_login6 = 'https://post.kz/mail-app/api/intervale/card?device=mobile'
         sd2 = {"blockedAmount": "", "phone": mobileNumber, "paymentId": "", "returnUrl": "", "transferId": ""}
         r = session.post(url_login6, json=sd2)
         card = r.json()[last_sender_message['chosenCardIndex']]
 
-        # 3 - вызов getToken()
-        url_login4 = url + portal_id + '/token'
-        headers = {'Content-Type': 'application/x-www-form-urlencoded',
-                   'X-Channel-Id': x_channel_id,
-                   'X-IV-Authorization': 'Identifier ' + mobileNumber}
-        r = session.post(url_login4, headers=headers)
-        token = r.json()['token']
+        sd2 = {}
+        sd2['phone'] = mobileNumber
+        sd2['paymentId'] = payment_id
+        sd2['cardId'] = card['id']
+        sd2['csc'] = message
+        sd2['token'] = token
+        sd2['returnUrl'] = 'https://post.kz/static/return.html'
 
-        # 4 - вызов startPayment()
-        amount = last_sender_message['amount']
-        data = {'paymentId': 'MoneyTransfer_KazPost_Card2Card',
-                'currency': 'KZT',
-                'amount': str(amount) + '00',
-                'commission': str(last_sender_message['commission']) + '00',
-                'total': str(last_sender_message['total']) + '00',
-                'src.type': 'card_id',
-                'src.cardId': card['id'],
-                'src.csc': message,
-                'dst.type': 'card',
-                'dst.pan': last_sender_message['lastCardDst'],
-                'returnUrl': 'https://transfer.post.kz/?token=' + token}
+        # 7 - вызов startPayment()
+        url_login7 = 'https://post.kz/mail-app/api/intervale/payment/start/' + token
+        r = session.post(url_login7, json=sd2)
 
-        url_login5 = url + portal_id + '/payment/' + token + '/start'
-        r = session.post(url_login5, data=data, headers=headers)
+        # 8 - вызов statusPayment()
+        url_login8 = 'https://post.kz/mail-app/api/intervale/payment/status/' + token
+        sd22 = {}
+        sd22['phone'] = mobileNumber
+        sd22['paymentId'] = payment_id
+        r = session.post(url_login8, json=sd22)
 
-        # 5 - вызов statusPayment()
+        # 9 - вызов acceptPayment()
+        url_login9 = 'https://post.kz/mail-app/api/intervale/payment/accept/' + token
+        r = session.post(url_login9, json=sd2)
 
-        url_login10 = url + portal_id + '/payment/' + token
-        r = session.post(url_login10, headers=headers)
+        # 10 - вызов statusPayment()
+        url_login10 = 'https://post.kz/mail-app/api/intervale/payment/status/' + token
+        r = session.post(url_login10, json=sd22)
         data = r.json()
-        state = data['state']
-        if state == 'redirect':
-            reply_send_redirect_url(sender, data['url'])
+        if data['state'] == 'redirect':
+            main.reply_send_redirect_url(sender, data['url'])
+            time.sleep(5)
 
-        card_w_spaces = helper.insert_4_spaces(last_sender_message['lastCardDst'])
         timer = 0
-        while timer < timeout:
+        while timer < main.timeout:
             time.sleep(1)
-            r = session.post(url_login10, headers=headers)
+            r = session.post(url_login10, json=sd22)
             data = r.json()
-            try:
+            if data['state'] == 'result':
                 result_status = data['result']['status']
                 if result_status == 'fail':
-                    reply(sender, "Платеж не был завершен успешно. Попробуйте снова")
+                    main.reply(sender, "Платеж не был завершен успешно. Попробуйте снова")
                 elif result_status == 'success':
-                    res = "Поздравляю! Платеж был проведен успешно, карта " + card_w_spaces + " пополнена на сумму " + str(
-                        amount) + " тг.\n"
-                    res += "Номер квитанции: " + str(data['result']['trxId'])
-                    res += ", она доступна в профиле post.kz в разделе История платежей"
-                    reply(sender, res)
-                last_sender_message['payload'] = 'card2card.finished'
-                mongo_update_record(last_sender_message)
-                reply_typing_off(sender)
-                reply_main_menu_buttons(sender)
+                    res = "Поздравляю! Платеж был проведен успешно, квитанция счёта Астана ЕРЦ " + \
+                          last_sender_message['astanaErc_last_acc'] + " оплачена на сумму " + str(amount) + " тг.\n"
+                    res += "Номер квитанции: " + str(payment_id)
+                    res += ", она доступна на post.kz в разделе История платежей"
+                    main.reply(sender, res)
+                last_sender_message['payload'] = 'astanaErc.finished'
+                main.mongo_update_record(last_sender_message)
+                main.reply_typing_off(sender)
+                main.reply_main_menu_buttons(sender)
                 return "ok"
-            except Exception as e:
-                pass
             timer += 1
 
-        last_sender_message = collection_messages.find_one({"sender": sender})
-        if last_sender_message['payload'] == 'card2card.startPayment':
-            strminutes = str(timeout // 60)
-            reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
-            reply_typing_off(sender)
-            reply_main_menu_buttons(sender)
+        last_sender_message = main.mongo_get_by_sender(sender)
+        if last_sender_message['payload'] == 'astanaErc.startPayment':
+            strminutes = str(main.timeout // 60)
+            main.reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
+            main.reply_typing_off(sender)
+            main.reply_main_menu_buttons(sender)
             last_sender_message['payload'] = 'mainMenu'
-            mongo_update_record(last_sender_message)
+            main.mongo_update_record(last_sender_message)
         return "time exceed"
+
     except Exception as e:
-        reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
-        reply_typing_off(sender)
-        reply_main_menu_buttons(sender)
+        main.reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
+        main.reply_typing_off(sender)
+        main.reply_main_menu_buttons(sender)
         logging.error(helper.PrintException())
         return "fail"

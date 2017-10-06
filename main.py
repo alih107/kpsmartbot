@@ -35,9 +35,25 @@ to_find_dict = {'nearest.postamats': 'ближайший постамат',
 
 url_mobile_payments = 'https://post.kz/finance/payment/mobile'
 
+def get_authorized_session(encodedLoginPass):
+    url_login = 'https://post.kz/mail-app/api/account/'
+    headers = {"Authorization": "Basic " + encodedLoginPass, 'Content-Type': 'application/json'}
+    session = requests.Session()
+    session.get(url_login, headers=headers)
+    return session
+
+def get_token_postkz(session, mobileNumber):
+    url_login4 = 'https://post.kz/mail-app/api/intervale/token'
+    sd2 = {"blockedAmount": "", "phone": mobileNumber, "paymentId": "", "returnUrl": "", "transferId": ""}
+    r = session.post(url_login4, json=sd2)
+    return r.json()['token']
+
 def mongo_update_record(last_sender_message):
     collection_messages.update_one({'sender': last_sender_message['sender']},
                                    {"$set": last_sender_message}, upsert=False)
+
+def mongo_get_by_sender(sender):
+    return collection_messages.find_one({"sender": sender})
 
 def check_login(sender, last_sender_message):
     if last_sender_message['encodedLoginPass'] == None:
@@ -774,11 +790,7 @@ def reply_onai_startPayment(sender, message, last_sender_message):
     reply_typing_on(sender)
     # 1 - авторизация на post.kz
     try:
-        url_login = 'https://post.kz/mail-app/api/account/'
-        headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type':'application/json'}
-
-        session = requests.Session()
-        r = session.get(url_login, headers=headers)
+        session = get_authorized_session(last_sender_message['encodedLoginPass'])
 
         # 2 - вызов createSubscription() из PaymentAPI
         url_login2 = 'https://post.kz/mail-app/api/v2/subscriptions'
@@ -799,11 +811,8 @@ def reply_onai_startPayment(sender, message, last_sender_message):
         body = r.json()['invoiceData'][0]
 
         # 4 - вызов getToken()
-        url_login4 = 'https://post.kz/mail-app/api/intervale/token'
         mobileNumber = last_sender_message['mobileNumber']
-        sd2 = {"blockedAmount":"","phone":mobileNumber,"paymentId":"","returnUrl":"","transferId":""}
-        r = session.post(url_login4, json=sd2)
-        token = r.json()['token']
+        token = get_token_postkz(session, mobileNumber)
 
         body['token'] = token
         body['invoiceId'] = invoiceId
@@ -852,7 +861,7 @@ def reply_onai_startPayment(sender, message, last_sender_message):
         state = data['state']
         if state == 'redirect':
             reply_send_redirect_url(sender, data['url'])
-            time.sleep(9)
+            time.sleep(5)
 
         timer = 0
         while timer < timeout:
@@ -1154,12 +1163,7 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
     reply_typing_on(sender)
     # 1 - авторизация на post.kz
     try:
-        url_login = 'https://post.kz/mail-app/api/account/'
-        headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
-                   'Content-Type': 'application/json'}
-
-        session = requests.Session()
-        r = session.get(url_login, headers=headers)
+        session = get_authorized_session(last_sender_message['encodedLoginPass'])
         mobileNumber = last_sender_message['mobileNumber']
 
         # 2 - вызов getCards()

@@ -197,7 +197,6 @@ def handle_intent(sender, last_sender_message, value):
             anekdot = anekdot.replace('<br />', '\n').replace('&mdash;', '').replace('<BR>', '').replace('<br>', '')
             logging.info("Anekdot = " + anekdot)
             main.reply(sender, anekdot)
-            pass
         else:
             main.reply(sender, "Я не поняла Вашу команду")
     except:
