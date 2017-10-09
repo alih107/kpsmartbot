@@ -37,36 +37,28 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
         voice_filename_wav = "voice_" + sender + ".wav"
         with open(voice_filename, "wb") as o:
             o.write(g.content)
-        start = time.time()
         try:
             AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="wav")  # android
         except:
             AudioSegment.from_file(voice_filename, "aac").export(voice_filename_wav, format="wav")  # iphone
-        logging.info('AudioSegment export time = ' + str(time.time() - start))
-        with open(voice_filename_wav, 'rb') as f:
-            try:
-                headers = {'Content-Type': 'audio/x-wav'}
-                url = 'http://asr.yandex.net/asr_xml?uuid=' + uuid + '&key=' + api_key + '&topic=queries'
-                start = time.time()
-                r = requests.post(url, data=f, headers=headers)
-                logging.info('requests.post to yandex time = ' + str(time.time() - start))
-                root = ET.fromstring(r.text)
-                logging.info("" + str(root.tag) + " | " + str(root.attrib) + " | " + str(root.text))
-                if root.attrib['success'] == '0':
-                    main.reply(sender, "Мне кажется, что Вы отправили пустую аудио-запись")
-                else:
-                    for child in root:
-                        logging.info("" + str(child.tag) + " " + str(child.attrib) + " | " + str(child.text))
-                        start = time.time()
-                        resp = client.message(child.text)
-                        logging.info('Yay, got Wit.ai response: ' + str(resp))
-                        logging.info('client.message time = ' + str(time.time() - start))
-                        handle_entities(sender, last_sender_message, resp)
-                        logging.info('handle_voice_message elapsed time = ' + str(time.time() - start_function))
-                        break
-            except:
-                logging.info(helper.PrintException())
-                main.reply(sender, "Извините, я не поняла что Вы сказали")
+        try:
+            headers = {'Content-Type': 'audio/x-wav'}
+            url = 'http://asr.yandex.net/asr_xml?uuid=' + uuid + '&key=' + api_key + '&topic=queries'
+            r = requests.post(url, data=open(voice_filename_wav, 'rb'), headers=headers)
+            root = ET.fromstring(r.text)
+            logging.info(str(root.tag) + " | " + str(root.attrib))
+            if root.attrib['success'] == '0':
+                main.reply(sender, "Мне кажется, что Вы отправили пустую аудио-запись")
+            else:
+                for child in root:
+                    logging.info(str(child.tag) + " | " + str(child.attrib) + " | " + child.text)
+                resp = client.message(root[0].text)
+                logging.info('Yay, got Wit.ai response: ' + str(resp))
+                handle_entities(sender, last_sender_message, resp)
+
+        except:
+            logging.info(helper.PrintException())
+            main.reply(sender, "Извините, я не поняла что Вы сказали")
         main.reply_typing_off(sender)
         try:
             os.remove(voice_filename)

@@ -1,12 +1,12 @@
 import requests
 import base64
-import time
+import os
 import pymongo
 import datetime
-import constants
 import logging
-import helper
 import json
+import constants
+import helper
 
 client = pymongo.MongoClient()
 db = client.kpsmartbot_db
@@ -84,6 +84,10 @@ def send_voice(sender, msg):
         }
         files = {'filedata': (voice_file, open(voice_file, "rb"), 'audio/mp3')}
         requests.post(fb_url, data=data, files=files)
+        try:
+            os.remove(voice_file)
+        except:
+            pass
     except:
         logging.error(helper.PrintException())
 
