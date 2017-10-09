@@ -10,6 +10,7 @@ import komuslugi
 import helper
 import voice_assistant
 from finances import mobile
+from finances import onai
 from services import shtrafy
 from services import tracking
 
@@ -245,13 +246,13 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
         tracking.reply_tracking_delete_number(sender, text, last_sender_message)
         payload = 'tracking'
     elif payload == 'onai.last':
-        main.reply_onai(sender, text, last_sender_message)
+        onai.reply_onai(sender, text, last_sender_message)
         payload = 'onai.amount'
     elif payload == 'onai.delete':
-        main.reply_onai_delete(sender, last_sender_message)
+        onai.reply_onai_delete(sender, last_sender_message)
         return "ok"
     elif payload == 'onai.delete.phone':
-        main.reply_onai_delete_phone(sender, text, last_sender_message)
+        onai.reply_onai_delete_phone(sender, text, last_sender_message)
         return "ok"
     elif payload == 'mobile.last':
         mobile.reply_mobile_check_number(sender, text, last_sender_message)
@@ -316,16 +317,8 @@ def handle_postback_payload(sender, last_sender_message, payload):
     elif payload == 'card2cash':
         if not call_card2cash(sender, last_sender_message, payload):
             return "ok"
-    elif payload == 'courier':
-        main.reply(sender, "[не работает] Отправьте геолокацию\n" + hint_main_menu)
-    elif payload == 'currencies':
-        main.reply_currencies(sender)
     elif payload == '10.kursy':
         main.reply_currencies_kursy(sender)
-    elif payload == '10.grafik':
-        main.reply_currencies_grafik(sender)
-    elif payload == 'closest':
-        main.reply_closest(sender)
     elif payload == 'misc':
         main.reply_misc(sender)
     elif payload == 'onai':
@@ -350,7 +343,7 @@ def handle_postback_payload(sender, last_sender_message, payload):
             mobile.reply_mobile_csc(sender, payload, last_sender_message)
             payload = 'mobile.startPayment'
         elif lastCommand == 'onai':
-            main.reply_onai_csc(sender, payload, last_sender_message)
+            onai.reply_onai_csc(sender, payload, last_sender_message)
             payload = 'onai.startPayment'
         elif lastCommand == 'card2card':
             main.reply_card2card_csc(sender, payload, last_sender_message)
@@ -455,13 +448,13 @@ def handle_text_messages(sender, last_sender_message, message):
     elif payload == 'mobile.finished' or payload == 'onai.finished':
         return "ok"
     elif payload == 'onai':
-        main.reply_onai(sender, message, last_sender_message)
+        onai.reply_onai(sender, message, last_sender_message)
         return "ok"
     elif payload == 'onai.amount':
-        main.reply_onai_amount(sender, message, last_sender_message)
+        onai.reply_onai_amount(sender, message, last_sender_message)
         return "ok"
     elif payload == 'onai.startPayment':
-        t = threading.Thread(target=main.reply_onai_startPayment, args=(sender, message, last_sender_message,))
+        t = threading.Thread(target=onai.reply_onai_startPayment, args=(sender, message, last_sender_message,))
         t.setDaemon(True)
         t.start()
         return "ok"
@@ -569,7 +562,7 @@ def call_balance(sender, last_sender_message, payload):
 def call_onai(sender, last_sender_message, payload):
     if main.check_login(sender, last_sender_message):
         last_sender_message['lastCommand'] = payload
-        main.reply_onai_enter_number(sender, last_sender_message)
+        onai.reply_onai_enter_number(sender, last_sender_message)
         return True
     return False
 
