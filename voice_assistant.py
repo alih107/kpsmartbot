@@ -55,7 +55,6 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                 resp = client.message(root[0].text)
                 logging.info('Yay, got Wit.ai response: ' + str(resp))
                 handle_entities(sender, last_sender_message, resp)
-
         except:
             logging.error(helper.PrintException())
             main.reply(sender, "Извините, я не поняла что Вы сказали")
