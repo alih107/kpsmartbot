@@ -56,6 +56,7 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                 logging.info('Yay, got Wit.ai response: ' + str(resp))
                 handle_entities(sender, last_sender_message, resp)
         except:
+            logging.error('11111')
             logging.error(helper.PrintException())
             main.reply(sender, "Извините, я не поняла что Вы сказали")
         main.reply_typing_off(sender)
@@ -77,6 +78,7 @@ def handle_entities(sender, last_sender_message, resp):
         main.reply(sender, "Я не уверена, что именно Вы хотите")
     else:
         main.reply(sender, "Я не поняла Вашу команду")
+        logging.error('22222')
         logging.error(helper.PrintException())
 
 def handle_intent(sender, last_sender_message, value):
