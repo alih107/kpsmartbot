@@ -122,10 +122,12 @@ def send_voice(sender, msg):
         logging.error(helper.PrintException())
 
 def reply(sender, msg):
+    if len(msg) > 640:
+        msg_parts = msg.split('\n')
+        for part in msg_parts:
+            logging.info(part)
     data = {"recipient": {"id": sender}, "message": {"text": msg}}
     r = requests.post(fb_url, json=data)
-    if r.status_code != 200:
-        logging.error("Got facebook error: " + r.text + " | msg length = " + str(len(msg)))
     last_sender_message = collection_messages.find_one({"sender": sender})
     if last_sender_message['sendVoice']:
         send_voice(sender, msg)
