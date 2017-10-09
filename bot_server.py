@@ -10,6 +10,7 @@ import komuslugi
 import helper
 import voice_assistant
 from finances import mobile
+from services import shtrafy
 
 app = Flask(__name__)
 client = pymongo.MongoClient()
@@ -199,28 +200,28 @@ def reply_intro(sender):
 def handle_quickreply_payload(sender, data, last_sender_message, payload):
     text = data['entry'][0]['messaging'][0]['message']['text']
     if payload == '4.IIN':
-        main.reply_pdd_shtrafy_iin_enter(sender, last_sender_message)
+        shtrafy.reply_pdd_shtrafy_iin_enter(sender, last_sender_message)
         return "ok"
     if payload == 'pddIIN.last':
-        main.reply_pdd_shtrafy_iin(sender, text, last_sender_message)
+        shtrafy.reply_pdd_shtrafy_iin(sender, text, last_sender_message)
         return "ok"
     if payload == 'pddIIN.delete':
-        main.reply_pdd_shtrafy_iin_delete(sender, last_sender_message)
+        shtrafy.reply_pdd_shtrafy_iin_delete(sender, last_sender_message)
         return "ok"
     if payload == 'pddIIN.delete.number':
-        main.reply_pdd_shtrafy_iin_delete_iin(sender, text, last_sender_message)
+        shtrafy.reply_pdd_shtrafy_iin_delete_iin(sender, text, last_sender_message)
         return "ok"
     elif payload == '4.GosNomer':
-        main.reply_pdd_shtrafy_gosnomer_enter(sender, last_sender_message)
+        shtrafy.reply_pdd_shtrafy_gosnomer_enter(sender, last_sender_message)
         return "ok"
     elif payload == 'pddGosnomer.last':
-        main.reply_pdd_shtrafy_gosnomer(sender, text, last_sender_message)
+        shtrafy.reply_pdd_shtrafy_gosnomer(sender, text, last_sender_message)
         return "ok"
     elif payload == 'pddGosnomer.delete':
-        main.reply_pdd_shtrafy_gosnomer_delete(sender, last_sender_message)
+        shtrafy.reply_pdd_shtrafy_gosnomer_delete(sender, last_sender_message)
         return "ok"
     elif payload == 'pddGosnomer.delete.number':
-        main.reply_pdd_shtrafy_gosnomer_delete_gosnomer(sender, text, last_sender_message)
+        shtrafy.reply_pdd_shtrafy_gosnomer_delete_gosnomer(sender, text, last_sender_message)
         return "ok"
     elif payload == 'astanaErc.last':
         komuslugi.reply_astanaErc(sender, text, last_sender_message)
@@ -294,7 +295,7 @@ def handle_postback_payload(sender, last_sender_message, payload):
         main.reply_tracking_enter_number(sender, last_sender_message)
         return "ok"
     elif payload == 'shtrafy':
-        main.reply_pdd_shtrafy(sender)
+        shtrafy.reply_pdd_shtrafy(sender)
     elif payload == 'komuslugi':
         komuslugi.reply_komuslugi_cities(sender)
     elif payload == 'astanaErc':
@@ -408,10 +409,10 @@ def handle_text_messages(sender, last_sender_message, message):
         main.reply_tracking(sender, message, last_sender_message)
         return "ok"
     elif payload == '4.IIN':
-        main.reply_pdd_shtrafy_iin(sender, message, last_sender_message)
+        shtrafy.reply_pdd_shtrafy_iin(sender, message, last_sender_message)
         return "ok"
     elif payload == '4.GosNomer':
-        main.reply_pdd_shtrafy_gosnomer(sender, message, last_sender_message)
+        shtrafy.reply_pdd_shtrafy_gosnomer(sender, message, last_sender_message)
         return "ok"
     elif payload == 'astanaErc.enter':
         komuslugi.reply_astanaErc(sender, message, last_sender_message)
