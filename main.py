@@ -130,11 +130,13 @@ def reply_gif_mobile(sender):
     requests.post(fb_url, json=data)
 
 def reply_typing_on(sender):
+    logging.info('Trying to send typing on...')
     data = {
         "recipient": {"id": sender},
         "sender_action": "typing_on"
     }
-    requests.post(fb_url, json=data)
+    r = requests.post(fb_url, json=data)
+    logging.info(r.text)
 
 def reply_typing_off(sender):
     data = {
