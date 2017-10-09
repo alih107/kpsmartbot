@@ -11,6 +11,8 @@ import helper
 import voice_assistant
 from finances import mobile
 from finances import onai
+from finances import card2card
+from finances import card2cash
 from services import shtrafy
 from services import tracking
 
@@ -264,7 +266,7 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
         mobile.reply_mobile_delete_phone(sender, text, last_sender_message)
         return "ok"
     elif payload == 'card2card.last':
-        main.reply_card2card_check_cardDst(sender, text, last_sender_message)
+        card2card.reply_card2card_check_cardDst(sender, text, last_sender_message)
         payload = 'card2card.amount'
     elif payload == 'auth.delete.yes':
         last_sender_message['encodedLoginPass'] = None
@@ -285,7 +287,7 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
 # кнопки главного меню
 def handle_postback_payload(sender, last_sender_message, payload):
     if last_sender_message['payload'] == 'card2cash':
-        main.reply_card2cash_history_show(sender, last_sender_message, payload)
+        card2cash.reply_card2cash_history_show(sender, last_sender_message, payload)
         last_sender_message['payload'] = 'card2cash.show'
         main.mongo_update_record(last_sender_message)
         return "ok"
@@ -346,7 +348,7 @@ def handle_postback_payload(sender, last_sender_message, payload):
             onai.reply_onai_csc(sender, payload, last_sender_message)
             payload = 'onai.startPayment'
         elif lastCommand == 'card2card':
-            main.reply_card2card_csc(sender, payload, last_sender_message)
+            card2card.reply_card2card_csc(sender, payload, last_sender_message)
             payload = 'card2card.startPayment'
         elif lastCommand == 'astanaErc':
             komuslugi.reply_astanaErc_csc(sender, payload, last_sender_message)
@@ -423,13 +425,13 @@ def handle_text_messages(sender, last_sender_message, message):
         mobile.reply_mobile_check_number(sender, message, last_sender_message)
         return "ok"
     elif payload == 'card2cash.show':
-        main.reply_card2cash_history_startPayment(sender, message, last_sender_message)
+        card2cash.reply_card2cash_history_startPayment(sender, message, last_sender_message)
         return "ok"
     elif payload == 'card2card':
-        main.reply_card2card_check_cardDst(sender, message, last_sender_message)
+        card2card.reply_card2card_check_cardDst(sender, message, last_sender_message)
         return "ok"
     elif payload == 'card2card.amount':
-        main.reply_card2card_amount(sender, message, last_sender_message)
+        card2card.reply_card2card_amount(sender, message, last_sender_message)
         return "ok"
     elif payload == 'card2card.chooseCard':
         main.reply_display_cards(sender, last_sender_message)
@@ -459,7 +461,7 @@ def handle_text_messages(sender, last_sender_message, message):
         t.start()
         return "ok"
     elif payload == 'card2card.startPayment':
-        t = threading.Thread(target=main.reply_card2card_startPayment, args=(sender, message, last_sender_message,))
+        t = threading.Thread(target=card2card.reply_card2card_startPayment, args=(sender, message, last_sender_message,))
         t.setDaemon(True)
         t.start()
         return "ok"
@@ -541,14 +543,14 @@ def handle_messages_when_deactivated(sender, data, last_sender_message):
 def call_card2card(sender, last_sender_message, payload):
     if main.check_login(sender, last_sender_message):
         last_sender_message['lastCommand'] = payload
-        main.reply_card2card_enter_cardDst(sender, last_sender_message)
+        card2card.reply_card2card_enter_cardDst(sender, last_sender_message)
         return True
     return False
 
 def call_card2cash(sender, last_sender_message, payload):
     if main.check_login(sender, last_sender_message):
         last_sender_message['lastCommand'] = payload
-        main.reply_card2cash_history(sender, last_sender_message)
+        card2cash.reply_card2cash_history(sender, last_sender_message)
         return True
     return False
 
