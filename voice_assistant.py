@@ -197,6 +197,8 @@ def handle_intent(sender, last_sender_message, value):
             anekdot = anekdot.replace('<br />', '\n').replace('&mdash;', '').replace('<BR>', '').replace('<br>', '')
             logging.info("Anekdot = " + anekdot)
             main.reply(sender, anekdot)
+        elif value == 'thanx':
+            main.reply(sender, "Всегда рада Вам служить," + last_sender_message['first_name'] + "!")
         else:
             main.reply(sender, "Я не поняла Вашу команду")
     except:
