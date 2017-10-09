@@ -123,9 +123,16 @@ def send_voice(sender, msg):
 
 def reply(sender, msg):
     if len(msg) > 640:
+        result = ''
         msg_parts = msg.split('\n')
         for part in msg_parts:
-            logging.info(part)
+            if len(result + part) > 640:
+                data = {"recipient": {"id": sender}, "message": {"text": result}}
+                r = requests.post(fb_url, json=data)
+                result = ''
+            else:
+                result += part
+        msg = result
     data = {"recipient": {"id": sender}, "message": {"text": msg}}
     r = requests.post(fb_url, json=data)
     last_sender_message = collection_messages.find_one({"sender": sender})
