@@ -13,6 +13,7 @@ from finances import mobile
 from finances import onai
 from finances import card2card
 from finances import card2cash
+from finances import addcard
 from services import shtrafy
 from services import tracking
 
@@ -466,19 +467,19 @@ def handle_text_messages(sender, last_sender_message, message):
         t.start()
         return "ok"
     elif payload == 'addcard':
-        main.reply_addcard_checkcard(sender, message, last_sender_message)
+        addcard.reply_addcard_checkcard(sender, message, last_sender_message)
         return "ok"
     elif payload == 'addcard.expiredate':
-        main.reply_addcard_checkexpiredate(sender, message, last_sender_message)
+        addcard.reply_addcard_checkexpiredate(sender, message, last_sender_message)
         return "ok"
     elif payload == 'addcard.cardowner':
-        main.reply_addcard_checkcardowner(sender, message, last_sender_message)
+        addcard.reply_addcard_checkcardowner(sender, message, last_sender_message)
         return "ok"
     elif payload == 'addcard.confirmation':
-        main.card_registration_confirm(sender, message, last_sender_message)
+        addcard.card_registration_confirm(sender, message, last_sender_message)
         return "ok"
     elif payload == 'addcard.csc':
-        t = threading.Thread(target=main.reply_addcard_startAdding, args=(sender, message, last_sender_message,))
+        t = threading.Thread(target=addcard.reply_addcard_startAdding, args=(sender, message, last_sender_message,))
         t.setDaemon(True)
         t.start()
         return "ok"
@@ -598,7 +599,7 @@ def call_disable_bot(sender, last_sender_message, payload):
 
 def call_addcard(sender, last_sender_message, payload):
     if main.check_login(sender, last_sender_message):
-        main.reply_addcard_entercard(sender, last_sender_message)
+        addcard.reply_addcard_entercard(sender, last_sender_message)
         last_sender_message['payload'] = payload
         main.mongo_update_record(last_sender_message)
         return True

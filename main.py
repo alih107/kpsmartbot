@@ -362,7 +362,7 @@ def reply_auth(sender, loginPass, last_sender_message):
     elif status_code == 200:
         profile_data = r.json()
         iin = profile_data['iin']
-        mobile = profile_data['mobileNumber']
+        mobile = '7' + profile_data['mobileNumber'][-10:]
         answer = "Вы успешно авторизованы! Добро пожаловать, " + profile_data['firstName'] + "!\n"
         answer += "В целях безопасности удалите сообщение с вашими логином и паролем"
         reply(sender, answer)
@@ -409,13 +409,11 @@ def reply_misc(sender):
     requests.post(fb_url, json=data_misc_buttons)
 
 def reply_has_cards(sender, last_sender_message):
-    session = requests.Session()
-    headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'], 'Content-Type':'application/json'}
-    url_login = 'https://post.kz/mail-app/api/account/'
-    r = session.get(url_login, headers=headers)
+    session = get_authorized_session(last_sender_message['encodedLoginPass'])
     
     url_login6 = 'https://post.kz/mail-app/api/intervale/card?device=mobile'
-    sd2 = {"blockedAmount":"","phone":last_sender_message['mobileNumber'],"paymentId":"","returnUrl":"","transferId":""}
+    sd2 = {"blockedAmount": "", "phone": last_sender_message['mobileNumber'], "paymentId": "",
+           "returnUrl": "", "transferId": ""}
     r = session.post(url_login6, json=sd2)
     if r.status_code != 200:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
@@ -559,197 +557,6 @@ def reply_nearest_map_location(sender, locLong, locLat, title):
     }
 
     requests.post(fb_url, json=data_misc_buttons)
-
-def reply_addcard_entercard(sender, last_sender_message):
-    cards = get_cards_json(sender, last_sender_message)
-    if len(cards) > 0:
-        res = 'Список добавленных карт:\n'
-        for card in cards:
-            if card['state'] != 'REGISTERED':
-                continue
-            card_title = card['title']
-            if len(card_title) > 20:
-                card_title = card['brand'] + ' *' + card['alias']
-            res += card_title + '\n'
-        res += '\nЕсли Вы хотите добавить карту, введите 16ти-значный номер карты'
-        reply(sender, res)
-    else:
-        reply(sender, 'Чтобы добавить карту, введите 16ти-значный номер карты')
-
-def reply_addcard_checkcard(sender, message, last_sender_message):
-    message = message.replace(' ', '')
-    if len(message) != 16:
-        reply(sender, "Вы ввели не все 16 цифр карты, попробуйте ещё раз")
-        return "addcard.again"
-    if not helper.isAllDigits(message):
-        reply(sender, "Некоторые введенные Вами цифры не являются цифрами, попробуйте ещё раз")
-        return "addcard.again"
-    last_sender_message['addcard_cardnumber'] = message
-    last_sender_message['payload'] = 'addcard.expiredate'
-    mongo_update_record(last_sender_message)
-    reply(sender, "Введите месяц и год срока действия карты (например, 0418)\n" + hint_main_menu)
-
-def reply_addcard_checkexpiredate(sender, message, last_sender_message):
-    message = message.replace(' ', '')
-    message = message.replace('.', '')
-    message = message.replace('/', '')
-    if len(message) != 4:
-        reply(sender, "Вы должны ввести 4 цифры (2 на месяц, 2 на год), попробуйте ещё раз")
-        return "addcard.expiredateagain"
-    if not helper.isAllDigits(message):
-        reply(sender, "Некоторые введенные Вами цифры не являются цифрами, попробуйте ещё раз")
-        return "addcard.expiredateagain"
-    last_sender_message['addcard_expiredate'] = message
-    last_sender_message['payload'] = 'addcard.cardowner'
-    mongo_update_record(last_sender_message)
-    reply(sender, "Введите имя и фамилию на карте латинскими буквами\n" + hint_main_menu)
-
-def reply_addcard_checkcardowner(sender, message, last_sender_message):
-    last_sender_message['addcard_cardowner'] = message
-    res = 'Проверьте данные:\n'
-    res += 'Номер карты: ' + helper.insert_4_spaces(last_sender_message['addcard_cardnumber']) + '\n'
-    res += 'Срок действия: ' + last_sender_message['addcard_expiredate'][:2] + '/' + \
-                              last_sender_message['addcard_expiredate'][2:] + '\n'
-    res += 'Имя на карте: ' + last_sender_message['addcard_cardowner'] + '\n'
-    res += '\nЕсли всё верно, введите трехзначный код CSC/CVV2 на обратной стороне карты, чтобы добавить эту карту'
-    last_sender_message['payload'] = 'addcard.csc'
-    mongo_update_record(last_sender_message)
-    reply(sender, res)
-
-def reply_addcard_startAdding(sender, message, last_sender_message):
-    if not helper.check_csc(message):
-        reply(sender, "Вы неправильно ввели трёхзначный код CSC/CVV2 на обратной стороне карты, введите заново")
-        return "ok"
-    reply(sender, "Идет обработка добавления карты...")
-    reply_typing_on(sender)
-    try:
-        # 1 - авторизация на post.kz
-        url_login = 'https://post.kz/mail-app/api/account/'
-        headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
-                   'Content-Type': 'application/json'}
-
-        # 2 - создаём токен
-        session = requests.Session()
-        r = session.get(url_login, headers=headers)
-        mobileNumber = r.json()['mobileNumber']
-
-        # 3 - инициируем start registration
-        url_login2 = 'https://post.kz/mail-app/api/intervale/token'
-        data = {"phone": mobileNumber}
-        r = session.post(url_login2, json=data)
-        token = r.json()['token']
-
-        # 4 - передаём все данные карты для регистрации карты
-        url_login3 = 'https://post.kz/mail-app/api/intervale/card/registration/start/' + token
-        data = {"phone": mobileNumber, "returnUrl": "https://post.kz/static/return.html"}
-        r = session.post(url_login3, json=data)
-
-        # 4 - передаём все данные карты для регистрации карты
-        url_login5 = 'https://openapi-entry.intervale.ru/api/v3/'+ portal_id_2 +'/card/registration/'
-        url_login5 += token + '/card-page-submit?fallback=https%3A%2F%2Fpost.kz%2Fstatic%2Freturn.html'
-        data = {'pan': last_sender_message['addcard_cardnumber'],
-                'expiry': last_sender_message['addcard_expiredate'],
-                'csc': message,
-                'cardholder': last_sender_message['addcard_cardowner'].lower(),
-                'pageType': 'reg'}
-        r = session.post(url_login5, data=data)
-        result = r.json()
-        try:
-            if result['error'] == 'ALREADY_REGISTERED':
-                reply(sender, "Эта карта уже добавлена в вашем профиле на post.kz")
-                reply_main_menu_buttons(sender)
-                return "ALREADY_REGISTERED"
-        except:
-            pass
-
-        # 5 - дергаём статус, вытаскиваем url для 3DSecure
-        url_login4 = 'https://post.kz/mail-app/api/intervale/card/registration/status/' + token
-        data = {"phone": mobileNumber}
-        r = session.post(url_login4, json=data)
-        d = r.json()
-        if d['state'] == 'redirect':
-            reply_send_redirect_url(sender, d['url'])
-            time.sleep(9)
-        if d['state'] == 'confirmation':
-            message =  'Для подтверждения карты, введите сумму, блокированную на вашей карте.\n'
-            message += 'Блокированную сумму можно узнать через интернет-банкинг или call-центр вашего банка.\n'
-            message += 'Осталось попыток: 3'
-            reply(sender, message)
-            last_sender_message['token'] = token
-            last_sender_message['mobileNumber'] = mobileNumber
-            last_sender_message['payload'] = 'addcard.confirmation'
-            mongo_update_record(last_sender_message)
-            return "confirmation"
-
-        timer = 0
-        while timer < timeout:
-            time.sleep(1)
-            r = session.post(url_login4, json=data)
-            d = r.json()
-            if d['state'] == 'result':
-                status = d['result']['status']
-                if status == 'success':
-                    res = "Поздравляю! Карта успешно добавлена!"
-                    reply(sender, res)
-                if status == 'fail':
-                    reply(sender, "Карта не была добавлена. Попробуйте снова")
-                last_sender_message['payload'] = 'addcard.finished'
-                mongo_update_record(last_sender_message)
-                reply_typing_off(sender)
-                reply_main_menu_buttons(sender)
-                return "ok"
-
-        last_sender_message = collection_messages.find_one({"sender": sender})
-        if last_sender_message['payload'] == 'addcard.csc':
-            strminutes = str(timeout // 60)
-            reply(sender, "Прошло больше " + strminutes + " минут: добавление карты отменяется")
-            reply_typing_off(sender)
-            reply_main_menu_buttons(sender)
-            last_sender_message['payload'] = 'mainMenu'
-            mongo_update_record(last_sender_message)
-        return "time exceed"
-
-    except Exception:
-        logging.error(helper.PrintException())
-        reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
-        reply_typing_off(sender)
-        reply_main_menu_buttons(sender)
-        return "fail"
-
-def card_registration_confirm(sender, message, last_sender_message):
-    message = message.replace('.','')
-    message = message.replace(' ', '')
-    # 1 - авторизация на post.kz
-    url_login = 'https://post.kz/mail-app/api/account/'
-    headers = {"Authorization": "Basic " + last_sender_message['encodedLoginPass'],
-               'Content-Type': 'application/json'}
-
-    # 2 - создаём токен
-    session = requests.Session()
-    r = session.get(url_login, headers=headers)
-
-    phone = r.json()['mobileNumber']
-    token = last_sender_message['token']
-    # phone = last_sender_message['mobileNumber']
-    url_confirmation = 'https://post.kz/mail-app/api/intervale/card/registration/confirm/' + token
-    data = {'blockedAmount': message, 'phone': phone}
-    r = session.post(url_confirmation, json=data)
-    d = r.json()
-    if d['state'] == 'confirmation':
-        reply(sender, "Вы ввели неправильную сумму, осталось " + str(d['attempts']) + " попытки. Введите сумму ещё раз")
-        return "wrongamount"
-    if d['state'] == 'result':
-        status = d['result']['status']
-        if status == 'success':
-            res = "Поздравляю! Карта успешно добавлена!"
-            reply(sender, res)
-        if status == 'fail':
-            reply(sender, "Карта не была добавлена. Попробуйте снова")
-        last_sender_message['payload'] = 'addcard.finished'
-        mongo_update_record(last_sender_message)
-        reply_typing_off(sender)
-        reply_main_menu_buttons(sender)
-        return "ok"
 
 def reply_auth_delete(sender):
     data_quick_replies = {

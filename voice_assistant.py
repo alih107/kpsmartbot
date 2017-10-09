@@ -1,15 +1,17 @@
+from services import shtrafy
+from services import tracking
 import bot_server
 import main
 import helper
+import constants
+
 import requests
 import logging
-import constants
 import os
 import feedparser
 import time
 from random import randint
 import xml.etree.ElementTree as ET
-
 from wit import Wit
 from pydub import AudioSegment
 
@@ -67,6 +69,7 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
         while g.status_code != 200 and count < 10:
             g = requests.get(voice_url, stream=True)
             count += 1
+            logging.info("Couldn't get file from voice_url, try # " + str(count))
         if g.status_code != 200:
             main.reply(sender, "Произошла ошибка при обработке аудио-сообщения, попробуйте ещё раз")
             return
@@ -185,11 +188,11 @@ def handle_intent(sender, last_sender_message, value):
         elif value == 'COMMAND_disable_bot':
             bot_server.call_disable_bot(sender, last_sender_message, 'disable.bot')
         elif value == 'COMMAND_track':
-            main.reply_tracking_enter_number(sender, last_sender_message)
+            tracking.reply_tracking_enter_number(sender, last_sender_message)
         elif value == 'penalties_pdd' or value == 'COMMAND_penalties':
-            main.reply_pdd_shtrafy(sender)
+            shtrafy.reply_pdd_shtrafy(sender)
         elif value == 'info_post':
-            main.reply_tracking_enter_number(sender, last_sender_message)
+            tracking.reply_tracking_enter_number(sender, last_sender_message)
         elif value == 'how_are_you':
             main.reply(sender, "У меня всё замечательно!")
         elif value == 'FUN_anekdot':
