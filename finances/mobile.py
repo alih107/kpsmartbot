@@ -11,25 +11,28 @@ operators_dict = {'Tele2': 'tele2Wf', 'Beeline': 'beelineWf', 'Activ': 'activWf'
 timeout = main.timeout
 
 def reply_mobile_enter_number(sender, last_sender_message):
-    try:
-        phonesToRefill = last_sender_message['phonesToRefill']
-        assert len(phonesToRefill) > 0
-        buttons = []
-        for phone in phonesToRefill:
-            buttons.append({"content_type": "text", "payload": "mobile.last", "title": phone})
+    if main.check_login(sender, last_sender_message):
+        try:
+            phonesToRefill = last_sender_message['phonesToRefill']
+            assert len(phonesToRefill) > 0
+            buttons = []
+            for phone in phonesToRefill:
+                buttons.append({"content_type": "text", "payload": "mobile.last", "title": phone})
 
-        buttons.append({"content_type": "text", "payload": "mobile.delete", "title": "Удалить номер"})
+            buttons.append({"content_type": "text", "payload": "mobile.delete", "title": "Удалить номер"})
 
-        data_quick_replies = {
-            "recipient": {"id": sender},
-            "message": {
-                "text": "Выберите номер телефона или введите его\n" + hint_main_menu,
-                "quick_replies": buttons
+            data_quick_replies = {
+                "recipient": {"id": sender},
+                "message": {
+                    "text": "Выберите номер телефона или введите его\n" + hint_main_menu,
+                    "quick_replies": buttons
+                }
             }
-        }
-        requests.post(fb_url, json=data_quick_replies)
-    except:
-        main.reply(sender, "Введите номер телефона\n" + hint_main_menu)
+            requests.post(fb_url, json=data_quick_replies)
+        except:
+            main.reply(sender, "Введите номер телефона\n" + hint_main_menu)
+        last_sender_message['payload'] = 'balance'
+        main.mongo_update_record(last_sender_message)
 
 
 def reply_mobile_check_number(sender, message, last_sender_message):

@@ -312,8 +312,8 @@ def handle_postback_payload(sender, last_sender_message, payload):
         call_request_nearest_location(sender, last_sender_message, payload)
         return "ok"
     elif payload == 'balance':
-        if not call_balance(sender, last_sender_message, payload):
-            return "ok"
+        mobile.reply_mobile_enter_number(sender, last_sender_message)
+        return "ok"
     elif payload == 'card2card':
         if not call_card2card(sender, last_sender_message, payload):
             return "ok"
@@ -552,13 +552,6 @@ def call_card2cash(sender, last_sender_message, payload):
     if main.check_login(sender, last_sender_message):
         last_sender_message['lastCommand'] = payload
         card2cash.reply_card2cash_history(sender, last_sender_message)
-        return True
-    return False
-
-def call_balance(sender, last_sender_message, payload):
-    if main.check_login(sender, last_sender_message):
-        last_sender_message['lastCommand'] = payload
-        mobile.reply_mobile_enter_number(sender, last_sender_message)
         return True
     return False
 
