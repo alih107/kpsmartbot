@@ -1,14 +1,15 @@
-import main
-import komuslugi
-import helper
-import voice_assistant
 from flask import Flask, request
 import requests
 import pymongo
 import logging
 import datetime
 import threading
-import time
+
+import main
+import komuslugi
+import helper
+import voice_assistant
+from finances import mobile
 
 app = Flask(__name__)
 client = pymongo.MongoClient()
@@ -251,13 +252,13 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
         main.reply_onai_delete_phone(sender, text, last_sender_message)
         return "ok"
     elif payload == 'mobile.last':
-        main.reply_check_mobile_number(sender, text, last_sender_message)
+        mobile.reply_mobile_check_number(sender, text, last_sender_message)
         return "ok"
     elif payload == 'mobile.delete':
-        main.reply_mobile_delete(sender, last_sender_message)
+        mobile.reply_mobile_delete(sender, last_sender_message)
         return "ok"
     elif payload == 'mobile.delete.phone':
-        main.reply_mobile_delete_phone(sender, text, last_sender_message)
+        mobile.reply_mobile_delete_phone(sender, text, last_sender_message)
         return "ok"
     elif payload == 'card2card.last':
         main.reply_card2card_check_cardDst(sender, text, last_sender_message)
@@ -344,7 +345,7 @@ def handle_postback_payload(sender, last_sender_message, payload):
         last_sender_message['chosenCardIndex'] = int(payload)
         lastCommand = last_sender_message['lastCommand']
         if lastCommand == 'balance':
-            main.reply_mobile_csc(sender, payload, last_sender_message)
+            mobile.reply_mobile_csc(sender, payload, last_sender_message)
             payload = 'mobile.startPayment'
         elif lastCommand == 'onai':
             main.reply_onai_csc(sender, payload, last_sender_message)
@@ -377,8 +378,6 @@ def handle_postback_payload(sender, last_sender_message, payload):
     main.mongo_update_record(last_sender_message)
 
 def handle_attachments(sender, last_sender_message, attachment):
-    logging.info("Handling attachment...")
-    logging.info(attachment)
     attachment_type = attachment['type']
     payload = last_sender_message['payload']
     if attachment_type == 'location':
@@ -396,7 +395,7 @@ def handle_attachments(sender, last_sender_message, attachment):
             t.setDaemon(True)
             t.start()
         except:
-            logging.info(helper.PrintException())
+            logging.error(helper.PrintException())
 
 def handle_text_messages(sender, last_sender_message, message):
     if message == '👍':
@@ -426,7 +425,7 @@ def handle_text_messages(sender, last_sender_message, message):
         main.reply_auth(sender, message, last_sender_message)
         return "ok"
     elif payload == 'balance':
-        main.reply_check_mobile_number(sender, message, last_sender_message)
+        mobile.reply_mobile_check_number(sender, message, last_sender_message)
         return "ok"
     elif payload == 'card2cash.show':
         main.reply_card2cash_history_startPayment(sender, message, last_sender_message)
@@ -441,13 +440,13 @@ def handle_text_messages(sender, last_sender_message, message):
         main.reply_display_cards(sender, last_sender_message)
         return "ok"
     elif payload == 'mobile.amount':
-        main.reply_mobile_amount(sender, message, last_sender_message)
+        mobile.reply_mobile_amount(sender, message, last_sender_message)
         return "ok"
     elif payload == 'mobile.chooseCard':
         main.reply_display_cards(sender, last_sender_message)
         return "ok"
     elif payload == 'mobile.startPayment':
-        t = threading.Thread(target=main.reply_mobile_startPayment, args=(sender, message, last_sender_message,))
+        t = threading.Thread(target=mobile.reply_mobile_startPayment, args=(sender, message, last_sender_message,))
         t.setDaemon(True)
         t.start()
         return "ok"
@@ -485,13 +484,11 @@ def handle_text_messages(sender, last_sender_message, message):
         t = threading.Thread(target=main.reply_addcard_startAdding, args=(sender, message, last_sender_message,))
         t.setDaemon(True)
         t.start()
-        logging.info('main.reply_addcard_startAdding called with a new thread')
         return "ok"
     elif payload == 'astanaErc.startPayment':
         t = threading.Thread(target=komuslugi.reply_astanaErc_startPayment, args=(sender, message, last_sender_message,))
         t.setDaemon(True)
         t.start()
-        logging.info('komuslugi.reply_astanaErc_startPayment_startAdding called with a new thread')
         return "ok"
     elif payload == 'send.message':
         res = "Спасибо, Ваше сообщение принято! Ожидайте ответа от операторов\n"
@@ -563,7 +560,7 @@ def call_card2cash(sender, last_sender_message, payload):
 def call_balance(sender, last_sender_message, payload):
     if main.check_login(sender, last_sender_message):
         last_sender_message['lastCommand'] = payload
-        main.reply_mobile_enter_number(sender, last_sender_message)
+        mobile.reply_mobile_enter_number(sender, last_sender_message)
         return True
     return False
 

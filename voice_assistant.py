@@ -60,23 +60,25 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
     start_function = time.time()
     uuid = constants.uuid
     api_key = constants.api_key
-    logging.info("Handling audio with yandex")
     try:
         main.reply_typing_on(sender)
-        start = time.time()
+        count = 0
         g = requests.get(voice_url, stream=True)
-        logging.info('requests.get(voice_url) time = ' + str(time.time() - start))
+        while g.status_code != 200 and count < 10:
+            g = requests.get(voice_url, stream=True)
+            count += 1
+        if g.status_code != 200:
+            main.reply(sender, "Произошла ошибка при обработке аудио-сообщения, попробуйте ещё раз")
+            return
         voice_filename = "voice_" + sender + ".mp4"
         voice_filename_wav = "voice_" + sender + ".wav"
         with open(voice_filename, "wb") as o:
-            start = time.time()
             o.write(g.content)
-            logging.info('o.write(g.content) time = ' + str(time.time() - start))
         start = time.time()
         try:
-            AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="wav") # android
+            AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="wav")  # android
         except:
-            AudioSegment.from_file(voice_filename, "aac").export(voice_filename_wav, format="wav") # iphone
+            AudioSegment.from_file(voice_filename, "aac").export(voice_filename_wav, format="wav")  # iphone
         logging.info('AudioSegment export time = ' + str(time.time() - start))
         with open(voice_filename_wav, 'rb') as f:
             try:
@@ -198,7 +200,7 @@ def handle_intent(sender, last_sender_message, value):
             logging.info("Anekdot = " + anekdot)
             main.reply(sender, anekdot)
         elif value == 'thanx':
-            main.reply(sender, "Всегда рада Вам служить," + last_sender_message['first_name'] + "!")
+            main.reply(sender, "Всегда рада Вам служить, " + last_sender_message['first_name'] + "!")
         else:
             main.reply(sender, "Я не поняла Вашу команду")
     except:
