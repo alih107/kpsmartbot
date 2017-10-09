@@ -11,6 +11,7 @@ import helper
 import voice_assistant
 from finances import mobile
 from services import shtrafy
+from services import tracking
 
 app = Flask(__name__)
 client = pymongo.MongoClient()
@@ -236,12 +237,12 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
         komuslugi.reply_astanaErc_chooseCard(sender, last_sender_message)
         return "ok"
     elif payload == 'tracking.last':
-        main.reply_tracking(sender, text, last_sender_message)
+        tracking.reply_tracking(sender, text, last_sender_message)
         payload = 'tracking'
     elif payload == 'tracking.delete':
-        main.reply_tracking_delete(sender, last_sender_message)
+        tracking.reply_tracking_delete(sender, last_sender_message)
     elif payload == 'tracking.delete.number':
-        main.reply_tracking_delete_number(sender, text, last_sender_message)
+        tracking.reply_tracking_delete_number(sender, text, last_sender_message)
         payload = 'tracking'
     elif payload == 'onai.last':
         main.reply_onai(sender, text, last_sender_message)
@@ -292,7 +293,7 @@ def handle_postback_payload(sender, last_sender_message, payload):
         reply_intro(sender)
         return "ok"
     elif payload == 'tracking':
-        main.reply_tracking_enter_number(sender, last_sender_message)
+        tracking.reply_tracking_enter_number(sender, last_sender_message)
         return "ok"
     elif payload == 'shtrafy':
         shtrafy.reply_pdd_shtrafy(sender)
@@ -406,7 +407,7 @@ def handle_text_messages(sender, last_sender_message, message):
         return "ok"
     payload = last_sender_message['payload']
     if payload == 'tracking':
-        main.reply_tracking(sender, message, last_sender_message)
+        tracking.reply_tracking(sender, message, last_sender_message)
         return "ok"
     elif payload == '4.IIN':
         shtrafy.reply_pdd_shtrafy_iin(sender, message, last_sender_message)
