@@ -110,7 +110,7 @@ def handle_incoming_messages():
     t.setDaemon(True)
     t.start()
 
-    return "ok"
+    return "ok", 200
 
 def handle_data(data):
     sender = data['entry'][0]['messaging'][0]['sender']['id']
