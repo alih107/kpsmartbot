@@ -191,7 +191,6 @@ def reply_astanaErc_chooseCard(sender, last_sender_message):
 
 def reply_astanaErc_csc(sender, payload, last_sender_message):
     try:
-        main.reply_typing_on(sender)
         chosenCard = last_sender_message[payload]
         result = 'Проверьте суммы:\n'
         invoiceData = get_komuslugi_invoice(last_sender_message)
