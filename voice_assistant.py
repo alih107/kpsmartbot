@@ -22,8 +22,8 @@ uuid = constants.uuid
 api_key = constants.api_key
 
 def handle_voice_message_yandex(sender, voice_url, last_sender_message):
+    main.reply_typing_on(sender)
     try:
-        main.reply_typing_on(sender)
         count = 0
         g = requests.get(voice_url, stream=True)
         while g.status_code != 200 and count < 10:
@@ -57,7 +57,7 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                 handle_entities(sender, last_sender_message, resp)
 
         except:
-            logging.info(helper.PrintException())
+            logging.error(helper.PrintException())
             main.reply(sender, "Извините, я не поняла что Вы сказали")
         main.reply_typing_off(sender)
         try:
@@ -69,14 +69,14 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
         logging.error(helper.PrintException())
 
 def handle_entities(sender, last_sender_message, resp):
-    try:
-        entities = resp['entities']
+    entities = resp['entities']
+    if 'intent' in entities:
         for i in entities['intent']:
             if i['confidence'] > 0.5:
                 handle_intent(sender, last_sender_message, i['value'])
                 return
         main.reply(sender, "Я не уверена, что именно Вы хотите")
-    except:
+    else:
         main.reply(sender, "Я не поняла Вашу команду")
         logging.error(helper.PrintException())
 
