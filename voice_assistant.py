@@ -21,6 +21,11 @@ client = Wit(wit_token)
 uuid = constants.uuid
 api_key = constants.api_key
 
+def yandex_api_post(voice_filename_wav, topic):
+    headers = {'Content-Type': 'audio/x-wav'}
+    url = 'http://asr.yandex.net/asr_xml?uuid=' + uuid + '&key=' + api_key + '&topic=' + topic
+    return requests.post(url, data=open(voice_filename_wav, 'rb'), headers=headers)
+
 def handle_voice_message_yandex(sender, voice_url, last_sender_message):
     main.reply_typing_on(sender)
     try:
@@ -42,9 +47,7 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
         except:
             AudioSegment.from_file(voice_filename, "aac").export(voice_filename_wav, format="wav")  # iphone
         try:
-            headers = {'Content-Type': 'audio/x-wav'}
-            url = 'http://asr.yandex.net/asr_xml?uuid=' + uuid + '&key=' + api_key + '&topic=queries'
-            r = requests.post(url, data=open(voice_filename_wav, 'rb'), headers=headers)
+            r = yandex_api_post(voice_filename_wav, 'queries')
             root = ET.fromstring(r.text)
             logging.info(str(root.tag) + " | " + str(root.attrib))
             if root.attrib['success'] == '0':
@@ -55,6 +58,12 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                 resp = client.message(root[0].text)
                 logging.info('Yay, got Wit.ai response: ' + str(resp))
                 handle_entities(sender, last_sender_message, resp)
+                logging.info('Trying yandex API with numbers queries...')
+                r = yandex_api_post(voice_filename_wav, 'numbers')
+                root = ET.fromstring(r.text)
+                logging.info(str(root.tag) + " | " + str(root.attrib))
+                for child in root:
+                    logging.info(str(child.tag) + " | " + str(child.attrib) + " | " + child.text)
         except:
             logging.error(helper.PrintException())
             main.reply(sender, "Извините, я не поняла что Вы сказали")
