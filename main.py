@@ -129,7 +129,7 @@ def reply(sender, msg):
             if len(result + part + '\n') > 640:
                 data = {"recipient": {"id": sender}, "message": {"text": result}}
                 requests.post(fb_url, json=data)
-                result = ''
+                result = part + '\n'
             else:
                 result += part + '\n'
         msg = result
