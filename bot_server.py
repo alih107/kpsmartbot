@@ -385,6 +385,7 @@ def handle_attachments(sender, last_sender_message, attachment):
         else:
             main.reply(sender, "А для чего Вы мне отправили своё местоположение?")
     if attachment_type == 'audio':
+        main.reply_typing_on(sender)
         last_sender_message['sendVoice'] = True
         main.mongo_update_record(last_sender_message)
         try:
