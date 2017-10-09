@@ -126,3 +126,10 @@ def check_csc(csc):
     except:
         return False
     return True
+
+def extract_digits(message):
+    numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    for i in message:
+        if not i in numbers:
+            message = message.replace(i, '')
+    return message
