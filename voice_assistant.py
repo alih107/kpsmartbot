@@ -18,51 +18,10 @@ from pydub import AudioSegment
 
 wit_token = constants.wit_token
 client = Wit(wit_token)
-
-def handle_voice_message(sender, voice_url, last_sender_message):
-    logging.info("Handling audio")
-    try:
-        main.reply_typing_on(sender)
-        start = time.time()
-        g = requests.get(voice_url, stream=True)
-        logging.info('requests.get(voice_url) time = ' + str(time.time() - start))
-        voice_filename = "voice_" + sender + ".mp4"
-        #voice_filename_mp3 = "voice_" + sender + ".mp3"
-        voice_filename_wav = "voice_" + sender + ".wav"
-        with open(voice_filename, "wb") as o:
-            start = time.time()
-            o.write(g.content)
-            logging.info('o.write(g.content) time = ' + str(time.time() - start))
-        start = time.time()
-        #AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_mp3, format="mp3")
-        AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="wav")
-        logging.info('AudioSegment export time = ' + str(time.time() - start))
-        with open(voice_filename_wav, 'rb') as f:
-            try:
-                start = time.time()
-                resp = client.speech(f, None, {'Content-Type': 'audio/wav'})
-                if "_text" in resp:
-                    main.reply(sender, resp['_text'])
-                logging.info('Wit.ai client.speech response time = ' + str(time.time() - start))
-                logging.info('Yay, got Wit.ai response: ' + str(resp))
-                handle_entities(sender, last_sender_message, resp)
-            except:
-                logging.info(helper.PrintException())
-                main.reply(sender, "Извините, я не поняла что Вы сказали")
-        main.reply_typing_off(sender)
-        try:
-            os.remove(voice_filename)
-            #os.remove(voice_filename_mp3)
-            os.remove(voice_filename_wav)
-        except:
-            pass
-    except:
-        logging.error(helper.PrintException())
+uuid = constants.uuid
+api_key = constants.api_key
 
 def handle_voice_message_yandex(sender, voice_url, last_sender_message):
-    start_function = time.time()
-    uuid = constants.uuid
-    api_key = constants.api_key
     try:
         main.reply_typing_on(sender)
         count = 0
@@ -129,13 +88,13 @@ def handle_entities(sender, last_sender_message, resp):
         main.reply(sender, "Я не поняла Вашу команду")
         logging.error(helper.PrintException())
 
-
 def handle_intent(sender, last_sender_message, value):
     try:
         if value == 'greeting':
             message = "Здравствуйте, " + last_sender_message['first_name'] + "!\n"
-            message += "Меня зовут Е-Сауле, я голосовая помощница этого бота."
-            main.reply(sender, message)
+            message += "Меня зовут Е-Сау+ле, я голосовая помощница этого бота."
+            main.reply_just_text(sender, message.replace('+', ''))
+            main.send_voice(sender, message)
         elif value == 'postamat':
             main.reply(sender, helper.postamat)
         elif value == 'hybridpost_def':
@@ -210,3 +169,42 @@ def handle_intent(sender, last_sender_message, value):
     except:
         logging.error(helper.PrintException())
 
+def handle_voice_message(sender, voice_url, last_sender_message):
+    logging.info("Handling audio")
+    try:
+        main.reply_typing_on(sender)
+        start = time.time()
+        g = requests.get(voice_url, stream=True)
+        logging.info('requests.get(voice_url) time = ' + str(time.time() - start))
+        voice_filename = "voice_" + sender + ".mp4"
+        #voice_filename_mp3 = "voice_" + sender + ".mp3"
+        voice_filename_wav = "voice_" + sender + ".wav"
+        with open(voice_filename, "wb") as o:
+            start = time.time()
+            o.write(g.content)
+            logging.info('o.write(g.content) time = ' + str(time.time() - start))
+        start = time.time()
+        #AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_mp3, format="mp3")
+        AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="wav")
+        logging.info('AudioSegment export time = ' + str(time.time() - start))
+        with open(voice_filename_wav, 'rb') as f:
+            try:
+                start = time.time()
+                resp = client.speech(f, None, {'Content-Type': 'audio/wav'})
+                if "_text" in resp:
+                    main.reply(sender, resp['_text'])
+                logging.info('Wit.ai client.speech response time = ' + str(time.time() - start))
+                logging.info('Yay, got Wit.ai response: ' + str(resp))
+                handle_entities(sender, last_sender_message, resp)
+            except:
+                logging.info(helper.PrintException())
+                main.reply(sender, "Извините, я не поняла что Вы сказали")
+        main.reply_typing_off(sender)
+        try:
+            os.remove(voice_filename)
+            #os.remove(voice_filename_mp3)
+            os.remove(voice_filename_wav)
+        except:
+            pass
+    except:
+        logging.error(helper.PrintException())

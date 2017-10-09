@@ -73,7 +73,7 @@ def send_voice(sender, msg):
     try:
         ya_url = 'https://tts.voicetech.yandex.net/generate?key=' + api_key + '&text='
         ya_url += msg
-        ya_url += '&format=mp3&quality=hi&lang=ru-RU&speaker=oksana&speed=1.0&emotion=good'
+        ya_url += '&format=mp3&quality=hi&lang=ru-RU&speaker=omazh&speed=1.0&emotion=good'
         r = requests.get(ya_url)
         voice_file = 'ya_' + sender + '.mp3'
         with open(voice_file, "wb") as o:
@@ -104,6 +104,10 @@ def reply(sender, msg):
     last_sender_message = collection_messages.find_one({"sender": sender})
     if last_sender_message['sendVoice']:
         send_voice(sender, msg)
+
+def reply_just_text(sender, msg):
+    data = {"recipient": {"id": sender}, "message": {"text": msg}}
+    requests.post(fb_url, json=data)
 
 def reply_gif_desktop(sender):
     data = {
