@@ -1,6 +1,7 @@
 from services import shtrafy
 from services import tracking
 from finances import mobile
+from finances import card2card
 import bot_server
 import main
 import helper
@@ -147,7 +148,7 @@ def handle_intent(sender, last_sender_message, value):
         elif value == 'COMMAND_go_home':
             main.reply_main_menu_buttons(sender, last_sender_message)
         elif value == 'COMMAND_card2card':
-            bot_server.call_card2card(sender, last_sender_message, 'card2card')
+            card2card.reply_card2card_enter_cardDst(sender, last_sender_message)
         elif value == 'COMMAND_paymobile':
             mobile.reply_mobile_enter_number(sender, last_sender_message)
         elif value == 'COMMAND_payonai':

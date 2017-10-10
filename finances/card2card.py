@@ -18,26 +18,29 @@ MasterCard to MasterCard.\nПереводы между Visa и MasterCard воз
 
 
 def reply_card2card_enter_cardDst(sender, last_sender_message):
-    try:
-        cardDsts = last_sender_message['cardDsts']
-        assert len(cardDsts) > 0
-        buttons = []
-        for card in cardDsts:
-            card = helper.insert_4_spaces(card)
-            buttons.append({"content_type": "text", "payload": "card2card.last", "title": card})
-        buttons.append({"content_type": "text", "payload": "card2card.delete", "title": "Удалить карту"})
-        buttons.append({"content_type": "text", "payload": "card2card.info", "title": "Информация"})
-        data_quick_replies = {
-            "recipient": {"id": sender},
-            "message": {
-                "text": "Выберите номер карты получателя или введите его\n" + hint_main_menu,
-                "quick_replies": buttons
+    if main.check_login(sender, last_sender_message):
+        try:
+            cardDsts = last_sender_message['cardDsts']
+            assert len(cardDsts) > 0
+            buttons = []
+            for card in cardDsts:
+                card = helper.insert_4_spaces(card)
+                buttons.append({"content_type": "text", "payload": "card2card.last", "title": card})
+            buttons.append({"content_type": "text", "payload": "card2card.delete", "title": "Удалить карту"})
+            buttons.append({"content_type": "text", "payload": "card2card.info", "title": "Информация"})
+            data_quick_replies = {
+                "recipient": {"id": sender},
+                "message": {
+                    "text": "Выберите номер карты получателя или введите его\n" + hint_main_menu,
+                    "quick_replies": buttons
+                }
             }
-        }
-        requests.post(fb_url, json=data_quick_replies)
-    except:
-        main.reply(sender, card2card_info +
-                   "\n\nВведите 16ти-значный номер карты, на который Вы хотите перевести деньги\n" + hint_main_menu)
+            requests.post(fb_url, json=data_quick_replies)
+        except:
+            main.reply(sender, card2card_info +
+                       "\n\nВведите 16ти-значный номер карты, на который Вы хотите перевести деньги\n" + hint_main_menu)
+        last_sender_message['lastCommand'] = 'card2card'
+        main.mongo_update_record(last_sender_message)
 
 
 def reply_card2card_check_cardDst(sender, message, last_sender_message):
@@ -60,6 +63,27 @@ def reply_card2card_check_cardDst(sender, message, last_sender_message):
     except:
         logging.error(helper.PrintException())
     main.mongo_update_record(last_sender_message)
+
+def reply_card2card_delete(sender, last_sender_message):
+    cardDsts = last_sender_message['cardDsts']
+    buttons = []
+    for card in cardDsts:
+        card = helper.insert_4_spaces(card)
+        buttons.append({"content_type": "text", "payload": "card2card.delete.card", "title": card})
+
+    data_quick_replies = {
+        "recipient": {"id": sender},
+        "message": {
+            "text": "Выберите карту, чтобы её удалить",
+            "quick_replies": buttons
+        }
+    }
+    requests.post(fb_url, json=data_quick_replies)
+
+def reply_card2card_delete_card(sender, text, last_sender_message):
+    last_sender_message['cardDsts'].remove(text.replace(' ', ''))
+    main.reply(sender, "Карта " + text + " успешно удалёна")
+    reply_card2card_enter_cardDst(sender, last_sender_message)
 
 def reply_card2card_amount(sender, message, last_sender_message):
     amount = 0

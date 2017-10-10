@@ -272,10 +272,20 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
     elif payload == 'card2card.last':
         card2card.reply_card2card_check_cardDst(sender, text, last_sender_message)
         payload = 'card2card.amount'
+    elif payload == 'card2card.delete':
+        card2card.reply_card2card_delete(sender, last_sender_message)
+    elif payload == 'card2card.delete.card':
+        card2card.reply_card2card_delete_card(sender, text, last_sender_message)
+        return "ok"
+    elif payload == 'card2card.info':
+        main.reply_just_text(sender, card2card.card2card_info)
+        card2card.reply_card2card_enter_cardDst(sender, last_sender_message)
+        return
     elif payload == 'auth.delete.yes':
         last_sender_message['encodedLoginPass'] = None
         main.reply(sender, "Авторизация успешна удалена")
         main.reply_main_menu_buttons(sender, last_sender_message)
+        return
     elif payload == 'auth.delete.no':
         main.reply_main_menu_buttons(sender, last_sender_message)
     elif payload == 'disable.bot.yes':
@@ -318,8 +328,8 @@ def handle_postback_payload(sender, last_sender_message, payload):
         mobile.reply_mobile_enter_number(sender, last_sender_message)
         return "ok"
     elif payload == 'card2card':
-        if not call_card2card(sender, last_sender_message, payload):
-            return "ok"
+        card2card.reply_card2card_enter_cardDst(sender, last_sender_message)
+        return "ok"
     elif payload == 'card2cash':
         if not call_card2cash(sender, last_sender_message, payload):
             return "ok"
@@ -537,13 +547,6 @@ def handle_messages_when_deactivated(sender, data, last_sender_message):
             main.reply(sender, "Хорошо! Если Вы хотите включить бота, нажмите кнопку (y)")
     except:
         return
-
-def call_card2card(sender, last_sender_message, payload):
-    if main.check_login(sender, last_sender_message):
-        last_sender_message['lastCommand'] = payload
-        card2card.reply_card2card_enter_cardDst(sender, last_sender_message)
-        return True
-    return False
 
 def call_card2cash(sender, last_sender_message, payload):
     if main.check_login(sender, last_sender_message):
