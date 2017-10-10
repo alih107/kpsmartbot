@@ -17,6 +17,7 @@ def reply_onai(sender, message, last_sender_message):
         main.reply(sender, "Вы ввели неправильный номер карты Онай, введите еще раз")
         return "wrong onai number"
 
+    main.reply(sender, "Введите сумму пополнения баланса (не менее 100 тг, комиссия 0 тг)")
     last_sender_message['onaiToRefill'] = message
     try:
         if not "onaisToRefill" in last_sender_message:
@@ -28,7 +29,6 @@ def reply_onai(sender, message, last_sender_message):
 
     last_sender_message['payload'] = 'onai.amount'
     main.mongo_update_record(last_sender_message)
-    main.reply(sender, "Введите сумму пополнения баланса (не менее 100 тг, комиссия 0 тг)")
 
 
 def reply_onai_enter_number(sender, last_sender_message):

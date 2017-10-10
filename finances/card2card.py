@@ -19,38 +19,47 @@ MasterCard to MasterCard.\nПереводы между Visa и MasterCard воз
 
 def reply_card2card_enter_cardDst(sender, last_sender_message):
     try:
-        lastCardDst = helper.insert_4_spaces(last_sender_message['lastCardDst'])
+        cardDsts = last_sender_message['cardDsts']
+        assert len(cardDsts) > 0
+        buttons = []
+        for card in cardDsts:
+            card = helper.insert_4_spaces(card)
+            buttons.append({"content_type": "text", "payload": "card2card.last", "title": card})
+        buttons.append({"content_type": "text", "payload": "card2card.delete", "title": "Удалить карту"})
+        buttons.append({"content_type": "text", "payload": "card2card.info", "title": "Информация"})
         data_quick_replies = {
-          "recipient": {
-            "id": sender
-          },
-          "message": {
-            "text": card2card_info + "\n\nВыберите карту или введите 16ти-значный номер карты, на который Вы хотите перевести деньги\n" + hint_main_menu,
-            "quick_replies": [
-              {
-                "content_type": "text",
-                "title": lastCardDst,
-                "payload": "card2card.last"
-              }
-            ]
-          }
+            "recipient": {"id": sender},
+            "message": {
+                "text": "Выберите номер карты получателя или введите его\n" + hint_main_menu,
+                "quick_replies": buttons
+            }
         }
         requests.post(fb_url, json=data_quick_replies)
     except:
-        main.reply(sender, card2card_info + "\n\nВведите 16ти-значный номер карты, на который Вы хотите перевести деньги\n" + hint_main_menu)
+        main.reply(sender, card2card_info +
+                   "\n\nВведите 16ти-значный номер карты, на который Вы хотите перевести деньги\n" + hint_main_menu)
+
 
 def reply_card2card_check_cardDst(sender, message, last_sender_message):
     message = message.replace(' ', '')
     if len(message) != 16:
         main.reply(sender, "Вы ввели не все 16 цифр карты, попробуйте ещё раз")
         return "cardDst.again"
-    if not helper.isAllDigits(message):
+    if not message.isdigit():
         main.reply(sender, "Некоторые введенные Вами цифры не являются цифрами, попробуйте ещё раз")
         return "cardDst.again"
+    main.reply(sender, "Введите сумму перевода (от 500 до 494070; комиссия 1,2%, минимум 300 тенге)\n" + hint_main_menu)
+
     last_sender_message['lastCardDst'] = message
     last_sender_message['payload'] = 'card2card.amount'
+    try:
+        if not "cardDsts" in last_sender_message:
+            last_sender_message['cardDsts'] = []
+        if not message in last_sender_message['cardDsts'] and len(last_sender_message['cardDsts']) < 9:
+            last_sender_message['cardDsts'].append(message)
+    except:
+        logging.error(helper.PrintException())
     main.mongo_update_record(last_sender_message)
-    main.reply(sender, "Введите сумму перевода (от 500 до 494070; комиссия 1,2%, минимум 300 тенге)\n" + hint_main_menu)
 
 def reply_card2card_amount(sender, message, last_sender_message):
     amount = 0

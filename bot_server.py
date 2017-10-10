@@ -118,7 +118,7 @@ def handle_data(data):
     if last_sender_message == None:
         fn, ln = get_firstname_lastname(sender)
         db_record = {"sender": sender, "first_name": fn, "last_name": ln, "isBotActive": True, 'phonesToRefill': [],
-                     'onaisToRefill': [], 'trackingNumbers': [], 'pddIINs': [], 'pddGosnomers': [],
+                     'onaisToRefill': [], 'trackingNumbers': [], 'pddIINs': [], 'pddGosnomers': [], 'cardDsts': [],
                      'hasCards': False, 'encodedLoginPass': None, 'payload': 'mainMenu'}
         last_sender_message = collection_messages.insert_one(db_record)
         reply_intro(sender)
