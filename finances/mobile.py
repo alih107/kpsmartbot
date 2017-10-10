@@ -135,7 +135,7 @@ def reply_mobile_amount(sender, message, last_sender_message, is_voice=None):
                    str(minAmount) + " тг. Введите сумму заново")
         return "again"
     if is_voice:
-        main.reply(added_text)
+        main.reply(sender, added_text)
 
     main.reply_display_cards(sender, last_sender_message)
     operator = last_sender_message['mobileOperator']
