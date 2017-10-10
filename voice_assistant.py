@@ -72,7 +72,7 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                 resp = client.speech(open(voice_filename_wav, 'rb'), None, {'Content-Type': 'audio/wav'})
                 if "_text" in resp:
                     tracking_number = helper.extract_digits_and_letters(resp['_text'])
-                    logging.info(tracking_number)
+                    logging.info(resp['_text'] + ' | ' + tracking_number)
                     tracking.reply_tracking(sender, tracking_number, last_sender_message)
             else:
                 logging.info('Trying yandex API with topic queries ...')
