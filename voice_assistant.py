@@ -68,16 +68,21 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                     elif payload == 'mobile.amount':
                         mobile.reply_mobile_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
             elif payload == 'tracking':
-                logging.info('Trying yandex API with topic queries and english for tracking ...')
-                r = yandex_api_post(voice_filename_wav, 'queries', lang='en-US')
-                root = ET.fromstring(r.text)
-                logging.info(str(root.tag) + " | " + str(root.attrib))
-                if root.attrib['success'] == '0':
-                    main.reply(sender, "Мне кажется, что Вы отправили пустой трек-номер")
-                else:
-                    for child in root:
-                        logging.info(str(child.tag) + " | " + str(child.attrib) + " | " + child.text)
-                    tracking.reply_tracking(sender, root[0].text, last_sender_message)
+                logging.info('Trying wit.ai API for tracking ...')
+                resp = client.speech(open(voice_filename_wav, 'rb'), None, {'Content-Type': 'audio/wav'})
+                if "_text" in resp:
+                    logging.info(resp['_text'])
+                    tracking.reply_tracking(sender, resp['_text'], last_sender_message)
+                # logging.info('Trying yandex API with topic queries and english for tracking ...')
+                # r = yandex_api_post(voice_filename_wav, 'queries', lang='en-US')
+                # root = ET.fromstring(r.text)
+                # logging.info(str(root.tag) + " | " + str(root.attrib))
+                # if root.attrib['success'] == '0':
+                #     main.reply(sender, "Мне кажется, что Вы отправили пустой трек-номер")
+                # else:
+                #     for child in root:
+                #         logging.info(str(child.tag) + " | " + str(child.attrib) + " | " + child.text)
+                #     tracking.reply_tracking(sender, root[0].text, last_sender_message)
             else:
                 logging.info('Trying yandex API with topic queries ...')
                 r = yandex_api_post(voice_filename_wav, 'queries')
