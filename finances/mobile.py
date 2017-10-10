@@ -35,23 +35,8 @@ def reply_mobile_enter_number(sender, last_sender_message):
         main.mongo_update_record(last_sender_message)
 
 
-def reply_mobile_confirm_number_by_voice(sender, message, last_sender_message):
-    text = 'Вы продиктовали номер ' + message
-    buttons = [{"content_type": "text", "payload": "mobile.voice_number.yes", "title": "Подтвердить"},
-               {"content_type": "text", "payload": "mobile.voice_number.again", "title": "Ввести номер заново"}]
-    data_quick_replies = {
-        "recipient": {"id": sender},
-        "message": {
-            "text": text,
-            "quick_replies": buttons
-        }
-    }
-    requests.post(fb_url, json=data_quick_replies)
-    last_sender_message['voice_mobile_number'] = message
-    main.mongo_update_record(last_sender_message)
-
-
-def reply_mobile_check_number(sender, message, last_sender_message):
+def reply_mobile_check_number(sender, message, last_sender_message, is_voice=None):
+    added_text = 'Вы продиктовали номер ' + message + '.\n'
     main.reply_typing_on(sender)
     url_login = 'https://post.kz/mail-app/public/check/operator'
     message = message.replace(' ', '')
@@ -60,7 +45,10 @@ def reply_mobile_check_number(sender, message, last_sender_message):
     operator = r.json()['operator']
 
     if operator == 'error':
-        main.reply(sender, "Вы ввели неправильный номер телефона. Попробуйте еще раз")
+        if is_voice:
+            main.reply(sender, added_text + "К сожалению, он оказался неправильным. Попробуйте еще раз")
+        else:
+            main.reply(sender, "Вы ввели неправильный номер телефона. Попробуйте еще раз")
         return "error"
 
     operator = operator[:-2].title()
@@ -88,8 +76,20 @@ def reply_mobile_check_number(sender, message, last_sender_message):
     last_sender_message['minAmount'] = minAmount
     main.mongo_update_record(last_sender_message)
 
-    title = "Оператор номера: " + operator + "\nВведите сумму пополнения баланса (не менее " + str(minAmount) + " тг)"
-    main.reply(sender, title)
+    title = added_text + "Оператор номера: " + operator + \
+            "\nВведите или продиктуйте сумму пополнения баланса (не менее " + str(minAmount) + " тг)"
+    if is_voice:
+        buttons = [{"content_type": "text", "payload": "mobile.voice_number.again", "title": "Ввести номер заново"}]
+        data_quick_replies = {
+            "recipient": {"id": sender},
+            "message": {
+                "text": title,
+                "quick_replies": buttons
+            }
+        }
+        requests.post(fb_url, json=data_quick_replies)
+    else:
+        main.reply_just_text(sender, title)
 
 
 def reply_mobile_delete(sender, last_sender_message):
