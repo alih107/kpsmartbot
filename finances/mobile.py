@@ -35,6 +35,22 @@ def reply_mobile_enter_number(sender, last_sender_message):
         main.mongo_update_record(last_sender_message)
 
 
+def reply_mobile_confirm_number_by_voice(sender, message, last_sender_message):
+    text = 'Вы продиктовали номер ' + message
+    buttons = [{"content_type": "text", "payload": "mobile.voice_number.yes", "title": "Подтвердить"},
+               {"content_type": "text", "payload": "mobile.voice_number.again", "title": "Ввести номер заново"}]
+    data_quick_replies = {
+        "recipient": {"id": sender},
+        "message": {
+            "text": text,
+            "quick_replies": buttons
+        }
+    }
+    requests.post(fb_url, json=data_quick_replies)
+    last_sender_message['voice_mobile_number'] = message
+    main.mongo_update_record(last_sender_message)
+
+
 def reply_mobile_check_number(sender, message, last_sender_message):
     url_login = 'https://post.kz/mail-app/public/check/operator'
     message = message.replace(' ', '')

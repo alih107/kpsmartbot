@@ -47,31 +47,36 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
         except:
             AudioSegment.from_file(voice_filename, "aac").export(voice_filename_wav, format="wav")  # iphone
         try:
-            r = yandex_api_post(voice_filename_wav, 'queries')
-            root = ET.fromstring(r.text)
-            logging.info(str(root.tag) + " | " + str(root.attrib))
-            if root.attrib['success'] == '0':
-                main.reply(sender, "Мне кажется, что Вы отправили пустую аудио-запись")
-            else:
-                for child in root:
-                    logging.info(str(child.tag) + " | " + str(child.attrib) + " | " + child.text)
-                resp = client.message(root[0].text)
-                logging.info('Yay, got Wit.ai response: ' + str(resp))
-                if not handle_entities(sender, last_sender_message, resp):
-                    logging.info('Trying yandex API with numbers queries...')
-                    r = yandex_api_post(voice_filename_wav, 'numbers')
-                    root = ET.fromstring(r.text)
-                    logging.info(str(root.tag) + " | " + str(root.attrib))
-                    yandex_numbers = ''
+            if last_sender_message['payload'] == 'balance':
+                logging.info('Trying yandex API with topic numbers ...')
+                r = yandex_api_post(voice_filename_wav, 'numbers')
+                root = ET.fromstring(r.text)
+                logging.info(str(root.tag) + " | " + str(root.attrib))
+                if root.attrib['success'] == '0':
+                    main.reply(sender, "Пожалуйста, продиктуйте номер ещё раз")
+                else:
                     for child in root:
                         logging.info(str(child.tag) + " | " + str(child.attrib) + " | " + child.text)
                         yandex_numbers = helper.extract_digits(child.text)
+                        mobile.reply_mobile_confirm_number_by_voice(sender, yandex_numbers, last_sender_message)
                         break
-                    if last_sender_message['payload'] == 'balance':
-                        main.reply(sender, "Вы продиктовали номер " + yandex_numbers)
+            else:
+                logging.info('Trying yandex API with topic queries ...')
+                r = yandex_api_post(voice_filename_wav, 'queries')
+                root = ET.fromstring(r.text)
+                logging.info(str(root.tag) + " | " + str(root.attrib))
+                if root.attrib['success'] == '0':
+                    main.reply(sender, "Мне кажется, что Вы отправили пустую аудио-запись")
+                else:
+                    for child in root:
+                        logging.info(str(child.tag) + " | " + str(child.attrib) + " | " + child.text)
+                    resp = client.message(root[0].text)
+                    logging.info('Yay, got Wit.ai response: ' + str(resp))
+                    if not handle_entities(sender, last_sender_message, resp):
+                        main.reply(sender, "Извините, я не уверена, что именно Вы хотите")
         except:
             logging.error(helper.PrintException())
-            main.reply(sender, "Извините, я не поняла что Вы сказали")
+
         main.reply_typing_off(sender)
         try:
             os.remove(voice_filename)
@@ -88,10 +93,6 @@ def handle_entities(sender, last_sender_message, resp):
             if i['confidence'] > 0.5:
                 handle_intent(sender, last_sender_message, i['value'])
                 return True
-        main.reply(sender, "Я не уверена, что именно Вы хотите")
-        return False
-    else:
-        main.reply(sender, "Я не поняла Вашу команду")
     return False
 
 def handle_intent(sender, last_sender_message, value):
