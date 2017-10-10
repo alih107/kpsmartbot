@@ -12,9 +12,8 @@ timeout = main.timeout
 
 def reply_mobile_enter_number(sender, last_sender_message):
     if main.check_login(sender, last_sender_message):
-        try:
-            phonesToRefill = last_sender_message['phonesToRefill']
-            assert len(phonesToRefill) > 0
+        phonesToRefill = last_sender_message['phonesToRefill']
+        if len(phonesToRefill) > 0:
             buttons = []
             for phone in phonesToRefill:
                 buttons.append({"content_type": "text", "payload": "mobile.last", "title": phone})
@@ -24,12 +23,13 @@ def reply_mobile_enter_number(sender, last_sender_message):
             data_quick_replies = {
                 "recipient": {"id": sender},
                 "message": {
-                    "text": "Выберите номер телефона или введите его\n" + hint_main_menu,
+                    "text": "Выберите номер телефона или введите его, либо продиктуйте номер, "
+                            "отправив голосовое сообщение\n" + hint_main_menu,
                     "quick_replies": buttons
                 }
             }
             requests.post(fb_url, json=data_quick_replies)
-        except:
+        else:
             main.reply(sender, "Введите номер телефона\n" + hint_main_menu)
         last_sender_message['payload'] = 'balance'
         main.mongo_update_record(last_sender_message)
@@ -52,6 +52,7 @@ def reply_mobile_confirm_number_by_voice(sender, message, last_sender_message):
 
 
 def reply_mobile_check_number(sender, message, last_sender_message):
+    main.reply_typing_on(sender)
     url_login = 'https://post.kz/mail-app/public/check/operator'
     message = message.replace(' ', '')
     message = message[-10:]
