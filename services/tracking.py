@@ -7,12 +7,11 @@ hint_main_menu = main.hint_main_menu
 def reply_tracking_enter_number(sender, last_sender_message):
     if not 'trackingNumbers' in last_sender_message:
         last_sender_message['trackingNumbers'] = []
-    try:
-        trackingNumbers = last_sender_message['trackingNumbers']
-        assert len(trackingNumbers) > 0
+    trackingNumbers = last_sender_message['trackingNumbers']
+    if len(trackingNumbers) > 0:
         text = "Выберите трек-номер или введите его\n" + hint_main_menu
         reply_tracking_quick_replies_with_delete(sender, trackingNumbers, text)
-    except:
+    else:
         main.reply(sender, "Введите трек-номер посылки\n" + hint_main_menu)
     last_sender_message['payload'] = 'tracking'
     main.mongo_update_record(last_sender_message)

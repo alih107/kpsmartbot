@@ -23,9 +23,11 @@ api_key = constants.api_key
 
 payload_dict = {'balance': 'номер телефона', 'mobile.amount': 'сумму'}
 
-def yandex_api_post(voice_filename_wav, topic):
+def yandex_api_post(voice_filename_wav, topic, lang=None):
     headers = {'Content-Type': 'audio/x-wav'}
     url = 'http://asr.yandex.net/asr_xml?uuid=' + uuid + '&key=' + api_key + '&topic=' + topic
+    if lang == 'en-US':
+        url += '&lang=' + lang
     return requests.post(url, data=open(voice_filename_wav, 'rb'), headers=headers)
 
 def handle_voice_message_yandex(sender, voice_url, last_sender_message):
@@ -65,6 +67,17 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                         mobile.reply_mobile_check_number(sender, yandex_numbers, last_sender_message, is_voice=True)
                     elif payload == 'mobile.amount':
                         mobile.reply_mobile_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
+            elif payload == 'tracking':
+                logging.info('Trying yandex API with topic queries and english for tracking ...')
+                r = yandex_api_post(voice_filename_wav, 'queries', lang='en-US')
+                root = ET.fromstring(r.text)
+                logging.info(str(root.tag) + " | " + str(root.attrib))
+                if root.attrib['success'] == '0':
+                    main.reply(sender, "Мне кажется, что Вы отправили пустой трек-номер")
+                else:
+                    for child in root:
+                        logging.info(str(child.tag) + " | " + str(child.attrib) + " | " + child.text)
+                    tracking.reply_tracking(sender, root[0].text, last_sender_message)
             else:
                 logging.info('Trying yandex API with topic queries ...')
                 r = yandex_api_post(voice_filename_wav, 'queries')
