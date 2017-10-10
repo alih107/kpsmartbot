@@ -31,6 +31,7 @@ def reply_tracking_quick_replies_with_delete(sender, trackingNumbers, text):
     requests.post(fb_url, json=data_quick_replies)
 
 def reply_tracking(sender, tracking_number, last_sender_message):
+    tracking_number = tracking_number.upper()
     data = requests.get("https://post.kz/external-api/tracking/api/v2/" + tracking_number + "/events").json()
     data2 = requests.get("https://post.kz/external-api/tracking/api/v2/" + tracking_number).json()
     try:

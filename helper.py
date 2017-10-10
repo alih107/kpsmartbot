@@ -128,8 +128,15 @@ def check_csc(csc):
     return True
 
 def extract_digits(message):
-    numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    numbers = '0123456789'
     for i in message:
         if not i in numbers:
+            message = message.replace(i, '')
+    return message
+
+def extract_digits_and_letters(message):
+    numbers_digits = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    for i in message:
+        if not i in numbers_digits:
             message = message.replace(i, '')
     return message
