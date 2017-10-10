@@ -111,7 +111,7 @@ def reply_addcard_startAdding(sender, message, last_sender_message):
         try:
             if result['error'] == 'ALREADY_REGISTERED':
                 main.reply(sender, "Эта карта уже добавлена в вашем профиле на post.kz")
-                main.reply_main_menu_buttons(sender)
+                main.reply_main_menu_buttons(sender, last_sender_message)
                 return "ALREADY_REGISTERED"
         except:
             pass
@@ -147,24 +147,20 @@ def reply_addcard_startAdding(sender, message, last_sender_message):
                     main.reply(sender, res)
                 if status == 'fail':
                     main.reply(sender, "Карта не была добавлена. Попробуйте снова")
-                last_sender_message['payload'] = 'addcard.finished'
-                main.mongo_update_record(last_sender_message)
-                main.reply_main_menu_buttons(sender)
+                main.reply_main_menu_buttons(sender, last_sender_message)
                 return "ok"
 
         last_sender_message = main.mongo_get_by_sender(sender)
         if last_sender_message['payload'] == 'addcard.csc':
             strminutes = str(timeout // 60)
             main.reply(sender, "Прошло больше " + strminutes + " минут: добавление карты отменяется")
-            main.reply_main_menu_buttons(sender)
-            last_sender_message['payload'] = 'mainMenu'
-            main.mongo_update_record(last_sender_message)
+            main.reply_main_menu_buttons(sender, last_sender_message)
         return "time exceed"
 
     except:
         logging.error(helper.PrintException())
         main.reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
-        main.reply_main_menu_buttons(sender)
+        main.reply_main_menu_buttons(sender, last_sender_message)
         return "fail"
 
 def card_registration_confirm(sender, message, last_sender_message):
@@ -188,7 +184,5 @@ def card_registration_confirm(sender, message, last_sender_message):
             main.reply(sender, res)
         if status == 'fail':
             main.reply(sender, "Карта не была добавлена. Попробуйте снова")
-        last_sender_message['payload'] = 'addcard.finished'
-        main.mongo_update_record(last_sender_message)
-        main.reply_main_menu_buttons(sender)
+        main.reply_main_menu_buttons(sender, last_sender_message)
         return "ok"

@@ -167,9 +167,7 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
                     res += "\nКонтрольный номер перевода: " + r['result']['transferCode']
                     res += "\nКонтрольное слово: " + data['params']['codeWord']
                     main.reply(sender, res)
-                main.reply_main_menu_buttons(sender)
-                last_sender_message['payload'] = 'card2cash.finished'
-                main.mongo_update_record(last_sender_message)
+                main.reply_main_menu_buttons(sender, last_sender_message)
                 return
             timer += 1
 
@@ -177,9 +175,7 @@ def reply_card2cash_history_startPayment(sender, message, last_sender_message):
         if last_sender_message['payload'] == 'card2cash.show':
             strminutes = str(timeout // 60)
             main.reply(sender, "Прошло больше " + strminutes + " минут: перевод отменяется")
-            main.reply_main_menu_buttons(sender)
-            last_sender_message['payload'] = 'mainMenu'
-            main.mongo_update_record(last_sender_message)
+            main.reply_main_menu_buttons(sender, last_sender_message)
         return "time exceed"
     except:
         main.reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")

@@ -50,7 +50,7 @@ def get_cards_json(sender, last_sender_message):
     r = session.post(url_login6, json=sd2)
     if r.status_code != 200:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
-        reply_main_menu_buttons(sender)
+        reply_main_menu_buttons(sender, last_sender_message)
     return r.json()
 
 def mongo_update_record(last_sender_message):
@@ -137,7 +137,7 @@ def reply_typing_off(sender):
     data = {"recipient": {"id": sender}, "sender_action": "typing_off"}
     requests.post(fb_url, json=data)
 
-def reply_main_menu_buttons(sender):
+def reply_main_menu_buttons(sender, last_sender_message):
     data_main_menu_buttons = {
         "recipient": {"id": sender},
         "message": {
@@ -253,6 +253,8 @@ def reply_main_menu_buttons(sender):
         }
     }
     requests.post(fb_url, json=data_main_menu_buttons)
+    last_sender_message['payload'] = 'mainMenu'
+    mongo_update_record(last_sender_message)
 
 def reply_display_cards(sender, last_sender_message):
     session = requests.Session()
@@ -267,7 +269,7 @@ def reply_display_cards(sender, last_sender_message):
     cards = r.json()
     if r.status_code != 200:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
-        reply_main_menu_buttons(sender)
+        reply_main_menu_buttons(sender, last_sender_message)
         return "again"
 
     title = "Выберите карту"
@@ -373,7 +375,7 @@ def reply_auth(sender, loginPass, last_sender_message):
         last_sender_message['iin'] = iin
         last_sender_message['mobileNumber'] = mobile
         mongo_update_record(last_sender_message)
-        reply_main_menu_buttons(sender)
+        reply_main_menu_buttons(sender, last_sender_message)
 
 def reply_misc(sender):
     data_misc_buttons = {
@@ -419,7 +421,7 @@ def reply_has_cards(sender, last_sender_message):
     r = session.post(url_login6, json=sd2)
     if r.status_code != 200:
         reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
-        reply_main_menu_buttons(sender)
+        reply_main_menu_buttons(sender, last_sender_message)
         return False
     cardsCount = len(r.json())
     return cardsCount > 0

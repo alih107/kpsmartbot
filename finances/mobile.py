@@ -276,9 +276,7 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
                     res += "Номер квитанции: " + str(payment_id)
                     res += ", она доступна в профиле post.kz в разделе История платежей"
                     main.reply(sender, res)
-                last_sender_message['payload'] = 'mobile.finished'
-                main.mongo_update_record(last_sender_message)
-                main.reply_main_menu_buttons(sender)
+                main.reply_main_menu_buttons(sender, last_sender_message)
                 return "ok"
             except Exception as e:
                 pass
@@ -288,12 +286,10 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
         if last_sender_message['payload'] == 'mobile.startPayment':
             strminutes = str(timeout // 60)
             main.reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
-            main.reply_main_menu_buttons(sender)
-            last_sender_message['payload'] = 'mainMenu'
-            main.mongo_update_record(last_sender_message)
+            main.reply_main_menu_buttons(sender, last_sender_message)
         return "time exceed"
     except Exception:
         logging.error(helper.PrintException())
         main.reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
-        main.reply_main_menu_buttons(sender)
+        main.reply_main_menu_buttons(sender, last_sender_message)
         return "fail"

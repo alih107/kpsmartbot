@@ -207,9 +207,7 @@ def reply_onai_startPayment(sender, message, last_sender_message):
                     res += "Номер квитанции: " + str(payment_id)
                     res += ", она доступна на post.kz в разделе История платежей"
                     main.reply(sender, res)
-                last_sender_message['payload'] = 'onai.finished'
-                main.mongo_update_record(last_sender_message)
-                main.reply_main_menu_buttons(sender)
+                main.reply_main_menu_buttons(sender, last_sender_message)
                 return "ok"
             timer += 1
 
@@ -217,12 +215,10 @@ def reply_onai_startPayment(sender, message, last_sender_message):
         if last_sender_message['payload'] == 'onai.startPayment':
             strminutes = str(timeout // 60)
             main.reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
-            main.reply_main_menu_buttons(sender)
-            last_sender_message['payload'] = 'mainMenu'
-            main.mongo_update_record(last_sender_message)
+            main.reply_main_menu_buttons(sender, last_sender_message)
         return "time exceed"
     except:
         main.reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
-        main.reply_main_menu_buttons(sender)
+        main.reply_main_menu_buttons(sender, last_sender_message)
         logging.error(helper.PrintException())
         return "fail"

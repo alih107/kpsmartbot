@@ -136,7 +136,7 @@ def handle_intent(sender, last_sender_message, value):
         elif value == 'COMMAND_exchange_rates':
             main.reply_currencies_kursy(sender)
         elif value == 'COMMAND_go_home':
-            main.reply_main_menu_buttons(sender)
+            main.reply_main_menu_buttons(sender, last_sender_message)
         elif value == 'COMMAND_card2card':
             bot_server.call_card2card(sender, last_sender_message, 'card2card')
         elif value == 'COMMAND_paymobile':

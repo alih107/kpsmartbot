@@ -185,9 +185,9 @@ def check_login_and_cards(sender, last_sender_message):
 
     hasCards = main.reply_has_cards(sender, last_sender_message)
     if not hasCards:
-        main.reply(sender, "Добавьте карту в профиль " + last_sender_message['login'] +" на post.kz в разделе \"Мои счета и карты\", пожалуйста")
-        main.reply_main_menu_buttons(sender)
-        last_sender_message['payload'] = 'mainMenu'
+        main.reply(sender, "У вас отсутствуют добавленные карты в post.kz. "
+                      "Чтобы добавить, введите 16ти-значный номер карты")
+        last_sender_message['payload'] = 'addcard'
         main.mongo_update_record(last_sender_message)
         return False
 
@@ -275,16 +275,16 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
     elif payload == 'auth.delete.yes':
         last_sender_message['encodedLoginPass'] = None
         main.reply(sender, "Авторизация успешна удалена")
-        main.reply_main_menu_buttons(sender)
+        main.reply_main_menu_buttons(sender, last_sender_message)
     elif payload == 'auth.delete.no':
-        main.reply_main_menu_buttons(sender)
+        main.reply_main_menu_buttons(sender, last_sender_message)
     elif payload == 'disable.bot.yes':
         res = "Бот отключен. Чтобы включить, нажмите кнопку (y)"
         last_sender_message['isBotActive'] = False
         main.reply(sender, res)
     elif payload == 'disable.bot.no':
         main.reply(sender, "Бот остался включенным")
-        main.reply_main_menu_buttons(sender)
+        main.reply_main_menu_buttons(sender, last_sender_message)
     last_sender_message['payload'] = payload
     main.mongo_update_record(last_sender_message)
 
@@ -400,9 +400,7 @@ def handle_attachments(sender, last_sender_message, attachment):
 
 def handle_text_messages(sender, last_sender_message, message):
     if message == '👍':
-        main.reply_main_menu_buttons(sender)
-        last_sender_message['payload'] = 'mainMenu'
-        main.mongo_update_record(last_sender_message)
+        main.reply_main_menu_buttons(sender, last_sender_message)
         return "ok"
     payload = last_sender_message['payload']
     if payload == 'tracking':
@@ -497,14 +495,10 @@ def handle_text_messages(sender, last_sender_message, message):
         last_sender_message['isBotActive'] = False
         main.reply(sender, res)
         return "ok"
-    main.reply_main_menu_buttons(sender)
-    last_sender_message['payload'] = 'mainMenu'
-    main.mongo_update_record(last_sender_message)
+    main.reply_main_menu_buttons(sender, last_sender_message)
 
 def handle_sticker(sender, last_sender_message):
-    last_sender_message['payload'] = 'mainMenu'
-    main.mongo_update_record(last_sender_message)
-    main.reply_main_menu_buttons(sender)
+    main.reply_main_menu_buttons(sender, last_sender_message)
 
 def handle_messages_when_deactivated(sender, data, last_sender_message):
     try:
@@ -538,7 +532,7 @@ def handle_messages_when_deactivated(sender, data, last_sender_message):
             last_sender_message['isBotActive'] = True
             main.mongo_update_record(last_sender_message)
             main.reply(sender, "Бот включен")
-            main.reply_main_menu_buttons(sender)
+            main.reply_main_menu_buttons(sender, last_sender_message)
         if payload == 'deactivate.bot':
             main.reply(sender, "Хорошо! Если Вы хотите включить бота, нажмите кнопку (y)")
     except:

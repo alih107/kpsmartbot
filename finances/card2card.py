@@ -163,9 +163,7 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
                     res += "Номер квитанции: " + str(data['result']['trxId'])
                     res += ", она доступна в профиле post.kz в разделе История платежей"
                     main.reply(sender, res)
-                last_sender_message['payload'] = 'card2card.finished'
-                main.mongo_update_record(last_sender_message)
-                main.reply_main_menu_buttons(sender)
+                main.reply_main_menu_buttons(sender, last_sender_message)
                 return "ok"
             except:
                 pass
@@ -175,12 +173,10 @@ def reply_card2card_startPayment(sender, message, last_sender_message):
         if last_sender_message['payload'] == 'card2card.startPayment':
             strminutes = str(timeout // 60)
             main.reply(sender, "Прошло больше " + strminutes + " минут: платеж отменяется")
-            main.reply_main_menu_buttons(sender)
-            last_sender_message['payload'] = 'mainMenu'
-            main.mongo_update_record(last_sender_message)
+            main.reply_main_menu_buttons(sender, last_sender_message)
         return "time exceed"
     except:
         main.reply(sender, "Произошла непредвиденная ошибка, попробуйте позднее")
-        main.reply_main_menu_buttons(sender)
+        main.reply_main_menu_buttons(sender, last_sender_message)
         logging.error(helper.PrintException())
         return "fail"
