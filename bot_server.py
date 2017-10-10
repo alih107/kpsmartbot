@@ -260,9 +260,6 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
     elif payload == 'mobile.last':
         mobile.reply_mobile_check_number(sender, text, last_sender_message)
         return "ok"
-    elif payload == 'mobile.voice_number.yes':
-        mobile.reply_mobile_check_number(sender, last_sender_message['voice_mobile_number'], last_sender_message)
-        return "ok"
     elif payload == 'mobile.voice_number.again':
         mobile.reply_mobile_enter_number(sender, last_sender_message)
         return "ok"

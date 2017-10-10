@@ -118,17 +118,21 @@ def reply_mobile_delete_phone(sender, text, last_sender_message):
     main.mongo_update_record(last_sender_message)
 
 
-def reply_mobile_amount(sender, message, last_sender_message):
+def reply_mobile_amount(sender, message, last_sender_message, is_voice=None):
+    added_text = ''
+    if is_voice:
+        added_text = 'Вы продиктовали сумму ' + message + '.\n'
     amount = 0
     minAmount = last_sender_message['minAmount']
     try:
         amount = int(message)
     except:
-        main.reply(sender, "Вы неправильно ввели сумму пополнения баланса. Введите сумму заново")
+        main.reply(sender, added_text + "Вы неправильно ввели сумму пополнения баланса. Введите сумму заново")
         return "again"
 
     if amount < minAmount:
-        main.reply(sender, "Сумма пополнения баланса должна быть не менее " + str(minAmount) + " тг. Введите сумму заново")
+        main.reply(sender, added_text + "Сумма пополнения баланса должна быть не менее " +
+                   str(minAmount) + " тг. Введите сумму заново")
         return "again"
 
     main.reply_display_cards(sender, last_sender_message)

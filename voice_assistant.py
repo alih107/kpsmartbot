@@ -21,6 +21,8 @@ client = Wit(wit_token)
 uuid = constants.uuid
 api_key = constants.api_key
 
+payload_dict = {'balance': 'номер телефона', 'mobile.amount': 'сумму'}
+
 def yandex_api_post(voice_filename_wav, topic):
     headers = {'Content-Type': 'audio/x-wav'}
     url = 'http://asr.yandex.net/asr_xml?uuid=' + uuid + '&key=' + api_key + '&topic=' + topic
@@ -47,18 +49,22 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
         except:
             AudioSegment.from_file(voice_filename, "aac").export(voice_filename_wav, format="wav")  # iphone
         try:
-            if last_sender_message['payload'] == 'balance':
+            payload = last_sender_message['payload']
+            if payload in payload_dict:
                 logging.info('Trying yandex API with topic numbers ...')
                 r = yandex_api_post(voice_filename_wav, 'numbers')
                 root = ET.fromstring(r.text)
                 logging.info(str(root.tag) + " | " + str(root.attrib))
                 if root.attrib['success'] == '0':
-                    main.reply(sender, "Пожалуйста, продиктуйте номер ещё раз")
+                    main.reply(sender, "Пожалуйста, продиктуйте ещё раз " + payload_dict[payload])
                 else:
                     for child in root:
                         logging.info(str(child.tag) + " | " + str(child.attrib) + " | " + child.text)
                     yandex_numbers = helper.extract_digits(root[0].text)
-                    mobile.reply_mobile_check_number(sender, yandex_numbers, last_sender_message, is_voice=True)
+                    if payload == 'balance':
+                        mobile.reply_mobile_check_number(sender, yandex_numbers, last_sender_message, is_voice=True)
+                    elif payload == 'mobile.amount':
+                        mobile.reply_mobile_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
             else:
                 logging.info('Trying yandex API with topic queries ...')
                 r = yandex_api_post(voice_filename_wav, 'queries')
