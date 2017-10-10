@@ -57,9 +57,8 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                 else:
                     for child in root:
                         logging.info(str(child.tag) + " | " + str(child.attrib) + " | " + child.text)
-                        yandex_numbers = helper.extract_digits(child.text)
-                        mobile.reply_mobile_confirm_number_by_voice(sender, yandex_numbers, last_sender_message)
-                        break
+                    yandex_numbers = helper.extract_digits(root[0].text)
+                    mobile.reply_mobile_confirm_number_by_voice(sender, yandex_numbers, last_sender_message)
             else:
                 logging.info('Trying yandex API with topic queries ...')
                 r = yandex_api_post(voice_filename_wav, 'queries')
