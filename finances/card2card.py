@@ -40,6 +40,7 @@ def reply_card2card_enter_cardDst(sender, last_sender_message):
             main.reply(sender, card2card_info +
                        "\n\nВведите 16ти-значный номер карты, на который Вы хотите перевести деньги\n" + hint_main_menu)
         last_sender_message['lastCommand'] = 'card2card'
+        last_sender_message['payload'] = 'card2card'
         main.mongo_update_record(last_sender_message)
 
 
