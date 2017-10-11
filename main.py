@@ -5,6 +5,7 @@ import pymongo
 import datetime
 import logging
 import json
+import time
 import constants
 import helper
 
@@ -138,10 +139,12 @@ def reply_typing_off(sender):
     requests.post(fb_url, json=data)
 
 def reply_main_menu_buttons(sender, last_sender_message):
+    start = time.time()
     data_main_menu_buttons = {
         "recipient": {"id": sender},
         "message": helper.main_menu_attachment
     }
+    logging.info('creating data_main_menu_buttons time = ' + str(time.time() - start))
     requests.post(fb_url, json=data_main_menu_buttons)
     last_sender_message['payload'] = 'mainMenu'
     mongo_update_record(last_sender_message)
