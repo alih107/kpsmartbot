@@ -14,6 +14,7 @@ portal_id = constants.portal_id
 timeout = main.timeout
 
 def reply_card2cash_history(sender, last_sender_message):
+    main.reply_typing_on(sender)
     if main.check_login(sender, last_sender_message):
         try:
             main.reply_typing_on(sender)
