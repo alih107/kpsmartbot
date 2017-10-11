@@ -121,7 +121,7 @@ def reply_card2card_amount(sender, message, last_sender_message, is_voice=None):
         main.reply(sender, added_text + "Сумма перевода должна быть не более " + str(maxAmount) + " тг. Введите сумму заново")
         return "again"
     if is_voice:
-        main.reply(sender, added_text)
+        main.reply_just_text(sender, added_text)
     last_sender_message['payload'] = 'card2card.chooseCard'
     last_sender_message['amount'] = amount
     main.mongo_update_record(last_sender_message)
