@@ -151,11 +151,6 @@ def reply_main_menu_buttons(sender, last_sender_message):
                             "buttons": [
                                 {
                                     "type": "postback",
-                                    "title": "📲 Пополнение баланса",
-                                    "payload": "balance"
-                                },
-                                {
-                                    "type": "postback",
                                     "title": "🔍 Отслеживание",
                                     "payload": "tracking"
                                 },
@@ -163,6 +158,11 @@ def reply_main_menu_buttons(sender, last_sender_message):
                                     "type": "postback",
                                     "title": "📍Ближайшие отделения",
                                     "payload": "nearest"
+                                },
+                                {
+                                    "type": "postback",
+                                    "title": "💰 Финансы",
+                                    "payload": "menu.finances"
                                 }
                             ]
                         },
@@ -178,32 +178,7 @@ def reply_main_menu_buttons(sender, last_sender_message):
                                     "type": "postback",
                                     "title": "🚗 Штрафы ПДД",
                                     "payload": "shtrafy"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "📃 Оплата ком.услуг",
-                                    "payload": "komuslugi"
                                 }
-                            ]
-                        },
-                        {
-                            "title": "Платежи",
-                            "buttons": [
-                                {
-                                    "type": "postback",
-                                    "title": "💳 Перевод на карту",
-                                    "payload": "card2card"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "💸 Перевод на руки",
-                                    "payload": "card2cash"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "🚌 Пополнение Онай",
-                                    "payload": "onai"
-                                },
                             ]
                         },
                         {
@@ -254,6 +229,65 @@ def reply_main_menu_buttons(sender, last_sender_message):
     }
     requests.post(fb_url, json=data_main_menu_buttons)
     last_sender_message['payload'] = 'mainMenu'
+    mongo_update_record(last_sender_message)
+
+def reply_menu_finances(sender, last_sender_message):
+    data_finances_buttons = {
+        "recipient": {"id": sender},
+        "message": {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": [
+                        {
+                            "title": "Финансы",
+                            "buttons": [
+                                {
+                                    "type": "postback",
+                                    "title": "📲 Пополнение баланса",
+                                    "payload": "balance"
+                                },
+                                {
+                                    "type": "postback",
+                                    "title": "🚌 Пополнение Онай",
+                                    "payload": "onai"
+                                },
+                                {
+                                    "type": "postback",
+                                    "title": "💳 Перевод на карту",
+                                    "payload": "card2card"
+                                }
+
+                            ]
+                        },
+                        {
+                            "title": "Финансы",
+                            "buttons": [
+                                {
+                                    "type": "postback",
+                                    "title": "💸 Перевод на руки",
+                                    "payload": "card2cash"
+                                },
+                                {
+                                    "type": "postback",
+                                    "title": "📃 Оплата ком.услуг",
+                                    "payload": "komuslugi"
+                                },
+                                {
+                                    "type": "postback",
+                                    "title": "Главное меню",
+                                    "payload": "mainMenu"
+                                }
+                            ]
+                        },
+                    ]
+                }
+            }
+        }
+    }
+    requests.post(fb_url, json=data_finances_buttons)
+    last_sender_message['payload'] = 'menu.finances'
     mongo_update_record(last_sender_message)
 
 def reply_display_cards(sender, last_sender_message):

@@ -345,6 +345,12 @@ def handle_postback_payload(sender, last_sender_message, payload):
         main.reply_currencies_kursy(sender)
     elif payload == 'misc':
         main.reply_misc(sender)
+    elif payload == 'menu.finances':
+        main.reply_menu_finances(sender, last_sender_message)
+        return "ok"
+    elif payload == 'mainMenu':
+        main.reply_main_menu_buttons(sender, last_sender_message)
+        return "ok"
     elif payload == 'onai':
         if not call_onai(sender, last_sender_message, payload):
             return "ok"
