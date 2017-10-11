@@ -54,21 +54,6 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
         try:
             payload = last_sender_message['payload']
             if payload in payload_dict:
-                logging.info('Trying wit.ai API for numbers ...')
-                try:
-                    resp = client.speech(open(voice_filename_wav, 'rb'), None, {'Content-Type': 'audio/wav'})
-                    wit_text = resp['_text']
-                    just_numbers = helper.extract_digits(wit_text)
-                    logging.info(wit_text + ' | ' + just_numbers)
-                    if payload == 'balance':
-                        mobile.reply_mobile_check_number(sender, just_numbers, last_sender_message, is_voice=True)
-                    elif payload == 'mobile.amount':
-                        mobile.reply_mobile_amount(sender, just_numbers, last_sender_message, is_voice=True)
-                    elif payload == 'card2card':
-                        card2card.reply_card2card_check_cardDst(sender, just_numbers, last_sender_message,
-                                                                is_voice=True)
-                except:
-                    main.reply(sender, "Пожалуйста, продиктуйте ещё раз " + payload_dict[payload])
                 logging.info('Trying yandex API with topic numbers ...')
                 r = yandex_api_post(voice_filename_wav, 'numbers')
                 root = ET.fromstring(r.text)
@@ -78,13 +63,13 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                 else:
                     for child in root:
                         logging.info(str(child.tag) + " | " + str(child.attrib) + " | " + child.text)
-                #     yandex_numbers = helper.extract_digits(root[0].text)
-                #     if payload == 'balance':
-                #         mobile.reply_mobile_check_number(sender, yandex_numbers, last_sender_message, is_voice=True)
-                #     elif payload == 'mobile.amount':
-                #         mobile.reply_mobile_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
-                #     elif payload == 'card2card':
-                #         card2card.reply_card2card_check_cardDst(sender, yandex_numbers, last_sender_message, is_voice=True)
+                    yandex_numbers = helper.extract_digits(root[0].text)
+                    if payload == 'balance':
+                        mobile.reply_mobile_check_number(sender, yandex_numbers, last_sender_message, is_voice=True)
+                    elif payload == 'mobile.amount':
+                        mobile.reply_mobile_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
+                    elif payload == 'card2card':
+                        card2card.reply_card2card_check_cardDst(sender, yandex_numbers, last_sender_message, is_voice=True)
 
             else:
                 logging.info('Trying yandex API with topic queries ...')
