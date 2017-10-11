@@ -32,8 +32,6 @@ hint_main_menu = "(для перехода в главное меню нажми
 digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15',
           '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30']
 
-global_start = 0
-
 @app.route('/kpsmartbot', methods=['GET'])
 def verify():
     # when the endpoint is registered as a webhook, it must echo back
@@ -107,6 +105,7 @@ def get_firstname_lastname(sender):
 
 @app.route('/kpsmartbot', methods=['POST'])
 def handle_incoming_messages():
+    logging.info('Time before data = request.json = ' + str(time.time()))
     data = request.json
     t = threading.Thread(target=handle_data, args=(data,))
     t.setDaemon(True)
@@ -115,7 +114,6 @@ def handle_incoming_messages():
     return "ok", 200
 
 def handle_data(data):
-    global_start = time.time()
     sender = data['entry'][0]['messaging'][0]['sender']['id']
     last_sender_message = collection_messages.find_one({"sender": sender})
     if last_sender_message == None:
@@ -418,7 +416,7 @@ def handle_attachments(sender, last_sender_message, attachment):
         last_sender_message['sendVoice'] = True
         main.mongo_update_record(last_sender_message)
         try:
-            logging.info('Time from getting data handle and calling voice_assistant = ' + str(time.time() - global_start))
+            logging.info('Time from getting data handle and calling voice_assistant = ' + str(time.time()))
             t = threading.Thread(target=voice_assistant.handle_voice_message_yandex,
                                  args=(sender, attachment['payload']['url'], last_sender_message,))
             t.setDaemon(True)
