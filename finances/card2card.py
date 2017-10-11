@@ -55,7 +55,18 @@ def reply_card2card_check_cardDst(sender, message, last_sender_message, is_voice
     if not message.isdigit():
         main.reply(sender, added_text + "Некоторые введенные Вами цифры не являются цифрами, попробуйте ещё раз")
         return "cardDst.again"
-    main.reply(sender, added_text + "Введите сумму перевода (от 500 до 494070; комиссия 1,2%, минимум 300 тенге)\n" + hint_main_menu)
+    if is_voice:
+        buttons = [{"content_type": "text", "payload": "card2card.again", "title": "Ввести номер заново"}]
+        data_quick_replies = {
+            "recipient": {"id": sender},
+            "message": {
+                "text": added_text + "Введите сумму перевода (от 500 до 494070; комиссия 1,2%, минимум 300 тенге)\n" + hint_main_menu,
+                "quick_replies": buttons
+            }
+        }
+        requests.post(fb_url, json=data_quick_replies)
+    else:
+        main.reply(sender, "Введите сумму перевода (от 500 до 494070; комиссия 1,2%, минимум 300 тенге)\n" + hint_main_menu)
 
     last_sender_message['lastCardDst'] = message
     last_sender_message['payload'] = 'card2card.amount'

@@ -274,6 +274,9 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
         payload = 'card2card.amount'
     elif payload == 'card2card.delete':
         card2card.reply_card2card_delete(sender, last_sender_message)
+    elif payload == 'card2card.again':
+        card2card.reply_card2card_enter_cardDst(sender, last_sender_message)
+        return "ok"
     elif payload == 'card2card.delete.card':
         card2card.reply_card2card_delete_card(sender, text, last_sender_message)
         return "ok"
