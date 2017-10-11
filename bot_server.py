@@ -275,6 +275,7 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
     elif payload == 'card2card.delete':
         card2card.reply_card2card_delete(sender, last_sender_message)
     elif payload == 'card2card.again':
+        last_sender_message['cardDsts'].remove(last_sender_message['lastCardDst'])
         card2card.reply_card2card_enter_cardDst(sender, last_sender_message)
         return "ok"
     elif payload == 'card2card.delete.card':
