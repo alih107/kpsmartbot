@@ -14,55 +14,58 @@ portal_id = constants.portal_id
 timeout = main.timeout
 
 def reply_card2cash_history(sender, last_sender_message):
-    try:
-        main.reply_typing_on(sender)
+    if main.check_login(sender, last_sender_message):
+        try:
+            main.reply_typing_on(sender)
 
-        url_history = url + portal_id + '/payment/?pageSize=30&pageNumber=0&result=success&portalType=web'
-        headers = {'Content-Type': 'application/x-www-form-urlencoded',
-                   'X-Channel-Id': x_channel_id,
-                   'X-IV-Authorization': 'Identifier ' + last_sender_message['mobileNumber']}
-        r = requests.get(url_history, headers=headers)
-        history_items = r.json()['items']
-        card2cash_items = []
-        for h in history_items:
-            if h['paymentId'] == 'MoneyTransfer_KazPost_Card2Cash':
-                amount = str(h['amount'] // 100)
-                card_title = h['src']['title'][-4:]
-                desc_length = 20 - 2 - len(amount) - 4  # 20 - button title limit, 2 - for > and :, 4 - last 4 digits
-                description = h['description'][:desc_length]
-                title = card_title + '>' + description + ':' + amount
-                item = {'title': title, 'token': h['token']}
-                card2cash_items.append(item)
+            url_history = url + portal_id + '/payment/?pageSize=30&pageNumber=0&result=success&portalType=web'
+            headers = {'Content-Type': 'application/x-www-form-urlencoded',
+                       'X-Channel-Id': x_channel_id,
+                       'X-IV-Authorization': 'Identifier ' + last_sender_message['mobileNumber']}
+            r = requests.get(url_history, headers=headers)
+            history_items = r.json()['items']
+            card2cash_items = []
+            for h in history_items:
+                if h['paymentId'] == 'MoneyTransfer_KazPost_Card2Cash':
+                    amount = str(h['amount'] // 100)
+                    card_title = h['src']['title'][-4:]
+                    desc_length = 20 - 2 - len(amount) - 4  # 20 - button title limit, 2 - for > and :, 4 - last 4 digits
+                    description = h['description'][:desc_length]
+                    title = card_title + '>' + description + ':' + amount
+                    item = {'title': title, 'token': h['token']}
+                    card2cash_items.append(item)
 
-        elements = []
-        buttons = []
-        count = 0
-        if len(card2cash_items) == 0:
-            main.reply(sender, 'Пожалуйста, инициируйте операцию по переводу на руки на портале transfer.post.kz\n'
-                          'Данная функция предназначена только для повторных операций')
-            return
-        for i in card2cash_items:
-            if count > 0 and count % 3 == 0:
-                elements.append({'title': 'Выберите перевод (Карта>Кому:Сумма)', 'buttons': buttons})
-                buttons = []
-            buttons.append({"type": "postback", "title": i['title'], "payload": i['token']})
-            count += 1
-        elements.append({'title': 'Выберите перевод (Карта>Кому:Сумма)', 'buttons': buttons})
-        data_items_buttons = {
-            "recipient": {"id": sender},
-            "message": {
-                "attachment": {
-                    "type": "template",
-                    "payload": {
-                        "template_type": "generic",
-                        "elements": elements
+            elements = []
+            buttons = []
+            count = 0
+            if len(card2cash_items) == 0:
+                main.reply(sender, 'Пожалуйста, инициируйте операцию по переводу на руки на портале transfer.post.kz\n'
+                              'Данная функция предназначена только для повторных операций')
+                return
+            for i in card2cash_items:
+                if count > 0 and count % 3 == 0:
+                    elements.append({'title': 'Выберите перевод (Карта>Кому:Сумма)', 'buttons': buttons})
+                    buttons = []
+                buttons.append({"type": "postback", "title": i['title'], "payload": i['token']})
+                count += 1
+            elements.append({'title': 'Выберите перевод (Карта>Кому:Сумма)', 'buttons': buttons})
+            data_items_buttons = {
+                "recipient": {"id": sender},
+                "message": {
+                    "attachment": {
+                        "type": "template",
+                        "payload": {
+                            "template_type": "generic",
+                            "elements": elements
+                        }
                     }
                 }
             }
-        }
-        requests.post(fb_url, json=data_items_buttons)
-    except:
-        logging.error(helper.PrintException())
+            requests.post(fb_url, json=data_items_buttons)
+            last_sender_message['payload'] = 'card2cash'
+            main.mongo_update_record(last_sender_message)
+        except:
+            logging.error(helper.PrintException())
 
 def reply_card2cash_history_show(sender, last_sender_message, token):
     try:

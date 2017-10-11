@@ -339,8 +339,8 @@ def handle_postback_payload(sender, last_sender_message, payload):
         card2card.reply_card2card_enter_cardDst(sender, last_sender_message)
         return "ok"
     elif payload == 'card2cash':
-        if not call_card2cash(sender, last_sender_message, payload):
-            return "ok"
+        card2cash.reply_card2cash_history(sender, last_sender_message)
+        return "ok"
     elif payload == '10.kursy':
         main.reply_currencies_kursy(sender)
     elif payload == 'misc':
@@ -561,13 +561,6 @@ def handle_messages_when_deactivated(sender, data, last_sender_message):
             main.reply(sender, "Хорошо! Если Вы хотите включить бота, нажмите кнопку (y)")
     except:
         return
-
-def call_card2cash(sender, last_sender_message, payload):
-    if main.check_login(sender, last_sender_message):
-        last_sender_message['lastCommand'] = payload
-        card2cash.reply_card2cash_history(sender, last_sender_message)
-        return True
-    return False
 
 def call_onai(sender, last_sender_message, payload):
     if main.check_login(sender, last_sender_message):
