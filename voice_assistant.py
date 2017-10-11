@@ -34,6 +34,7 @@ def yandex_api_post(voice_filename_wav, topic, lang=None):
     return requests.post(url, data=open(voice_filename_wav, 'rb'), headers=headers)
 
 def handle_voice_message_yandex(sender, voice_url, last_sender_message):
+    logging.info('Time inside thread for voice_assistant = ' + str(time.time()))
     main.reply_typing_on(sender)
     try:
         count = 0

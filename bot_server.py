@@ -105,7 +105,6 @@ def get_firstname_lastname(sender):
 
 @app.route('/kpsmartbot', methods=['POST'])
 def handle_incoming_messages():
-    logging.info('Time before data = request.json = ' + str(time.time()))
     data = request.json
     t = threading.Thread(target=handle_data, args=(data,))
     t.setDaemon(True)
@@ -416,7 +415,7 @@ def handle_attachments(sender, last_sender_message, attachment):
         last_sender_message['sendVoice'] = True
         main.mongo_update_record(last_sender_message)
         try:
-            logging.info('Time from getting data handle and calling voice_assistant = ' + str(time.time()))
+            logging.info('Time before calling thread for voice_assistant = ' + str(time.time()))
             t = threading.Thread(target=voice_assistant.handle_voice_message_yandex,
                                  args=(sender, attachment['payload']['url'], last_sender_message,))
             t.setDaemon(True)
