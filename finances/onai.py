@@ -9,15 +9,29 @@ fb_url = main.fb_url
 hint_main_menu = main.hint_main_menu
 timeout = main.timeout
 
-def reply_onai(sender, message, last_sender_message):
+def reply_onai(sender, message, last_sender_message, is_voice=None):
+    added_text = ''
+    if is_voice:
+        added_text = 'Вы продиктовали номер ' + helper.insert_spaces_onai(message) + '.\n'
     url_login = 'https://post.kz/mail-app/api/public/v2/invoices/create'
     message = message.replace(' ', '')
     r = requests.post(url_login, json={"operatorId": "onai", "data": message})
     if r.status_code == 404:
-        main.reply(sender, "Вы ввели неправильный номер карты Онай, введите еще раз")
+        main.reply(sender, added_text + "Вы ввели неправильный номер карты Онай, введите еще раз")
         return "wrong onai number"
 
-    main.reply(sender, "Введите сумму пополнения баланса (не менее 100 тг, комиссия 0 тг)")
+    if is_voice:
+        buttons = [{"content_type": "text", "payload": "onai.again", "title": "Ввести номер заново"}]
+        data_quick_replies = {
+            "recipient": {"id": sender},
+            "message": {
+                "text": added_text + "Введите сумму пополнения баланса (не менее 100 тг, комиссия 0 тг)",
+                "quick_replies": buttons
+            }
+        }
+        requests.post(fb_url, json=data_quick_replies)
+    else:
+        main.reply(sender, added_text + "Введите сумму пополнения баланса (не менее 100 тг, комиссия 0 тг)")
     last_sender_message['onaiToRefill'] = message
     try:
         if not "onaisToRefill" in last_sender_message:

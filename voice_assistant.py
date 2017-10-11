@@ -2,6 +2,7 @@ from services import shtrafy
 from services import tracking
 from finances import mobile
 from finances import card2card
+from finances import onai
 import bot_server
 import main
 import helper
@@ -23,7 +24,7 @@ uuid = constants.uuid
 api_key = constants.api_key
 
 payload_dict = {'balance': 'номер телефона', 'mobile.amount': 'сумму', 'card2card': 'номер карты',
-                'card2card.amount': 'сумму'}
+                'card2card.amount': 'сумму', 'onai': 'номер карты Онай'}
 
 def yandex_api_post(voice_filename_wav, topic, lang=None):
     headers = {'Content-Type': 'audio/x-wav'}
@@ -73,6 +74,8 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                         card2card.reply_card2card_check_cardDst(sender, yandex_numbers, last_sender_message, is_voice=True)
                     elif payload == 'card2card.amount':
                         card2card.reply_card2card_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
+                    elif payload == 'onai':
+                        onai.reply_onai(sender, yandex_numbers, last_sender_message, is_voice=True)
 
             else:
                 logging.info('Trying yandex API with topic queries ...')

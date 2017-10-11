@@ -100,6 +100,16 @@ def insert_space_onai(onai):
             res += ' '
     return res
 
+def insert_spaces_onai(onai):
+    res = ''
+    index = 0
+    for c in onai:
+        res += c
+        index += 1
+        if index in [4, 6, 8, 11, 15]:
+            res += ' '
+    return res
+
 def isAllDigits(card):
     for c in card:
         try:

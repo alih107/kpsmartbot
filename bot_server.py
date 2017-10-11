@@ -251,6 +251,10 @@ def handle_quickreply_payload(sender, data, last_sender_message, payload):
     elif payload == 'onai.last':
         onai.reply_onai(sender, text, last_sender_message)
         payload = 'onai.amount'
+    elif payload == 'onai.again':
+        last_sender_message['onaisToRefill'].remove(last_sender_message['onaiToRefill'])
+        onai.reply_onai_enter_number(sender, last_sender_message)
+        return "ok"
     elif payload == 'onai.delete':
         onai.reply_onai_delete(sender, last_sender_message)
         return "ok"
