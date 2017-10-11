@@ -106,7 +106,7 @@ def insert_spaces_onai(onai):
     for c in onai:
         res += c
         index += 1
-        if index in [4, 6, 8, 11, 15]:
+        if index in [4, 6, 11, 15]:
             res += ' '
     return res
 
