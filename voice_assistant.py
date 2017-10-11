@@ -75,6 +75,7 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                     resp = client.speech(open(voice_filename_wav, 'rb'), None, {'Content-Type': 'audio/wav'})
                     wit_text = resp['_text']
                     just_numbers = helper.extract_digits(wit_text)
+                    logging.info(wit_text + ' | ' + just_numbers)
                     if payload == 'balance':
                         mobile.reply_mobile_check_number(sender, just_numbers, last_sender_message, is_voice=True)
                     elif payload == 'mobile.amount':
