@@ -72,7 +72,7 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                     elif payload == 'card2card':
                         card2card.reply_card2card_check_cardDst(sender, yandex_numbers, last_sender_message, is_voice=True)
                     elif payload == 'card2card.amount':
-                        card2card.reply_card2card_amount(sender, yandex_numbers, last_sender_message, is_voice=None)
+                        card2card.reply_card2card_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
 
             else:
                 logging.info('Trying yandex API with topic queries ...')
