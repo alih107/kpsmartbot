@@ -22,7 +22,8 @@ client = Wit(wit_token)
 uuid = constants.uuid
 api_key = constants.api_key
 
-payload_dict = {'balance': 'номер телефона', 'mobile.amount': 'сумму', 'card2card': 'номер карты'}
+payload_dict = {'balance': 'номер телефона', 'mobile.amount': 'сумму', 'card2card': 'номер карты',
+                'card2card.amount': 'сумму'}
 
 def yandex_api_post(voice_filename_wav, topic, lang=None):
     headers = {'Content-Type': 'audio/x-wav'}
@@ -70,6 +71,8 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                         mobile.reply_mobile_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
                     elif payload == 'card2card':
                         card2card.reply_card2card_check_cardDst(sender, yandex_numbers, last_sender_message, is_voice=True)
+                    elif payload == 'card2card.amount':
+                        card2card.reply_card2card_amount(sender, yandex_numbers, last_sender_message, is_voice=None)
 
             else:
                 logging.info('Trying yandex API with topic queries ...')

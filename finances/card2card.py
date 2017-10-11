@@ -100,24 +100,28 @@ def reply_card2card_delete_card(sender, text, last_sender_message):
     main.reply(sender, "Карта " + text + " успешно удалёна")
     reply_card2card_enter_cardDst(sender, last_sender_message)
 
-def reply_card2card_amount(sender, message, last_sender_message):
+def reply_card2card_amount(sender, message, last_sender_message, is_voice=None):
+    added_text = ''
+    if is_voice:
+        added_text = 'Вы продиктовали сумму ' + message + '.\n'
     amount = 0
     minAmount = 500
     maxAmount = 494070
     try:
         amount = int(message)
     except:
-        main.reply(sender, "Вы неправильно ввели сумму перевода. Введите сумму заново")
+        main.reply(sender, added_text + "Вы неправильно ввели сумму перевода. Введите сумму заново")
         return "again"
 
     if amount < minAmount:
-        main.reply(sender, "Сумма перевода должна быть не менее " + str(minAmount) + " тг. Введите сумму заново")
+        main.reply(sender, added_text + "Сумма перевода должна быть не менее " + str(minAmount) + " тг. Введите сумму заново")
         return "again"
 
     if amount > maxAmount:
-        main.reply(sender, "Сумма перевода должна быть не более " + str(maxAmount) + " тг. Введите сумму заново")
+        main.reply(sender, added_text + "Сумма перевода должна быть не более " + str(maxAmount) + " тг. Введите сумму заново")
         return "again"
-
+    if is_voice:
+        main.reply(sender, added_text)
     last_sender_message['payload'] = 'card2card.chooseCard'
     last_sender_message['amount'] = amount
     main.mongo_update_record(last_sender_message)

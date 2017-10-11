@@ -256,8 +256,7 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
         url_login10 = 'https://post.kz/mail-app/api/intervale/payment/status/' + token + '?device=mobile'
         r = session.post(url_login10, json=sd22)
         data = r.json()
-        state = data['state']
-        if state == 'redirect':
+        if data['state'] == 'redirect':
             main.reply_send_redirect_url(sender, data['url'])
             time.sleep(9)
 
@@ -266,7 +265,7 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
             time.sleep(1)
             r = session.post(url_login10, json=sd22)
             data = r.json()
-            try:
+            if data['state'] == 'result':
                 result_status = data['result']['status']
                 if result_status == 'fail':
                     main.reply(sender, "Платеж не был завершен успешно. Попробуйте снова")
@@ -278,8 +277,6 @@ def reply_mobile_startPayment(sender, message, last_sender_message):
                     main.reply(sender, res)
                 main.reply_main_menu_buttons(sender, last_sender_message)
                 return "ok"
-            except Exception as e:
-                pass
             timer += 1
 
         last_sender_message = main.mongo_get_by_sender(sender)
