@@ -47,7 +47,7 @@ def reply_card2card_enter_cardDst(sender, last_sender_message):
 def reply_card2card_check_cardDst(sender, message, last_sender_message, is_voice=None):
     added_text = ''
     if is_voice:
-        added_text = 'Вы продиктовали номер карты ' + message + '.\n'
+        added_text = 'Вы продиктовали номер карты ' + helper.insert_4_spaces(message) + '.\n'
     message = message.replace(' ', '')
     if len(message) != 16:
         main.reply(sender, added_text + "Вы ввели не все 16 цифр карты, попробуйте ещё раз")
