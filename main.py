@@ -140,92 +140,7 @@ def reply_typing_off(sender):
 def reply_main_menu_buttons(sender, last_sender_message):
     data_main_menu_buttons = {
         "recipient": {"id": sender},
-        "message": {
-            "attachment": {
-                "type": "template",
-                "payload": {
-                    "template_type": "generic",
-                    "elements": [
-                        {
-                            "title": "Главное меню",
-                            "buttons": [
-                                {
-                                    "type": "postback",
-                                    "title": "🔍 Отслеживание",
-                                    "payload": "tracking"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "📍Ближайшие отделения",
-                                    "payload": "nearest"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "💰 Финансы",
-                                    "payload": "menu.finances"
-                                }
-                            ]
-                        },
-                        {
-                            "title": "Доп. услуги",
-                            "buttons": [
-                                {
-                                    "type": "postback",
-                                    "title": "💲 Курсы валют",
-                                    "payload": "10.kursy"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "🚗 Штрафы ПДД",
-                                    "payload": "shtrafy"
-                                }
-                            ]
-                        },
-                        {
-                            "title": "Прочие услуги",
-                            "buttons": [
-                                {
-                                    "type": "web_url",
-                                    "title": "⚖️ Cудебные штрафы",
-                                    "url": "https://post.kz/finance/payment/fines",
-                                    "webview_height_ratio": "full"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "📁 Прочее",
-                                    "payload": "misc"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "✖ Отключить бота",
-                                    "payload": "disable.bot"
-                                }
-                            ]
-                        },
-                        {
-                            "title": "Профиль на post.kz",
-                            "buttons": [
-                                {
-                                    "type": "postback",
-                                    "title": "Авторизация",
-                                    "payload": "auth"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "Мои карты",
-                                    "payload": "addcard"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "Удаление авторизации",
-                                    "payload": "auth.delete"
-                                }
-                            ]
-                        }
-                    ]
-                }
-            }
-        }
+        "message": helper.main_menu_attachment
     }
     requests.post(fb_url, json=data_main_menu_buttons)
     last_sender_message['payload'] = 'mainMenu'
@@ -234,57 +149,7 @@ def reply_main_menu_buttons(sender, last_sender_message):
 def reply_menu_finances(sender, last_sender_message):
     data_finances_buttons = {
         "recipient": {"id": sender},
-        "message": {
-            "attachment": {
-                "type": "template",
-                "payload": {
-                    "template_type": "generic",
-                    "elements": [
-                        {
-                            "title": "Финансы",
-                            "buttons": [
-                                {
-                                    "type": "postback",
-                                    "title": "📲 Пополнение баланса",
-                                    "payload": "balance"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "🚌 Пополнение Онай",
-                                    "payload": "onai"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "💳 Перевод на карту",
-                                    "payload": "card2card"
-                                }
-
-                            ]
-                        },
-                        {
-                            "title": "Финансы",
-                            "buttons": [
-                                {
-                                    "type": "postback",
-                                    "title": "💸 Перевод на руки",
-                                    "payload": "card2cash"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "📃 Оплата ком.услуг",
-                                    "payload": "komuslugi"
-                                },
-                                {
-                                    "type": "postback",
-                                    "title": "Главное меню",
-                                    "payload": "mainMenu"
-                                }
-                            ]
-                        },
-                    ]
-                }
-            }
-        }
+        "message": helper.finances_buttons_attachment
     }
     requests.post(fb_url, json=data_finances_buttons)
     last_sender_message['payload'] = 'menu.finances'
