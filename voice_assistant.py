@@ -24,7 +24,7 @@ uuid = constants.uuid
 api_key = constants.api_key
 
 payload_dict = {'balance': 'номер телефона', 'mobile.amount': 'сумму', 'card2card': 'номер карты',
-                'card2card.amount': 'сумму', 'onai': 'номер карты Онай'}
+                'card2card.amount': 'сумму', 'onai': 'номер карты Онай', 'onai.amount': 'сумму'}
 
 def yandex_api_post(voice_filename_wav, topic, lang=None):
     headers = {'Content-Type': 'audio/x-wav'}
@@ -76,6 +76,8 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                         card2card.reply_card2card_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
                     elif payload == 'onai':
                         onai.reply_onai(sender, yandex_numbers, last_sender_message, is_voice=True)
+                    elif payload == 'onai.amount':
+                        onai.reply_onai_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
 
             else:
                 logging.info('Trying yandex API with topic queries ...')
