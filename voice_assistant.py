@@ -22,7 +22,7 @@ client = Wit(wit_token)
 uuid = constants.uuid
 api_key = constants.api_key
 
-payload_dict = {'balance': 'номер телефона', 'mobile.amount': 'сумму'}
+payload_dict = {'balance': 'номер телефона', 'mobile.amount': 'сумму', 'card2card': 'номер карты'}
 
 def yandex_api_post(voice_filename_wav, topic, lang=None):
     headers = {'Content-Type': 'audio/x-wav'}
@@ -68,6 +68,8 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
                         mobile.reply_mobile_check_number(sender, yandex_numbers, last_sender_message, is_voice=True)
                     elif payload == 'mobile.amount':
                         mobile.reply_mobile_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
+                    elif payload == 'card2card':
+                        card2card.reply_card2card_check_cardDst(sender, yandex_numbers, last_sender_message, is_voice=True)
             elif payload == 'tracking':
                 logging.info('Trying wit.ai API for tracking ...')
                 resp = client.speech(open(voice_filename_wav, 'rb'), None, {'Content-Type': 'audio/wav'})
