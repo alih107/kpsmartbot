@@ -34,10 +34,10 @@ def yandex_api_post(voice_filename_wav, topic, lang=None):
     return requests.post(url, data=open(voice_filename_wav, 'rb'), headers=headers)
 
 def handle_voice_message_yandex(sender, voice_url, last_sender_message):
-    logging.info('Time inside thread for voice_assistant = ' + str(time.time()))
     main.reply_typing_on(sender)
     try:
         count = 0
+        logging.info('Before requests.get(voice_url) time = ' + str(time.time()))
         g = requests.get(voice_url, stream=True)
         while g.status_code != 200 and count < 10:
             g = requests.get(voice_url, stream=True)
@@ -46,6 +46,7 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
         if g.status_code != 200:
             main.reply(sender, "Произошла ошибка при обработке аудио-сообщения, попробуйте ещё раз")
             return
+        logging.info('After  requests.get(voice_url) time = ' + str(time.time()))
         voice_filename = "voice_" + sender + ".mp4"
         voice_filename_wav = "voice_" + sender + ".wav"
         with open(voice_filename, "wb") as o:

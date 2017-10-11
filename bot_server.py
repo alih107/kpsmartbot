@@ -415,7 +415,6 @@ def handle_attachments(sender, last_sender_message, attachment):
         last_sender_message['sendVoice'] = True
         main.mongo_update_record(last_sender_message)
         try:
-            logging.info('Time before calling thread for voice_assistant = ' + str(time.time()))
             t = threading.Thread(target=voice_assistant.handle_voice_message_yandex,
                                  args=(sender, attachment['payload']['url'], last_sender_message,))
             t.setDaemon(True)
