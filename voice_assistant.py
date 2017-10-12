@@ -68,6 +68,7 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
     else:
         data = {'url': voice_url, 'source': 'facebook', 'id': sender, 'topic': 'queries'}
         r = requests.post(aws_url, json=data)
+        logging.info(r.json())
         if r.status_code == 404:
             main.reply(sender, "Произошла ошибка при обработке аудио-сообщения, попробуйте ещё раз")
         data = r.json()
