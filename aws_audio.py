@@ -4,11 +4,15 @@ import xml.etree.ElementTree as ET
 from wit import Wit
 from pydub import AudioSegment
 import os
+import logging
 
 app = Flask(__name__)
 uuid = "FF83B58DC263F322AC168932DF0DFDBB"
 api_key = "1ed1cc83-4c28-44d1-8d40-5942c9875310"
 client = Wit('TCLMX5YEBCRG5TO2TLW3VJCOGFOWMOJW')
+logging.basicConfig(filename='log_audio.log', level=logging.INFO,
+                    format='[%(levelname)s] (%(threadName)-10s) %(message)s')
+
 
 def yandex_api_post(voice_filename_wav, topic, lang=None):
     headers = {'Content-Type': 'audio/x-wav'}
@@ -27,7 +31,7 @@ def extract_digits(message):
 @app.route('/bot_audio', methods=['POST'])
 def handle_incoming_messages():
     data = request.json
-    print(data)
+    logging.info(data)
     voice_url, topic, source, sender = data['url'], data['topic'], data['source'], data['id']
     g = requests.get(voice_url, stream=True)
     count = 0
