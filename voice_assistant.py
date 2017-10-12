@@ -25,6 +25,7 @@ api_key = constants.api_key
 
 payload_dict = {'balance': 'номер телефона', 'mobile.amount': 'сумму', 'card2card': 'номер карты',
                 'card2card.amount': 'сумму', 'onai': 'номер карты Онай', 'onai.amount': 'сумму'}
+aws_url = constants.aws_url
 
 def yandex_api_post(voice_filename_wav, topic, lang=None):
     headers = {'Content-Type': 'audio/x-wav'}
@@ -34,6 +35,7 @@ def yandex_api_post(voice_filename_wav, topic, lang=None):
     return requests.post(url, data=open(voice_filename_wav, 'rb'), headers=headers)
 
 def handle_voice_message_yandex(sender, voice_url, last_sender_message):
+    requests.post(aws_url, json={'voice_url': voice_url, 'sender': sender})
     main.reply_typing_on(sender)
     try:
         count = 0
