@@ -42,6 +42,8 @@ def yandex_api_post(voice_filename_wav, topic, lang=None):
     return requests.post(url, data=open(voice_filename_wav, 'rb'), headers=headers)
 
 def handle_voice_message_yandex(sender, voice_url, last_sender_message):
+    data = {'url': voice_url, 'source': 'facebook', 'id': sender, 'topic': 'queries'}
+    logging.info(requests.post(aws_url, json=data))
     main.reply_typing_on(sender)
     try:
         count = 0
