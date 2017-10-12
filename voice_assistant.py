@@ -42,80 +42,106 @@ def yandex_api_post(voice_filename_wav, topic, lang=None):
     return requests.post(url, data=open(voice_filename_wav, 'rb'), headers=headers)
 
 def handle_voice_message_yandex(sender, voice_url, last_sender_message):
-    data = {'url': voice_url, 'source': 'facebook', 'id': sender, 'topic': 'queries'}
-    logging.info(requests.post(aws_url, json=data).json())
     main.reply_typing_on(sender)
-    try:
-        count = 0
-        logging.info('Before requests.get(voice_url) time = ' + str(time.time()))
-        g = requests.get(voice_url, stream=True)
-        while g.status_code != 200 and count < 10:
-            g = requests.get(voice_url, stream=True)
-            count += 1
-            logging.info("Couldn't get file from voice_url, try # " + str(count))
-        if g.status_code != 200:
+    payload = last_sender_message['payload']
+    if payload in payload_dict:
+        data = {'url': voice_url, 'source': 'facebook', 'id': sender, 'topic': 'queries'}
+        r = requests.post(aws_url, json=data)
+        if r.status_code == 404:
             main.reply(sender, "Произошла ошибка при обработке аудио-сообщения, попробуйте ещё раз")
-            return
-        logging.info('After  requests.get(voice_url) time = ' + str(time.time()))
-        voice_filename = "voice_" + sender + ".mp4"
-        voice_filename_wav = "voice_" + sender + ".wav"
-        with open(voice_filename, "wb") as o:
-            o.write(g.content)
-        try:
-            AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="wav")  # android
-        except:
-            AudioSegment.from_file(voice_filename, "aac").export(voice_filename_wav, format="wav")  # iphone
-        try:
-            payload = last_sender_message['payload']
-            if payload in payload_dict:
-                logging.info('Trying yandex API with topic numbers ...')
-                r = yandex_api_post(voice_filename_wav, 'numbers')
-                root = ET.fromstring(r.text)
-                logging.info(str(root.tag) + " | " + str(root.attrib))
-                if root.attrib['success'] == '0':
-                    main.reply(sender, "Пожалуйста, продиктуйте ещё раз " + payload_dict[payload])
-                else:
-                    for child in root:
-                        logging.info(str(child.tag) + " | " + str(child.attrib) + " | " + child.text)
-                    yandex_numbers = helper.extract_digits(root[0].text)
-                    if payload == 'balance':
-                        mobile.reply_mobile_check_number(sender, yandex_numbers, last_sender_message, is_voice=True)
-                    elif payload == 'mobile.amount':
-                        mobile.reply_mobile_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
-                    elif payload == 'card2card':
-                        card2card.reply_card2card_check_cardDst(sender, yandex_numbers, last_sender_message, is_voice=True)
-                    elif payload == 'card2card.amount':
-                        card2card.reply_card2card_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
-                    elif payload == 'onai':
-                        onai.reply_onai(sender, yandex_numbers, last_sender_message, is_voice=True)
-                    elif payload == 'onai.amount':
-                        onai.reply_onai_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
-
-            else:
-                logging.info('Trying yandex API with topic queries ...')
-                r = yandex_api_post(voice_filename_wav, 'queries')
-                root = ET.fromstring(r.text)
-                logging.info(str(root.tag) + " | " + str(root.attrib))
-                if root.attrib['success'] == '0':
-                    main.reply(sender, "Мне кажется, что Вы отправили пустую аудио-запись")
-                else:
-                    for child in root:
-                        logging.info(str(child.tag) + " | " + str(child.attrib) + " | " + child.text)
-                    resp = client.message(root[0].text)
-                    logging.info('Yay, got Wit.ai response: ' + str(resp))
-                    if not handle_entities(sender, last_sender_message, resp):
-                        main.reply(sender, "Извините, я не уверена, что именно Вы хотите")
-        except:
-            logging.error(helper.PrintException())
-
-        main.reply_typing_off(sender)
-        try:
-            os.remove(voice_filename)
-            os.remove(voice_filename_wav)
-        except:
-            pass
-    except:
-        logging.error(helper.PrintException())
+        data = r.json()
+        yandex_numbers = data['numbers']
+        if payload == 'balance':
+            mobile.reply_mobile_check_number(sender, yandex_numbers, last_sender_message, is_voice=True)
+        elif payload == 'mobile.amount':
+            mobile.reply_mobile_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
+        elif payload == 'card2card':
+            card2card.reply_card2card_check_cardDst(sender, yandex_numbers, last_sender_message, is_voice=True)
+        elif payload == 'card2card.amount':
+            card2card.reply_card2card_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
+        elif payload == 'onai':
+            onai.reply_onai(sender, yandex_numbers, last_sender_message, is_voice=True)
+        elif payload == 'onai.amount':
+            onai.reply_onai_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
+    else:
+        data = {'url': voice_url, 'source': 'facebook', 'id': sender, 'topic': 'queries'}
+        r = requests.post(aws_url, json=data)
+        if r.status_code == 404:
+            main.reply(sender, "Произошла ошибка при обработке аудио-сообщения, попробуйте ещё раз")
+        data = r.json()
+        intent = data['intent']
+        handle_intent(sender, last_sender_message, intent)
+    # try:
+    #     count = 0
+    #     logging.info('Before requests.get(voice_url) time = ' + str(time.time()))
+    #     g = requests.get(voice_url, stream=True)
+    #     while g.status_code != 200 and count < 10:
+    #         g = requests.get(voice_url, stream=True)
+    #         count += 1
+    #         logging.info("Couldn't get file from voice_url, try # " + str(count))
+    #     if g.status_code != 200:
+    #         main.reply(sender, "Произошла ошибка при обработке аудио-сообщения, попробуйте ещё раз")
+    #         return
+    #     logging.info('After  requests.get(voice_url) time = ' + str(time.time()))
+    #     voice_filename = "voice_" + sender + ".mp4"
+    #     voice_filename_wav = "voice_" + sender + ".wav"
+    #     with open(voice_filename, "wb") as o:
+    #         o.write(g.content)
+    #     try:
+    #         AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="wav")  # android
+    #     except:
+    #         AudioSegment.from_file(voice_filename, "aac").export(voice_filename_wav, format="wav")  # iphone
+    #     try:
+    #         payload = last_sender_message['payload']
+    #         if payload in payload_dict:
+    #             logging.info('Trying yandex API with topic numbers ...')
+    #             r = yandex_api_post(voice_filename_wav, 'numbers')
+    #             root = ET.fromstring(r.text)
+    #             logging.info(str(root.tag) + " | " + str(root.attrib))
+    #             if root.attrib['success'] == '0':
+    #                 main.reply(sender, "Пожалуйста, продиктуйте ещё раз " + payload_dict[payload])
+    #             else:
+    #                 for child in root:
+    #                     logging.info(str(child.tag) + " | " + str(child.attrib) + " | " + child.text)
+    #                 yandex_numbers = helper.extract_digits(root[0].text)
+    #                 if payload == 'balance':
+    #                     mobile.reply_mobile_check_number(sender, yandex_numbers, last_sender_message, is_voice=True)
+    #                 elif payload == 'mobile.amount':
+    #                     mobile.reply_mobile_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
+    #                 elif payload == 'card2card':
+    #                     card2card.reply_card2card_check_cardDst(sender, yandex_numbers, last_sender_message, is_voice=True)
+    #                 elif payload == 'card2card.amount':
+    #                     card2card.reply_card2card_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
+    #                 elif payload == 'onai':
+    #                     onai.reply_onai(sender, yandex_numbers, last_sender_message, is_voice=True)
+    #                 elif payload == 'onai.amount':
+    #                     onai.reply_onai_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
+    #
+    #         else:
+    #             logging.info('Trying yandex API with topic queries ...')
+    #             r = yandex_api_post(voice_filename_wav, 'queries')
+    #             root = ET.fromstring(r.text)
+    #             logging.info(str(root.tag) + " | " + str(root.attrib))
+    #             if root.attrib['success'] == '0':
+    #                 main.reply(sender, "Мне кажется, что Вы отправили пустую аудио-запись")
+    #             else:
+    #                 for child in root:
+    #                     logging.info(str(child.tag) + " | " + str(child.attrib) + " | " + child.text)
+    #                 resp = client.message(root[0].text)
+    #                 logging.info('Yay, got Wit.ai response: ' + str(resp))
+    #                 if not handle_entities(sender, last_sender_message, resp):
+    #                     main.reply(sender, "Извините, я не уверена, что именно Вы хотите")
+    #     except:
+    #         logging.error(helper.PrintException())
+    #
+    #     main.reply_typing_off(sender)
+    #     try:
+    #         os.remove(voice_filename)
+    #         os.remove(voice_filename_wav)
+    #     except:
+    #         pass
+    # except:
+    #     logging.error(helper.PrintException())
 
 def handle_entities(sender, last_sender_message, resp):
     entities = resp['entities']
