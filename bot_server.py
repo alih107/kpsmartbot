@@ -106,9 +106,10 @@ def get_firstname_lastname(sender):
 @app.route('/kpsmartbot', methods=['POST'])
 def handle_incoming_messages():
     data = request.json
-    t = threading.Thread(target=handle_data, args=(data,))
-    t.setDaemon(True)
-    t.start()
+    requests.post(main.aws_url, json=data)
+    # t = threading.Thread(target=handle_data, args=(data,))
+    # t.setDaemon(True)
+    # t.start()
 
     return "ok", 200
 
