@@ -3,6 +3,7 @@ import requests
 import xml.etree.ElementTree as ET
 from wit import Wit
 from pydub import AudioSegment
+import os
 
 app = Flask(__name__)
 uuid = "FF83B58DC263F322AC168932DF0DFDBB"
@@ -49,6 +50,11 @@ def handle_incoming_messages():
             AudioSegment.from_file(voice_filename, "aac").export(voice_filename_wav, format="wav")  # iphone
 
     r = yandex_api_post(voice_filename_wav, topic)
+    try:
+        os.remove(voice_filename)
+        os.remove(voice_filename_wav)
+    except:
+        pass
     root = ET.fromstring(r.text)
     if root.attrib['success'] == '0':
         return 404
