@@ -45,7 +45,7 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
     main.reply_typing_on(sender)
     payload = last_sender_message['payload']
     if payload in payload_dict:
-        data = {'url': voice_url, 'source': 'facebook', 'id': sender, 'topic': 'queries'}
+        data = {'url': voice_url, 'source': 'facebook', 'id': sender, 'topic': 'numbers'}
         r = requests.post(aws_url, json=data)
         if r.status_code == 404:
             main.reply(sender, "Произошла ошибка при обработке аудио-сообщения, попробуйте ещё раз")
