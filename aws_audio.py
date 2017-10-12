@@ -93,8 +93,8 @@ def handle_incoming_messages():
                             max_confidence = i['confidence']
                             intent = i['value']
                     return jsonify({'intent': intent}), 200
-            else:
-                return 404
+                else:
+                    return 404
 
         return jsonify({'message': 'idi nahui'}), 404
     except:
