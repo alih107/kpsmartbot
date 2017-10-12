@@ -19,6 +19,7 @@ portal_id_2 = constants.portal_id_2
 ACCESS_TOKEN = constants.ACCESS_TOKEN
 fb_url = "https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN
 api_key = constants.api_key
+aws_url = constants.aws_url
 
 hint_main_menu = "(для перехода в главное меню нажмите кнопку (y) "
 hint_main_menu2 = "(Нажмите (y) для перехода в главное меню)"

@@ -27,6 +27,7 @@ logging.basicConfig(filename='botserver.log', level=logging.INFO,
 
 ACCESS_TOKEN = main.ACCESS_TOKEN
 fb_url = main.fb_url
+aws_url = main.aws_url
 
 hint_main_menu = "(для перехода в главное меню нажмите кнопку (y)"
 digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15',
@@ -106,7 +107,7 @@ def get_firstname_lastname(sender):
 @app.route('/kpsmartbot', methods=['POST'])
 def handle_incoming_messages():
     data = request.json
-    requests.post(main.aws_url, json=data)
+    requests.post(aws_url, json=data)
     # t = threading.Thread(target=handle_data, args=(data,))
     # t.setDaemon(True)
     # t.start()
