@@ -99,6 +99,7 @@ def handle_incoming_messages():
         return jsonify({'message': 'idi nahui'}), 404
     except:
         logging.error(PrintException())
+        return 404
 
 if __name__ == '__main__':
     app.run(debug=True)
