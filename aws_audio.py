@@ -3,8 +3,6 @@ import requests
 
 app = Flask(__name__)
 
-def telegram_audio(url, source):
-
 @app.route('/bot_audio', methods=['POST'])
 def handle_incoming_messages():
     data = request.json
