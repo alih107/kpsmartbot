@@ -67,7 +67,9 @@ def handle_voice_message_yandex(sender, voice_url, last_sender_message):
             onai.reply_onai_amount(sender, yandex_numbers, last_sender_message, is_voice=True)
     else:
         data = {'url': voice_url, 'source': 'facebook', 'id': sender, 'topic': 'queries'}
+        start = time.time()
         r = requests.post(aws_url, json=data)
+        logging.info('requests.post(aws_url) time = ' + str(time.time() - start))
         logging.info(r.json())
         if r.status_code == 404:
             main.reply(sender, "Произошла ошибка при обработке аудио-сообщения, попробуйте ещё раз")
