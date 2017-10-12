@@ -27,6 +27,13 @@ payload_dict = {'balance': 'номер телефона', 'mobile.amount': 'су
                 'card2card.amount': 'сумму', 'onai': 'номер карты Онай', 'onai.amount': 'сумму'}
 aws_url = constants.aws_url
 
+def extract_digits(message):
+    numbers = '0123456789'
+    for i in message:
+        if not i in numbers:
+            message = message.replace(i, '')
+    return message
+
 def yandex_api_post(voice_filename_wav, topic, lang=None):
     headers = {'Content-Type': 'audio/x-wav'}
     url = 'http://asr.yandex.net/asr_xml?uuid=' + uuid + '&key=' + api_key + '&topic=' + topic
