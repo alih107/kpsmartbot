@@ -7,6 +7,10 @@ app = Flask(__name__)
 def handle_incoming_messages():
     data = request.json
     print (data)
+    url, topic, source = data['url'], data['topic'], data['source']
+    print(url)
+    print(topic)
+    print(source)
     return "ok", 200
 
 if __name__ == '__main__':
