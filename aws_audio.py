@@ -3,7 +3,7 @@ import requests
 
 app = Flask(__name__)
 
-@app.route('/kpsmartbot', methods=['POST'])
+@app.route('/bot_audio', methods=['POST'])
 def handle_incoming_messages():
     data = request.json
 
