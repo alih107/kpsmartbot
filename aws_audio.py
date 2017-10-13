@@ -99,8 +99,6 @@ def handle_incoming_messages():
                         if i['confidence'] > max_confidence:
                             max_confidence = i['confidence']
                             intent = i['value']
-                    if intent == 'greeting':
-                        reply_just_text(sender, "Hello, my name is E-Saule!")
                     return jsonify({'intent': intent}), 200
                 else:
                     return 404
