@@ -18,6 +18,8 @@ logging.basicConfig(filename='log_audio.log', level=logging.INFO,
 ACCESS_TOKEN = "EAAVWwjEHWcYBAOjjLRU8c15mW9ZBKHj9pZAD8k3QmDEZCRyxdN61Jgn79C7PHOZCsyYG0W2lOdkg19VtXQZAIOgRKllVun8KZCFICQ4G2BW8gJVYACAsRznfDExvVvfwyiIq8s5fP0c3c8XHtZAx5EXf4ubxxgAmDSM8GroetIvq5zas3isTEZAn"
 fb_url = "https://graph.facebook.com/v2.6/me/messages?access_token=" + ACCESS_TOKEN
 
+# test with proxy
+
 def reply_just_text(sender, msg):
     data = {"recipient": {"id": sender}, "message": {"text": msg}}
     requests.post(fb_url, json=data)
