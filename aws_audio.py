@@ -7,11 +7,12 @@ import os
 import logging
 import sys
 import linecache
+import constants
 
 app = Flask(__name__)
-uuid = "FF83B58DC263F322AC168932DF0DFDBB"
-api_key = "1ed1cc83-4c28-44d1-8d40-5942c9875310"
-client = Wit('TCLMX5YEBCRG5TO2TLW3VJCOGFOWMOJW')
+uuid = constants.uuid
+api_key = constants.uuid
+client = Wit(constants.wit_token)
 logging.basicConfig(filename='log_audio.log', level=logging.INFO,
                     format='[%(levelname)s] (%(threadName)-10s) %(message)s')
 
