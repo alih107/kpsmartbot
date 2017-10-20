@@ -11,7 +11,7 @@ import constants
 
 app = Flask(__name__)
 uuid = constants.uuid
-api_key = constants.uuid
+api_key = constants.api_key
 client = Wit(constants.wit_token)
 logging.basicConfig(filename='log_audio.log', level=logging.INFO,
                     format='[%(levelname)s] (%(threadName)-10s) %(message)s')
@@ -31,7 +31,6 @@ def yandex_api_post(voice_filename_wav, topic, lang=None):
     if lang == 'en-US':
         url += '&lang=' + lang
     return requests.post(url, data=open(voice_filename_wav, 'rb'), headers=headers)
-
 def extract_digits(message):
     numbers = '0123456789'
     for i in message:
@@ -59,6 +58,18 @@ def handle_incoming_messages():
             o.write(g.content)
         if source == 'telegram':
             AudioSegment.from_file(voice_filename, "ogg").export(voice_filename_wav, format="wav")
+            if topic == 'queries':
+                try:
+                    resp = client.speech(open(voice_filename_wav, 'rb'), None, {'Content-Type': 'audio/wav'})
+                    logging.info(resp)
+                    os.remove(voice_filename_wav)
+                    os.remove(voice_filename)
+                    return jsonify(resp), 200
+                except:
+                    logging.info(PrintException())
+                    os.remove(voice_filename)
+                    os.remove(voice_filename_wav)
+                    return 404
         elif source == 'facebook':
             try:
                 AudioSegment.from_file(voice_filename, "mp4").export(voice_filename_wav, format="wav")  # android
@@ -66,6 +77,7 @@ def handle_incoming_messages():
                 AudioSegment.from_file(voice_filename, "aac").export(voice_filename_wav, format="wav")  # iphone
 
         r = yandex_api_post(voice_filename_wav, topic)
+        logging.info(r.text)
         try:
             os.remove(voice_filename)
             os.remove(voice_filename_wav)
